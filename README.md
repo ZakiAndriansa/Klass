@@ -138,21 +138,44 @@ Sebelum membuka pull request, jalankan `npm run lint`, `npm run typecheck`, dan 
 
 1. Buat branch dari `main`: `feat/<nama>-<ringkas>`, misalnya `feat/rehan-kartu-tugas`.
 2. Kerjakan di folder milikmu. Butuh perubahan di folder orang lain? Minta ke pemiliknya.
-3. Commit dengan pesan yang diawali salah satu dari empat kata di bawah.
+3. Commit dengan pesan sesuai [standar pesan commit](#standar-pesan-commit).
 4. Buka pull request dan minta review lead bagianmu.
 
-### Standar pesan commit
+## Standar pesan commit
 
-Bentuknya `Awalan: ringkasan`, dan awalannya hanya boleh salah satu dari ini:
+Setiap pesan commit **wajib diawali** salah satu dari empat kata berikut, lalu titik dua, lalu ringkasan singkat berbahasa Indonesia. Tidak ada awalan lain.
 
-| Awalan   | Dipakai saat                      | Contoh                                     |
-| -------- | --------------------------------- | ------------------------------------------ |
-| `Add`    | Menambah sesuatu yang baru        | `Add: kartu tugas dengan status tenggat`   |
-| `Update` | Mengubah yang sudah ada           | `Update: teks halaman utama`               |
-| `Delete` | Menghapus berkas atau kode        | `Delete: komponen banner lama`             |
-| `Fix`    | Memperbaiki yang salah atau rusak | `Fix: tombol join tidak bisa diklik di HP` |
+| Awalan   | Dipakai saat                                                                                 | Contoh                                     |
+| -------- | -------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `Add`    | Menambah sesuatu yang baru: berkas, fitur, komponen, tabel, endpoint                         | `Add: kartu tugas dengan status tenggat`   |
+| `Update` | Mengubah yang sudah ada tanpa memperbaiki bug: tampilan, isi, config, dokumen, perapian kode | `Update: teks halaman utama`               |
+| `Delete` | Menghapus berkas, fitur, atau kode yang tidak dipakai                                        | `Delete: komponen banner lama`             |
+| `Fix`    | Memperbaiki sesuatu yang salah atau rusak                                                    | `Fix: tombol join tidak bisa diklik di HP` |
 
-Aturan lengkapnya ada di `.claude/skills/klass-pr/SKILL.md`.
+Cara menulisnya di terminal:
+
+```bash
+git commit -m "Add: kartu tugas dengan status tenggat"
+```
+
+Aturan:
+
+1. Bentuknya `Awalan: ringkasan`. Awalan diawali huruf besar dan ditulis persis seperti di tabel.
+2. Ringkasan menjelaskan **apa yang berubah**, paling panjang kira-kira 70 karakter, tanpa titik di akhir.
+3. Satu commit untuk satu jenis perubahan. Bila pekerjaanmu menambah sekaligus menghapus, pecah menjadi dua commit. Bila tidak bisa dipecah, pakai awalan dari perubahan utamanya.
+4. Ragu antara `Update` dan `Fix`? Bila sebelumnya salah atau rusak, pakai `Fix`. Bila sebelumnya benar tetapi diubah, pakai `Update`.
+5. Judul pull request memakai bentuk yang sama.
+6. Jangan menyebut alat AI di pesan commit dan jangan menambahkan baris `Co-Authored-By`.
+
+| Salah                                            | Kenapa                                        | Benar                                  |
+| ------------------------------------------------ | --------------------------------------------- | -------------------------------------- |
+| `update`                                         | Tidak menjelaskan apa yang berubah            | `Update: warna tombol utama`           |
+| `add: form login`                                | Awalan harus diawali huruf besar              | `Add: form login`                      |
+| `feat: form login`                               | `feat` bukan salah satu dari empat awalan     | `Add: form login`                      |
+| `Fix bug`                                        | Tanpa titik dua dan tidak jelas bug yang mana | `Fix: jadwal hari Minggu tidak tampil` |
+| `Add: form login, hapus banner, perbaiki navbar` | Tiga jenis perubahan dalam satu commit        | Tiga commit terpisah                   |
+
+Commit pertama repo ini (`chore: setup awal proyek Klass`) dibuat sebelum standar berlaku dan dibiarkan apa adanya.
 
 ## Teknologi
 
