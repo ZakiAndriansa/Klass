@@ -1,6 +1,6 @@
 ---
 name: klass-pr
-description: Alur Git tim Klass, yaitu nama branch, format commit, isi PR, siapa reviewer wajibnya, dan aturan penggabungan. Pakai setiap kali diminta "commit", "push", "buat branch", "buat PR", "merge", atau saat menyiapkan pekerjaan untuk ditinjau. Berlaku untuk semua anggota tim.
+description: Alur Git tim Klass, yaitu nama branch, standar pesan commit (diawali Add, Update, Delete, atau Fix), isi PR, siapa reviewer wajibnya, dan aturan penggabungan. Pakai setiap kali diminta "commit", "push", "buat branch", "buat PR", "merge", atau saat menyiapkan pekerjaan untuk ditinjau. Berlaku untuk semua anggota tim.
 ---
 
 # Alur Git dan PR Klass
@@ -29,16 +29,24 @@ Selalu bercabang dari `main` terbaru. Satu branch untuk satu pekerjaan kecil; PR
 
 ## Commit
 
-Format Conventional Commits, isi berbahasa Indonesia, kalimat perintah singkat:
+Setiap pesan commit **selalu diawali** salah satu dari empat kata ini, lalu titik dua, lalu ringkasan singkat berbahasa Indonesia:
 
-```
-feat(tugas): tambah kartu tugas dengan status tenggat
-fix(api): tolak kick terhadap admin terakhir
-db(kelas): tambah tabel class_bans
-chore: atur prettier dan editorconfig
-```
+| Awalan | Dipakai saat | Contoh |
+| --- | --- | --- |
+| `Add` | Menambah sesuatu yang baru: berkas, fitur, komponen, tabel, endpoint | `Add: kartu tugas dengan status tenggat` |
+| `Update` | Mengubah yang sudah ada tanpa memperbaiki bug: tampilan, isi, config, dokumen, perapian kode | `Update: warna tombol utama memakai token primary` |
+| `Delete` | Menghapus berkas, fitur, atau kode yang tidak dipakai | `Delete: gambar bawaan Next.js di folder public` |
+| `Fix` | Memperbaiki sesuatu yang salah atau rusak | `Fix: kick terhadap admin terakhir tidak ditolak` |
 
-Jenis: `feat`, `fix`, `db`, `refactor`, `test`, `docs`, `chore`. Scope memakai nama modul: `akun`, `kelas`, `subkelas`, `materi`, `jadwal`, `tugas`, `poster`, `izin`, `api`, `ui`.
+Aturan penulisan:
+
+1. Bentuknya `Awalan: ringkasan`. Awalan diawali huruf besar dan ditulis persis seperti di tabel, tidak ada awalan lain (`feat`, `chore`, `Tambah`, `Edit`, dan sejenisnya tidak dipakai).
+2. Ringkasan menjelaskan apa yang berubah, paling panjang kira-kira 70 karakter, tanpa titik di akhir.
+3. Satu commit satu jenis perubahan. Bila sebuah pekerjaan menambah sekaligus menghapus, pecah menjadi dua commit; bila tidak bisa dipecah, pakai awalan dari perubahan utamanya.
+4. Bila ragu antara `Update` dan `Fix`: sebelumnya salah atau rusak berarti `Fix`, sebelumnya benar tetapi diubah berarti `Update`.
+5. Judul PR memakai bentuk yang sama.
+
+Commit pertama repo (`chore: setup awal proyek Klass`) dibuat sebelum standar ini berlaku dan dibiarkan apa adanya.
 
 ## Reviewer wajib
 
@@ -55,7 +63,7 @@ PR yang menyentuh frontend dan backend sekaligus butuh persetujuan keduanya. Pen
 
 ## Isi PR
 
-Judul mengikuti format commit. Deskripsi berisi:
+Judul mengikuti standar pesan commit di atas. Deskripsi berisi:
 
 ```
 ## Apa yang berubah

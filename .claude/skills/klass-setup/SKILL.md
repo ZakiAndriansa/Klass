@@ -99,6 +99,10 @@ Langkah 1 sampai 10 sudah dijalankan pada 14 November 2026 (Next.js 16.4, Tailwi
 9. `CLAUDE.md` di akar proyek: ringkasan stack, perintah, batas lapisan, dan daftar skill `klass-*`.
 10. `README.md`: cara menjalankan dari nol dalam lima langkah atau kurang.
 
+## Database lokal
+
+Anggota boleh memakai MySQL dari Docker (`npm run db:up`, port 3307, pengguna `klass`) atau dari Laragon (port 3306, pengguna `root` tanpa kata sandi, database `klass` dibuat sendiri). Kode tidak boleh bergantung pada salah satunya: semua koneksi membaca `DATABASE_URL` lewat `@/env`. Panduan untuk anggota ada di `README.md`.
+
 ## Hal yang berbeda dari Next.js versi lama
 
 1. `create-next-app` menyalakan Cache Components (`cacheComponents: true` di `next.config.ts`). Bagian halaman yang mengambil data harus dibungkus `<Suspense>`, dan `export const dynamic` tidak dipakai.

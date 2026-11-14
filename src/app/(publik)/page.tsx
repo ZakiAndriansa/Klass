@@ -62,7 +62,7 @@ async function StatusSistem() {
         keterangan={
           databaseTerhubung
             ? "MySQL bisa dihubungi."
-            : "MySQL belum menyala. Jalankan npm run db:up lalu muat ulang halaman ini."
+            : "MySQL belum bisa dihubungi. Nyalakan MySQL (Docker atau Laragon) dan periksa DATABASE_URL di .env. Caranya ada di README."
         }
       />
     </>

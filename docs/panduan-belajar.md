@@ -58,10 +58,9 @@ Bila penjelasan MDN terasa berat, ada kursus pelengkap dari web.dev:
 | 5      | Pull request                      | https://docs.github.com/en/pull-requests/reference/pull-requests        | Semua perubahan masuk lewat PR                |
 | 6      | Review pull request               | https://docs.github.com/en/pull-requests/reference/pull-request-reviews | Cara meminta dan memberi review               |
 | 7      | Konflik merge                     | https://docs.github.com/en/pull-requests/reference/merge-conflicts      | Pasti terjadi, jangan panik                   |
-| 8      | Conventional Commits (ID)         | https://www.conventionalcommits.org/id/v1.0.0/                          | Format pesan commit tim                       |
-| 9      | Git di dalam VS Code              | https://code.visualstudio.com/docs/sourcecontrol/quickstart             | Alternatif bila belum nyaman dengan terminal  |
+| 8      | Git di dalam VS Code              | https://code.visualstudio.com/docs/sourcecontrol/quickstart             | Alternatif bila belum nyaman dengan terminal  |
 
-Aturan tim sendiri ada di `.claude/skills/klass-pr/SKILL.md`.
+Pesan commit tim selalu diawali `Add:`, `Update:`, `Delete:`, atau `Fix:`; penjelasan dan contohnya ada di `README.md`. Aturan Git lengkap ada di `.claude/skills/klass-pr/SKILL.md`.
 
 ## Tahap 3. Stack Klass (semua orang)
 

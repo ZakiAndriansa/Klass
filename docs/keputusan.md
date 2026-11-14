@@ -18,6 +18,14 @@ Keputusan teknis yang sudah diambil beserta alasannya. Menambah pustaka baru ata
 | MySQL lokal di port 3307                                   | Menghindari bentrok dengan MySQL Laragon atau XAMPP di 3306                                                  | Zaki                           |
 | Cache Components tetap aktif                               | Bawaan Next.js 16.4 untuk proyek baru; bagian halaman yang mengambil data dibungkus `<Suspense>`             | Bawaan Next.js, belum ditinjau |
 
+## 14 November 2026: standar pesan commit
+
+Pesan commit selalu diawali `Add:`, `Update:`, `Delete:`, atau `Fix:`. Diputuskan Zaki supaya mudah diikuti anggota yang baru belajar Git. Format Conventional Commits (`feat`, `chore`, dan sejenisnya) tidak dipakai lagi.
+
+## 14 November 2026: MySQL lokal boleh dari Laragon
+
+MySQL untuk pengembangan boleh dari Docker atau dari Laragon, asalkan versinya 8. Yang membedakan hanya `DATABASE_URL` di `.env` masing-masing anggota. XAMPP tidak dipakai karena isinya MariaDB. Server produksi tetap memakai MySQL dalam kontainer sesuai PRD.
+
 ## Ditunda
 
 | Hal                                          | Menunggu                                   |

@@ -46,4 +46,6 @@ Zaki adalah lead backend dan Aqil lead frontend. Tabel pemilik per folder ada di
 
 ## Aturan Git
 
+Pesan commit selalu diawali `Add:`, `Update:`, `Delete:`, atau `Fix:`, misalnya `Add: kartu tugas dengan status tenggat`.
+
 Jangan menyebut Claude atau alat AI di pesan commit, judul PR, atau deskripsi PR. Tidak ada baris `Co-Authored-By`. Commit dan push hanya bila diminta. Rinciannya di skill `klass-pr`.

@@ -21,6 +21,7 @@
 ## Sebelum meminta review
 
 - [ ] `npm run lint`, `npm run typecheck`, dan `npm run test` lolos
+- [ ] Judul PR dan pesan commit diawali `Add:`, `Update:`, `Delete:`, atau `Fix:`
 - [ ] Hanya mengubah folder milikku, atau sudah disepakati dengan pemilik folder lain
 - [ ] Frontend: meminta review Aqil
 - [ ] Backend: meminta review Zaki

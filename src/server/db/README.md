@@ -17,6 +17,6 @@
 3. `npm run db:migrate` menerapkannya ke database lokal.
 4. Berkas migrasi yang sudah masuk `main` tidak diubah lagi; buat migrasi baru.
 
-Database lokal dijalankan dengan `npm run db:up` (MySQL di port 3307) dan bisa dilihat dengan `npm run db:studio`.
+Database lokal boleh dari Docker (`npm run db:up`, port 3307) atau dari Laragon (port 3306); caranya ada di `README.md` utama. Isinya bisa dilihat dengan `npm run db:studio`.
 
 Skill: `klass-db`.
