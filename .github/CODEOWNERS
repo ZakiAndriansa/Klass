@@ -1,0 +1,24 @@
+# CODEOWNERS membuat GitHub otomatis meminta review dari pemilik folder.
+# Dokumentasi: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# BELUM AKTIF. Semua baris di bawah masih berupa komentar karena nama pengguna GitHub
+# tiap anggota belum dicatat. Cara mengaktifkan:
+#   1. Ganti <github-zaki> dan <github-aqil> dengan nama pengguna GitHub masing-masing.
+#   2. Hapus tanda "# " di awal baris aturan.
+#   3. Di GitHub: Settings > Branches > aturan untuk `main` > centang "Require review from Code Owners".
+#
+# Baris yang lebih bawah menang atas baris yang lebih atas.
+
+# Bawaan: config, struktur, template
+# *                         @<github-zaki>
+
+# Frontend: lead Aqil
+# /src/components/          @<github-aqil>
+# /src/app/                 @<github-aqil>
+
+# Backend: lead Zaki
+# /src/app/api/             @<github-zaki>
+# /src/server/              @<github-zaki>
+# /src/types/               @<github-zaki>
+# /drizzle/                 @<github-zaki>
+# /worker/                  @<github-zaki>

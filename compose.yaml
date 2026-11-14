@@ -1,0 +1,32 @@
+# Layanan untuk pengembangan di laptop. Pemilik: Zaki.
+# Jalankan: npm run db:up      Hentikan: npm run db:down
+#
+# Kata sandi di bawah hanya untuk pengembangan lokal. Jangan dipakai di server.
+name: klass
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: klass
+      MYSQL_USER: klass
+      MYSQL_PASSWORD: klass_dev
+      MYSQL_ROOT_PASSWORD: root_dev
+      TZ: UTC
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      # Port 3307 di laptop, supaya tidak bentrok dengan MySQL Laragon atau XAMPP di 3306.
+      - "3307:3306"
+    volumes:
+      - klass-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  klass-db:

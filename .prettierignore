@@ -1,0 +1,11 @@
+.next
+node_modules
+package-lock.json
+next-env.d.ts
+drizzle
+public
+.claude
+AGENTS.md
+# Keluaran shadcn dibiarkan seperti aslinya supaya mudah dibandingkan saat diperbarui.
+src/components/ui
+src/lib/utils.ts
