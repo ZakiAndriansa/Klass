@@ -72,6 +72,24 @@ Yang perlu diperhatikan:
 
 Perintah lain (`npm run db:generate`, `npm run db:migrate`, `npm run db:studio`) sama untuk keduanya, karena semuanya membaca `DATABASE_URL` dari `.env`.
 
+### Pilihan C: aplikasi dan MySQL sekaligus di Docker
+
+Bila tidak ingin memasang Node.js, seluruh proyek bisa dijalankan dengan satu perintah:
+
+```bash
+docker compose up
+```
+
+Perintah itu menyalakan MySQL, memasang paket npm, lalu menjalankan aplikasi Next.js dalam mode pengembangan. Buka http://localhost:3000. Perubahan berkas di folder proyek langsung terlihat karena folder itu dipasang ke kontainer. Penyalaan pertama lebih lama karena paket npm sedang dipasang.
+
+Catatan:
+
+1. Hentikan dengan `docker compose down`, atau tekan Ctrl+C bila perintah dijalankan di terminal.
+2. Jangan menjalankan `npm run dev` di laptop bersamaan, karena port 3000 sudah dipakai.
+3. Ketergantungan npm dan cache Next.js disimpan di volume Docker, bukan di folder proyek.
+4. `.env` tidak perlu diubah. `compose.yaml` memberi `DATABASE_URL` ke kontainer dengan alamat `db:3306`.
+5. Bila nanti ingin kembali memakai `npm run dev` di laptop, hapus dulu folder `node_modules` dan `.next` buatan Docker, lalu jalankan `npm install`.
+
 ## Peta folder dan pemilik
 
 Setiap folder punya `README.md` sendiri yang menjelaskan isinya. Tabel ini ringkasannya.
@@ -119,18 +137,20 @@ Satu contoh lengkap yang bisa ditiru sudah ada, yaitu cek kesehatan:
 
 ## Perintah
 
-| Perintah                           | Guna                                    |
-| ---------------------------------- | --------------------------------------- |
-| `npm run dev`                      | Menjalankan aplikasi untuk pengembangan |
-| `npm run lint`                     | Memeriksa kode dan batas folder         |
-| `npm run typecheck`                | Memeriksa tipe TypeScript               |
-| `npm run test`                     | Menjalankan uji                         |
-| `npm run format`                   | Merapikan kode                          |
-| `npm run build`                    | Membangun versi produksi                |
-| `npm run db:up`, `npm run db:down` | Menyalakan dan mematikan MySQL          |
-| `npm run db:generate`              | Membuat migrasi dari perubahan tabel    |
-| `npm run db:migrate`               | Menerapkan migrasi ke database          |
-| `npm run db:studio`                | Melihat isi database di peramban        |
+| Perintah              | Guna                                     |
+| --------------------- | ---------------------------------------- |
+| `npm run dev`         | Menjalankan aplikasi untuk pengembangan  |
+| `npm run lint`        | Memeriksa kode dan batas folder          |
+| `npm run typecheck`   | Memeriksa tipe TypeScript                |
+| `npm run test`        | Menjalankan uji                          |
+| `npm run format`      | Merapikan kode                           |
+| `npm run build`       | Membangun versi produksi                 |
+| `npm run db:up`       | Menyalakan MySQL saja                    |
+| `npm run db:down`     | Mematikan semua layanan Docker           |
+| `docker compose up`   | Menjalankan aplikasi dan MySQL di Docker |
+| `npm run db:generate` | Membuat migrasi dari perubahan tabel     |
+| `npm run db:migrate`  | Menerapkan migrasi ke database           |
+| `npm run db:studio`   | Melihat isi database di peramban         |
 
 Sebelum membuka pull request, jalankan `npm run lint`, `npm run typecheck`, dan `npm run test`.
 

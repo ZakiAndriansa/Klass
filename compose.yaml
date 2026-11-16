@@ -1,5 +1,6 @@
 # Layanan untuk pengembangan di laptop. Pemilik: Zaki.
-# Jalankan: npm run db:up      Hentikan: npm run db:down
+# Jalankan semuanya: docker compose up     Hentikan: docker compose down
+# Hanya MySQL:       npm run db:up
 #
 # Kata sandi di bawah hanya untuk pengembangan lokal. Jangan dipakai di server.
 name: klass
@@ -28,5 +29,34 @@ services:
       timeout: 5s
       retries: 10
 
+  # Frontend dan backend Klass adalah satu aplikasi Next.js, jadi cukup satu layanan.
+  # Berjalan dalam mode pengembangan, sama seperti `npm run dev` di laptop.
+  app:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    init: true
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Di dalam Docker, database dipanggil lewat nama layanan `db`, bukan localhost.
+      # Nilai ini menimpa DATABASE_URL dari `.env` saat aplikasi berjalan di kontainer.
+      DATABASE_URL: mysql://klass:klass_dev@db:3306/klass
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      # Folder proyek dipasang ke kontainer supaya perubahan kode langsung terlihat.
+      # `:z` diperlukan di Linux dengan SELinux (misalnya Fedora); di sistem lain diabaikan.
+      - .:/app:z
+      # node_modules dan cache Next.js disimpan di volume Docker, bukan di folder proyek.
+      - klass-node-modules:/app/node_modules
+      - klass-next:/app/.next
+    # Pasang paket saat menyala (cepat bila sudah terpasang), lalu jalankan Next.js.
+    # `exec` membuat Ctrl+C dan `docker compose down` langsung menghentikan server.
+    command: sh -c "npm install --no-audit --no-fund && exec npm run dev"
+
 volumes:
   klass-db:
+  klass-node-modules:
+  klass-next:
