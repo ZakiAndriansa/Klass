@@ -1,0 +1,61 @@
+/* ==========================================================================
+   Component: Tabs (Physical Index Folder Dividers)
+   ========================================================================== */
+
+.ds .tabs__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-1);
+  padding-inline: var(--ds-space-2);
+}
+
+.ds .tabs__tab {
+  position: relative;
+  padding: var(--ds-space-3) var(--ds-space-5);
+  min-height: 44px;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
+  cursor: pointer;
+  background-color: var(--ds-color-folder-bg);
+  color: var(--ds-color-ink-secondary);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-bottom: 0;
+  border-top-left-radius: var(--ds-radius-sm);
+  border-top-right-radius: var(--ds-radius-sm);
+  box-shadow: inset 0 1px 0 var(--ds-color-highlight-specular);
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-ease-standard),
+    transform var(--ds-duration-fast) var(--ds-ease-standard);
+}
+
+.ds .tabs__tab:hover:not(.is-active) {
+  background-color: var(--ds-color-folder-tab);
+  color: var(--ds-color-ink);
+}
+
+.ds .tabs__tab.is-active {
+  z-index: 2;
+  background-color: var(--ds-color-primary);
+  color: var(--ds-color-ink);
+  transform: translateY(var(--ds-border-thick));
+  padding-bottom: calc(var(--ds-space-3) + var(--ds-border-thick));
+}
+
+.ds .tabs__panel {
+  position: relative;
+  z-index: 1;
+  padding: var(--ds-space-6);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-paper);
+}
+
+.ds .tabs__text {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-color-ink-secondary);
+}

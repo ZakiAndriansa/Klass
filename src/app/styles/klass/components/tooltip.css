@@ -1,0 +1,64 @@
+/* ==========================================================================
+   Component: Tooltip (Highlighter Label)
+   ========================================================================== */
+
+.ds .tooltip-demo {
+  padding-top: var(--ds-space-8);
+}
+
+.ds .tooltip-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ds .tooltip {
+  position: absolute;
+  bottom: calc(100% + var(--ds-space-2));
+  left: 50%;
+  transform: translateX(-50%) translateY(4px) rotate(var(--ds-marker-tilt));
+  padding: var(--ds-space-2) var(--ds-space-3);
+  color: var(--ds-color-ink);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+  background-color: transparent;
+  background-image:
+    var(--ds-marker-streak),
+    linear-gradient(
+      92deg,
+      rgba(245, 197, 66, 0.5) 0%,
+      var(--ds-color-marker-yellow) 6% 94%,
+      rgba(245, 197, 66, 0.55) 100%
+    );
+  border: 0;
+  border-radius: 0;
+  box-shadow: 0 3px 8px rgba(28, 25, 23, 0.16);
+  clip-path: var(--ds-marker-clip);
+  opacity: 0;
+  pointer-events: none;
+  z-index: var(--ds-z-tooltip);
+  transition:
+    opacity var(--ds-duration-fast) var(--ds-ease-standard),
+    transform var(--ds-duration-fast) var(--ds-ease-standard);
+}
+
+/* Ekor penunjuk dibuat dari goresan miring, bukan segitiga datar */
+.ds .tooltip::after {
+  content: "";
+  position: absolute;
+  top: calc(100% - 3px);
+  left: 50%;
+  width: 14px;
+  height: 10px;
+  transform: translateX(-50%) rotate(8deg);
+  background-color: rgba(245, 197, 66, 0.55);
+  clip-path: polygon(0 0, 100% 0, 62% 100%);
+}
+
+.ds .tooltip-trigger:hover .tooltip,
+.ds .tooltip-trigger:focus-within .tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) rotate(var(--ds-marker-tilt));
+}

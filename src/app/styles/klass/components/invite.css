@@ -1,0 +1,63 @@
+/* ==========================================================================
+   Component: Invite Band ("Ajakan bergabung")
+   Sumber: Figma 60:766 — pita penuh 1440×250 berwarna map manila, judul 30/39
+   di y=43, kalimat pendukung di y=98, CTA kuning di y=78.
+   ========================================================================== */
+
+.ds .invite {
+  background-color: var(--ds-color-folder-bg);
+}
+
+.ds .invite__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-space-6);
+  width: 100%;
+  max-width: var(--ds-container-wide-max);
+  margin-inline: auto;
+  padding: var(--ds-invite-pad-block) var(--ds-space-4);
+}
+
+/* Di layar lebar tinggi pita dikunci 250px seperti Figma dan CTA duduk rata
+   tengah terhadap blok teks (y=78 dari atas, tinggi CTA 49px).
+   Kolom teks mengisi sisa ruang dan CTA menempel tepi kanan konten, jadi pita
+   tetap terasa penuh tanpa celah di kanan. */
+@media (min-width: 768px) {
+  .ds .invite__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: clamp(var(--ds-space-6), 5.5vw, 70px);
+    min-height: var(--ds-invite-height);
+    padding-inline: var(--ds-content-gutter);
+  }
+}
+
+.ds .invite__title {
+  /* Figma: judul 30/39, lalu 16px ke kalimat pendukung (43 → 98 − 39) */
+  margin: 0 0 var(--ds-space-4);
+  font-size: var(--ds-text-2xl);
+  font-weight: 700;
+  line-height: var(--ds-leading-h2);
+  letter-spacing: 0;
+}
+
+.ds .invite__copy {
+  margin: 0;
+  font-size: var(--ds-text-base);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink);
+}
+
+/* CTA memakai TombolKertas (primary); kelas ini hanya mengatur posisinya. */
+.ds .invite__cta {
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .ds .invite__cta {
+    /* 78 − 43 = 35px di bawah awal blok teks */
+    margin-top: var(--ds-invite-cta-offset);
+  }
+}

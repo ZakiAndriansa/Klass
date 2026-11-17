@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Component: Hero — "KLASS." wordmark & sketsa tinta merah
+   Sumber: Figma node 60:649 (frame 1440×680). Semua nilai visual dari
+   tokens.css.
+
+   Struktur:
+     .hero__stage   panggung ber-aspect-ratio 1440:680 (desktop)
+       .hero__lockup  kotak tinta merah + wordmark
+       .hero__badges  lima badge status (absolut, koordinat Figma)
+       .hero__actions dua CTA (absolut di y=476)
+   Di bawah 901px semua anak kembali ke alur normal dan ditumpuk.
+   ========================================================================== */
+
+.ds .hero {
+  padding-block: 0;
+}
+
+.ds .hero__stage {
+  position: relative;
+  max-width: 1440px;
+  margin-inline: auto;
+  aspect-ratio: 1440 / 680;
+}
+
+/* Lockup memenuhi panggung; sketsa jadi latar dan wordmark diposisikan absolut
+   di tengahnya, persis seperti frame Figma. */
+.ds .hero__lockup {
+  position: absolute;
+  inset: 0;
+}
+
+/* Kotak tinta merah + panah tulisan tangan, satu gambar latar agar posisinya
+   selalu sinkron dengan badge di atasnya. */
+.ds .hero__sketch {
+  position: absolute;
+  inset: 0;
+  background-image: url("/hero/hero-art.svg");
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: 100% auto;
+}
+
+/* Wordmark Handjet (font piksel) di tengah kotak tinta */
+.ds .hero__wordmark {
+  position: absolute;
+  top: 24.4%; /* 166 / 680 */
+  left: 50%;
+  width: 22.22%; /* 320 / 1440 */
+  margin: 0;
+  transform: translateX(-50%);
+  font-family: var(--ds-font-pixel);
+  font-weight: 900;
+  font-size: clamp(3rem, 10.28vw, var(--ds-hero-wordmark-size));
+  line-height: 1;
+  text-align: center;
+  color: #000;
+  font-variation-settings:
+    "ELGR" 1,
+    "ELSH" 2;
+}
+
+.ds .hero__badges {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Koordinat Figma diubah ke persentase panggung (1440×680) */
+.ds .hero__badge {
+  position: absolute;
+}
+
+.ds .hero__badge--pj {
+  left: 26.88%;
+  top: 21.62%;
+} /* 387, 147 */
+.ds .hero__badge--besok {
+  left: 59.03%;
+  top: 12.35%;
+} /* 850,  84 */
+.ds .hero__badge--terlewat {
+  left: 68.47%;
+  top: 40.44%;
+} /* 986, 275 */
+.ds .hero__badge--admin {
+  left: 22.01%;
+  top: 53.09%;
+} /* 317, 361 */
+.ds .hero__badge--terkumpul {
+  left: 51.11%;
+  top: 58.38%;
+} /* 736, 397 */
+
+/* Pada desktop CTA duduk 476px dari atas frame (70% dari 680px) */
+.ds .hero__actions {
+  position: absolute;
+  left: 50%;
+  top: 70%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ds-hero-cta-gap);
+  width: max-content;
+}
+
+/* CTA hero memakai TombolKertas (primary/secondary); lihat tombol-kertas.tsx. */
+
+/* --- Layar kecil (≤900px) -------------------------------------------------
+   Komposisi absolut Figma tidak terbaca di layar sempit: sketsa penuh beserta
+   panahnya jadi terlalu kecil. Yang dipertahankan hanya gagasan visualnya —
+   KLASS. di dalam kotak tinta merah — lalu badge dan CTA ditumpuk di bawah. */
+@media (max-width: 900px) {
+  .ds .hero {
+    padding-inline: var(--ds-space-4);
+  }
+
+  .ds .hero__stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    aspect-ratio: auto;
+    padding-block: var(--ds-space-8);
+    max-width: 34rem;
+  }
+
+  .ds .hero__lockup {
+    position: relative;
+    inset: auto;
+    width: min(100%, 20rem);
+    aspect-ratio: 402 / 182;
+  }
+
+  .ds .hero__sketch {
+    background-image: url("/hero/hero-box.svg");
+    background-size: 100% 100%;
+  }
+
+  /* Wordmark diletakkan di tengah kotak, bukan pada offset desktop */
+  .ds .hero__wordmark {
+    top: 50%;
+    left: 50%;
+    width: 76%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(3.5rem, 17vw, 5.5rem);
+  }
+
+  .ds .hero__badges {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--ds-space-2);
+    margin-block: var(--ds-space-6) var(--ds-space-8);
+  }
+
+  .ds .hero__badge {
+    position: static;
+  }
+
+  .ds .hero__actions {
+    position: static;
+    transform: none;
+    width: 100%;
+    gap: var(--ds-space-3);
+  }
+}

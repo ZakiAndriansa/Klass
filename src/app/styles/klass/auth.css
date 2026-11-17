@@ -1,0 +1,1095 @@
+/* ==========================================================================
+   Auth screen: buku terbuka dua halaman (masuk & daftar).
+   Satu lembar berporos di punggung buku: sisi depan formulir masuk, sisi
+   belakang formulir daftar. Setelah dibalik, seluruh bentangan bercermin.
+   Semua warna, bayangan, dan ukuran memakai token dari tokens.css.
+   ========================================================================== */
+
+.ds .auth {
+  /* Variabel publik layar ini. Nilai inti tetap tinggal di tokens.css. */
+  --spine-width: var(--ds-auth-spine-width);
+  --fold-size: var(--ds-auth-fold-size);
+  --paper: var(--ds-auth-paper);
+  --paper-shade: var(--ds-auth-paper-shade);
+  --page-thickness: var(--ds-auth-page-thickness);
+  --flip-duration: var(--ds-auth-flip-duration);
+  --shadow-color: rgba(28, 25, 23, 0.32);
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: clamp(var(--ds-space-4), 4vh, var(--ds-space-12)) var(--ds-space-4);
+  overflow-x: clip;
+  background-color: var(--ds-auth-desk);
+  background-image:
+    var(--ds-auth-paper-grain),
+    radial-gradient(ellipse 92% 68% at 50% 18%, rgba(255, 255, 255, 0.28), transparent 66%),
+    radial-gradient(ellipse 120% 70% at 50% 108%, var(--ds-auth-desk-shade), transparent 64%),
+    linear-gradient(145deg, var(--ds-auth-desk-light) 0%, var(--ds-auth-desk) 48%, #ded5c4 100%);
+}
+
+.ds .auth::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--ds-auth-stage-glow);
+  pointer-events: none;
+}
+
+.ds .auth__stage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--ds-auth-book-width);
+  margin-block: auto;
+  perspective: 2000px;
+  perspective-origin: 50% 20%;
+}
+
+/* Di layar pendek (laptop 13"), buku mengecil mengikuti tinggi layar supaya
+   tidak memaksa scroll vertikal. 144dvh = 90dvh tinggi buku × rasio 8/5. */
+@media (min-width: 900px) {
+  .ds .auth__stage {
+    max-width: min(var(--ds-auth-book-width), 144dvh);
+  }
+}
+
+.ds .auth__desktop,
+.ds .auth__mobile {
+  position: relative;
+}
+
+.ds .auth__mobile {
+  display: none;
+}
+
+/* Bayangan kontak: elips kabur tepat di bawah tepi bawah buku. */
+.ds .auth__contact-shadow {
+  position: absolute;
+  right: 5%;
+  bottom: calc(-1 * var(--ds-space-3));
+  left: 5%;
+  z-index: 0;
+  height: clamp(22px, 3.8vw, 44px);
+  background-image: var(--ds-auth-contact-shadow);
+  filter: blur(11px);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Tumpukan lembaran di bawah buku. Sisi formulir selalu terlihat lebih tebal;
+   ketebalan itu bergeser saat lembar berbalik.
+   -------------------------------------------------------------------------- */
+.ds .auth__stack {
+  --peek-left: var(--ds-auth-stack-peek-max);
+  --peek-right: var(--ds-auth-stack-peek-min);
+
+  position: relative;
+  z-index: 1;
+  transform: rotateX(3deg);
+  transform-style: preserve-3d;
+}
+
+.ds .auth__stack.is-masuk {
+  --peek-left: var(--ds-auth-stack-peek-min);
+  --peek-right: var(--ds-auth-stack-peek-max);
+}
+
+.ds .auth__stack.is-daftar {
+  --peek-left: var(--ds-auth-stack-peek-max);
+  --peek-right: var(--ds-auth-stack-peek-min);
+}
+
+/* Saat berbalik, ketebalan langsung bergerak ke sisi tujuan. */
+.ds .auth__stack.ke-masuk {
+  --peek-left: var(--ds-auth-stack-peek-min);
+  --peek-right: var(--ds-auth-stack-peek-max);
+}
+
+.ds .auth__stack.ke-daftar {
+  --peek-left: var(--ds-auth-stack-peek-max);
+  --peek-right: var(--ds-auth-stack-peek-min);
+}
+
+.ds .auth__stack::before,
+.ds .auth__stack::after {
+  content: "";
+  position: absolute;
+  border-radius: calc(var(--ds-auth-page-radius) + 2px);
+  pointer-events: none;
+  transition: inset var(--flip-duration) var(--ds-auth-ease-flip);
+}
+
+.ds .auth__stack::before {
+  z-index: 1;
+  inset: 3px calc(-1 * var(--peek-right)) calc(-1 * var(--page-thickness))
+    calc(-1 * var(--peek-left));
+  border: 1px solid var(--ds-auth-page-edge-line);
+  background-color: var(--ds-auth-page-edge-1);
+  box-shadow:
+    0 2px 0 var(--ds-auth-page-edge-2),
+    0 3px 0 var(--ds-auth-page-edge-line),
+    0 5px 0 var(--ds-auth-page-edge-3),
+    0 6px 0 var(--ds-auth-page-edge-line),
+    0 8px 0 var(--ds-auth-page-edge-2);
+  /* Tepi tumpukan memudar ke arah punggung: garis-garis halaman bertemu di
+     tengah dan membentuk lekuk tipis, bukan satu garis lurus. */
+  -webkit-mask-image: radial-gradient(
+    ellipse 38px 15px at 50% calc(100% + 1px),
+    transparent 0%,
+    transparent 42%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 38px 15px at 50% calc(100% + 1px),
+    transparent 0%,
+    transparent 42%,
+    #000 100%
+  );
+}
+
+.ds .auth__stack::after {
+  z-index: 0;
+  inset: 11px calc(-1 * (var(--peek-right) + 3px)) calc(-1 * var(--ds-auth-cover-depth))
+    calc(-1 * (var(--peek-left) + 3px));
+  border: 1px solid var(--ds-auth-cover-edge);
+  border-radius: calc(var(--ds-auth-page-radius) + 4px);
+  background-color: var(--ds-auth-cover);
+  box-shadow: 0 14px 24px rgba(28, 25, 23, 0.2);
+  -webkit-mask-image: radial-gradient(
+    ellipse 44px 18px at 50% calc(100% + 2px),
+    transparent 0%,
+    transparent 40%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 44px 18px at 50% calc(100% + 2px),
+    transparent 0%,
+    transparent 40%,
+    #000 100%
+  );
+}
+
+/* Buku: 1120 × 700, dua halaman 560 px. */
+.ds .auth__book {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  border-radius: var(--ds-auth-page-radius);
+  box-shadow: var(--ds-auth-book-shadow);
+  transform-style: preserve-3d;
+}
+
+/* --------------------------------------------------------------------------
+   Halaman dasar: ilustrasi di kiri dan salinan cerminnya di kanan. Halaman
+   kanan hanya terlihat penuh setelah lembar formulir berbalik ke kiri.
+   -------------------------------------------------------------------------- */
+.ds .auth__base {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background-color: var(--ds-color-ink);
+}
+
+.ds .auth__base--kiri {
+  border-radius: var(--ds-auth-page-radius) var(--ds-auth-page-radius-inner)
+    var(--ds-auth-page-radius-inner) var(--ds-auth-page-radius);
+  box-shadow: var(--ds-auth-bow-top-dark), var(--ds-auth-bow-bottom-dark);
+}
+
+.ds .auth__base--kanan {
+  border-radius: var(--ds-auth-page-radius-inner) var(--ds-auth-page-radius)
+    var(--ds-auth-page-radius) var(--ds-auth-page-radius-inner);
+  box-shadow: var(--ds-auth-bow-top-dark), var(--ds-auth-bow-bottom-dark);
+}
+
+.ds .auth__art {
+  position: absolute;
+  inset: 0;
+}
+
+.ds .auth__art--cermin {
+  transform: scaleX(-1);
+}
+
+.ds .auth__art-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ds .auth__art-grain {
+  mix-blend-mode: soft-light;
+}
+
+.ds .auth__art-wash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background-image: var(--ds-auth-art-wash);
+  pointer-events: none;
+}
+
+/* Bayangan 60–90px dari punggung ke arah dalam halaman. Sisi ilustrasi lebih
+   lembut; sisi kertas lebih jelas karena memantulkan lebih banyak cahaya. */
+.ds .auth__gutter {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  width: var(--ds-auth-gutter-width);
+  pointer-events: none;
+}
+
+.ds .auth__gutter--kiri {
+  left: 0;
+}
+
+.ds .auth__gutter--kanan {
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.ds .auth__gutter--art {
+  background-image: var(--ds-auth-gutter-art);
+  opacity: 0.9;
+}
+
+.ds .auth__gutter--paper {
+  z-index: 1;
+  background-image: var(--ds-auth-gutter-paper);
+}
+
+/* --------------------------------------------------------------------------
+   Lembar berporos: satu lembar, dua sisi. Sisi depan masuk, sisi belakang
+   daftar. Poros tepat di tengah buku (tepi kiri halaman kanan).
+   -------------------------------------------------------------------------- */
+.ds .auth__leaf {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 50%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+}
+
+.ds .auth__book.is-masuk .auth__leaf {
+  transform: translateZ(1px) rotateY(0deg);
+}
+
+.ds .auth__book.is-daftar .auth__leaf {
+  transform: translateZ(1px) rotateY(-180deg);
+}
+
+.ds .auth__book.is-flipping .auth__leaf {
+  pointer-events: none;
+  will-change: transform;
+}
+
+.ds .auth__book.is-flipping.ke-daftar .auth__leaf {
+  animation: auth-turn-ke-daftar var(--flip-duration) var(--ds-auth-ease-flip) both;
+}
+
+.ds .auth__book.is-flipping.ke-masuk .auth__leaf {
+  animation: auth-turn-ke-masuk var(--flip-duration) var(--ds-auth-ease-flip) both;
+}
+
+.ds .auth__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.ds .auth__face--depan {
+  border-radius: var(--ds-auth-page-radius-inner) var(--ds-auth-page-radius)
+    var(--ds-auth-page-radius) var(--ds-auth-page-radius-inner);
+}
+
+.ds .auth__face--belakang {
+  border-radius: var(--ds-auth-page-radius) var(--ds-auth-page-radius-inner)
+    var(--ds-auth-page-radius-inner) var(--ds-auth-page-radius);
+  transform: rotateY(180deg);
+}
+
+/* Kertas formulir. Sudut luar terlipat; clip-path membuat sudutnya benar-
+   benar hilang, sementara overflow pada .auth__face menjaga sudut lain tetap
+   membulat. */
+.ds .auth__paper--form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: var(--ds-auth-page-pad);
+  overflow: hidden;
+  color: var(--ds-color-ink);
+  background-color: var(--paper);
+  background-image:
+    var(--ds-auth-paper-grain),
+    radial-gradient(ellipse 108% 64% at 30% 12%, rgba(255, 255, 255, 0.4), transparent 64%),
+    linear-gradient(
+      155deg,
+      var(--ds-auth-paper-center) 0%,
+      var(--paper) 52%,
+      var(--ds-auth-paper-edge) 100%
+    );
+  box-shadow: var(--ds-auth-bow-top), var(--ds-auth-bow-bottom);
+}
+
+.ds .auth__paper--masuk {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--fold-size)),
+    calc(100% - var(--fold-size)) 100%,
+    0 100%
+  );
+}
+
+.ds .auth__paper--daftar {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    var(--fold-size) 100%,
+    0 calc(100% - var(--fold-size))
+  );
+}
+
+.ds .auth__form-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+/* Sisi halaman yang berputar: lapisan gelap yang menyapu kertas. */
+.ds .auth__leaf-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ds .auth__leaf-shade--kiri {
+  background-image: linear-gradient(
+    to right,
+    rgba(28, 25, 23, 0.28) 0%,
+    rgba(28, 25, 23, 0.11) 22%,
+    transparent 62%
+  );
+}
+
+.ds .auth__leaf-shade--kanan {
+  background-image: linear-gradient(
+    to left,
+    rgba(28, 25, 23, 0.28) 0%,
+    rgba(28, 25, 23, 0.11) 22%,
+    transparent 62%
+  );
+}
+
+.ds .auth__book.is-flipping .auth__leaf-shade {
+  animation: auth-leaf-shade var(--flip-duration) var(--ds-auth-ease-flip) both;
+}
+
+/* Bayangan lembut yang jatuh dari lembar ke halaman di bawahnya. */
+.ds .auth__under-shadow {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background-image: var(--ds-auth-turn-shadow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+.ds .auth__book.is-flipping .auth__under-shadow {
+  animation: auth-under-shadow var(--flip-duration) var(--ds-auth-ease-flip) both;
+}
+
+/* --------------------------------------------------------------------------
+   Punggung buku: pita gradien 34px tepat di tengah, di atas kedua halaman.
+   -------------------------------------------------------------------------- */
+.ds .auth__spine {
+  position: absolute;
+  z-index: 20;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--spine-width);
+  transform: translateX(-50%) translateZ(24px);
+  pointer-events: none;
+}
+
+.ds .auth__spine-band {
+  position: absolute;
+  inset: 0;
+  background-image: var(--ds-auth-spine-band);
+  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0.55) 0%, #000 46%, #000 100%);
+  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0.55) 0%, #000 46%, #000 100%);
+}
+
+.ds .auth__book.is-daftar .auth__spine-band,
+.ds .auth__book.ke-daftar .auth__spine-band {
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 54%, rgba(0, 0, 0, 0.55) 100%);
+  mask-image: linear-gradient(to right, #000 0%, #000 54%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* Jahitan samar di sepanjang lipatan. */
+.ds .auth__spine-stitches {
+  position: absolute;
+  z-index: 1;
+  top: 4%;
+  bottom: 4%;
+  left: 50%;
+  width: 14px;
+  transform: translateX(-50%);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 24px,
+    var(--ds-auth-stitch) 24px,
+    var(--ds-auth-stitch) 26px
+  );
+  opacity: 0.7;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 12%,
+    #000 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%);
+}
+
+/* Garis lipatan 2px + kilau 1px di sisi kanannya. */
+.ds .auth__spine-crease {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  transform: translateX(-50%);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 9%,
+    #000 91%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 9%, #000 91%, transparent 100%);
+}
+
+.ds .auth__spine-crease::before,
+.ds .auth__spine-crease::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.ds .auth__spine-crease::before {
+  left: 1px;
+  width: 2px;
+  background-color: var(--ds-auth-crease-line);
+}
+
+.ds .auth__spine-crease::after {
+  left: 3px;
+  width: 1px;
+  background-color: var(--ds-auth-crease-highlight);
+}
+
+/* Punggung menggelap sedikit tepat di tengah putaran. */
+.ds .auth__spine-deepen {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background-image: var(--ds-auth-spine-band);
+  opacity: 0;
+}
+
+.ds .auth__book.is-flipping .auth__spine-deepen {
+  animation: auth-spine-deepen var(--flip-duration) var(--ds-auth-ease-flip) both;
+}
+
+/* Takik V kecil di ujung atas dan bawah punggung. */
+.ds .auth__spine-dip {
+  position: absolute;
+  left: 50%;
+  width: 14px;
+  height: 6px;
+  transform: translateX(-50%);
+  background-color: var(--ds-auth-cover-edge);
+  opacity: 0.55;
+}
+
+.ds .auth__spine-dip--atas {
+  top: 0;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.ds .auth__spine-dip--bawah {
+  bottom: 0;
+  clip-path: polygon(0 100%, 100% 100%, 50% 0);
+}
+
+/* --------------------------------------------------------------------------
+   Sudut terlipat: tombol transparan, flap segitiga, bayangan jatuh ke kertas.
+   -------------------------------------------------------------------------- */
+.ds .auth__fold {
+  position: absolute;
+  z-index: 5;
+  bottom: 0;
+  width: var(--fold-size);
+  height: var(--fold-size);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* Bayangan flap menempel di tombol, bukan di segitiga ber-clip-path: filter
+     pada elemen yang sama dengan clip-path ikut terpotong. */
+  filter: drop-shadow(-3px -3px 6px var(--shadow-color))
+    drop-shadow(2px 2px 4px rgba(28, 25, 23, 0.16));
+  transition: filter 200ms ease;
+}
+
+.ds .auth__fold--kanan {
+  right: 0;
+}
+
+.ds .auth__fold--kiri {
+  left: 0;
+  filter: drop-shadow(3px -3px 6px var(--shadow-color))
+    drop-shadow(-2px 2px 4px rgba(28, 25, 23, 0.16));
+}
+
+.ds .auth__fold.is-pasif {
+  cursor: default;
+}
+
+.ds .auth__fold:focus-visible {
+  outline: 3px solid var(--ds-color-primary);
+  outline-offset: -3px;
+}
+
+.ds .auth__fold-flap {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-image: linear-gradient(
+    315deg,
+    #cdbfa1 0%,
+    #cdbfa1 49.6%,
+    #fdfaf2 50%,
+    var(--ds-auth-fold-light) 53%,
+    #efe5d0 68%,
+    var(--paper-shade) 86%,
+    #c9bb9c 100%
+  );
+  transform-origin: 100% 100%;
+  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ds .auth__fold--kanan .auth__fold-flap {
+  border-top-left-radius: calc(var(--fold-size) * 0.34);
+  clip-path: polygon(0 0, 0 100%, 100% 0);
+}
+
+.ds .auth__fold--kiri .auth__fold-flap {
+  border-top-right-radius: calc(var(--fold-size) * 0.34);
+  clip-path: polygon(100% 0, 100% 100%, 0 0);
+  background-image: linear-gradient(
+    45deg,
+    #cdbfa1 0%,
+    #cdbfa1 49.6%,
+    #fdfaf2 50%,
+    var(--ds-auth-fold-light) 53%,
+    #efe5d0 68%,
+    var(--paper-shade) 86%,
+    #c9bb9c 100%
+  );
+  transform-origin: 0 100%;
+}
+
+@media (hover: hover) {
+  .ds .auth__fold:hover .auth__fold-flap {
+    transform: scale(1.2);
+  }
+
+  .ds .auth__fold--kanan:hover {
+    filter: drop-shadow(-4px -4px 9px var(--shadow-color))
+      drop-shadow(2px 2px 4px rgba(28, 25, 23, 0.16));
+  }
+
+  .ds .auth__fold--kiri:hover {
+    filter: drop-shadow(4px -4px 9px var(--shadow-color))
+      drop-shadow(-2px 2px 4px rgba(28, 25, 23, 0.16));
+  }
+
+  .ds .auth__fold.is-pasif:hover {
+    filter: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Isi halaman formulir.
+   -------------------------------------------------------------------------- */
+.ds .auth__brand {
+  position: relative;
+  z-index: 2;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  width: fit-content;
+  padding: var(--ds-space-1);
+  margin: calc(-1 * var(--ds-space-1));
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-color-ink);
+  font-size: var(--ds-text-lg);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.ds .auth__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background-color: var(--ds-color-primary);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-sm);
+  box-shadow: var(--ds-shadow-btn);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ds .auth__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--ds-auth-content-width);
+  margin-block: auto;
+  align-self: center;
+}
+
+.ds .auth__eyebrow {
+  margin: 0 0 var(--ds-space-1);
+  color: var(--ds-color-ink-muted);
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.ds .auth__title {
+  max-width: 12ch;
+  min-height: calc(2 * 1.08em);
+  margin: 0 0 var(--ds-space-8);
+  font-family: var(--ds-font-display);
+  color: var(--ds-color-ink);
+  font-size: var(--ds-auth-title-size);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: var(--ds-tracking-tight);
+  text-wrap: balance;
+}
+
+.ds .auth__title:focus {
+  outline: none;
+}
+
+.ds .auth__google {
+  width: 100%;
+  justify-content: center;
+  gap: var(--ds-space-3);
+  padding-block: var(--ds-space-3);
+  padding-inline: var(--ds-space-5);
+}
+
+.ds .auth__google-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-auth-google-chip);
+  height: var(--ds-auth-google-chip);
+  border: var(--ds-border-thin) solid var(--ds-color-border-subtle);
+  border-radius: var(--ds-radius-pill);
+  background-color: var(--ds-color-paper-surface);
+  box-shadow: inset 0 1px 0 var(--ds-color-highlight-specular);
+}
+
+.ds .auth__google-icon {
+  width: var(--ds-auth-google-icon);
+  height: var(--ds-auth-google-icon);
+}
+
+.ds .auth__switch {
+  margin: var(--ds-space-6) 0 0;
+  color: var(--ds-color-ink-muted);
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-snug);
+}
+
+.ds .auth__switch-link {
+  display: inline-block;
+  padding: 2px 1px;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-color-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+
+/* Halaman belakang lembar saat kosong (sisi yang menghadap ke bawah). */
+.ds .auth__back-mark {
+  margin: auto;
+  color: rgba(28, 25, 23, 0.12);
+  font-family: var(--ds-font-display);
+  font-size: clamp(var(--ds-text-3xl), 5vw, var(--ds-text-4xl));
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  transform: rotate(-6deg);
+}
+
+/* --------------------------------------------------------------------------
+   Animasi lembar.
+   -------------------------------------------------------------------------- */
+@keyframes auth-turn-ke-daftar {
+  0% {
+    transform: translateZ(0) rotateY(0deg);
+  }
+  50% {
+    transform: translateZ(18px) rotateY(-90deg);
+  }
+  100% {
+    transform: translateZ(0) rotateY(-180deg);
+  }
+}
+
+@keyframes auth-turn-ke-masuk {
+  0% {
+    transform: translateZ(0) rotateY(-180deg);
+  }
+  50% {
+    transform: translateZ(18px) rotateY(-90deg);
+  }
+  100% {
+    transform: translateZ(0) rotateY(0deg);
+  }
+}
+
+@keyframes auth-leaf-shade {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes auth-under-shadow {
+  0% {
+    opacity: 0;
+  }
+  24% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.82;
+  }
+  76% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes auth-spine-deepen {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.62;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   < 900px: satu halaman. Pita ilustrasi di atas formulir, tanpa punggung.
+   Lembar tetap berputar 3D dengan poros di tepi kiri.
+   -------------------------------------------------------------------------- */
+@media (max-width: 899px) {
+  .ds .auth {
+    --fold-size: 44px;
+
+    padding: var(--ds-space-4);
+  }
+
+  .ds .auth__stage {
+    max-width: calc(var(--ds-auth-book-width) / 2);
+    perspective: 1600px;
+    perspective-origin: 50% 34%;
+  }
+
+  .ds .auth__desktop {
+    display: none;
+  }
+
+  .ds .auth__mobile {
+    display: block;
+  }
+
+  .ds .auth__mobile-stack {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Tumpukan lembaran satu halaman. */
+  .ds .auth__mobile-stack::before,
+  .ds .auth__mobile-stack::after {
+    content: "";
+    position: absolute;
+    border-radius: calc(var(--ds-auth-page-radius) + 2px);
+    pointer-events: none;
+  }
+
+  .ds .auth__mobile-stack::before {
+    z-index: 0;
+    inset: 2px -5px calc(-1 * var(--page-thickness));
+    border: 1px solid var(--ds-auth-page-edge-line);
+    background-color: var(--ds-auth-page-edge-1);
+    box-shadow:
+      0 2px 0 var(--ds-auth-page-edge-2),
+      0 3px 0 var(--ds-auth-page-edge-line),
+      0 5px 0 var(--ds-auth-page-edge-3),
+      0 6px 0 var(--ds-auth-page-edge-line),
+      0 8px 0 var(--ds-auth-page-edge-2);
+  }
+
+  .ds .auth__mobile-stack::after {
+    z-index: -1;
+    inset: 8px -8px -14px;
+    border: 1px solid var(--ds-auth-cover-edge);
+    border-radius: calc(var(--ds-auth-page-radius) + 4px);
+    background-color: var(--ds-auth-cover);
+    box-shadow: 0 14px 24px rgba(28, 25, 23, 0.2);
+  }
+
+  .ds .auth__mobile-book {
+    position: relative;
+    z-index: 2;
+    border-radius: var(--ds-auth-page-radius);
+    transform-style: preserve-3d;
+  }
+
+  .ds .auth__mobile-under {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .ds .auth__mobile-leaf {
+    position: relative;
+    z-index: 1;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+  }
+
+  .ds .auth__mobile-leaf.is-flipping {
+    pointer-events: none;
+    will-change: transform;
+    animation: auth-turn-ke-daftar var(--flip-duration) var(--ds-auth-ease-flip) both;
+  }
+
+  .ds .auth__mobile-face {
+    overflow: hidden;
+    border-radius: var(--ds-auth-page-radius);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    filter: drop-shadow(0 24px 32px rgba(28, 25, 23, 0.27));
+  }
+
+  .ds .auth__mobile-face--belakang {
+    position: absolute;
+    inset: 0;
+    transform: rotateY(180deg);
+  }
+
+  .ds .auth__mobile-under .auth__mobile-face,
+  .ds .auth__mobile-under .auth__mobile-paper {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  .ds .auth__mobile-paper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+    color: var(--ds-color-ink);
+    background-color: var(--paper);
+    background-image:
+      var(--ds-auth-paper-grain),
+      radial-gradient(ellipse 108% 64% at 30% 10%, rgba(255, 255, 255, 0.4), transparent 64%),
+      linear-gradient(
+        170deg,
+        var(--ds-auth-paper-center) 0%,
+        var(--paper) 58%,
+        var(--ds-auth-paper-edge) 100%
+      );
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% calc(100% - var(--fold-size)),
+      calc(100% - var(--fold-size)) 100%,
+      0 100%
+    );
+    box-shadow: var(--ds-auth-bow-top), var(--ds-auth-bow-bottom);
+  }
+
+  .ds .auth__mobile-paper--belakang {
+    justify-content: center;
+    align-items: center;
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 100%,
+      var(--fold-size) 100%,
+      0 calc(100% - var(--fold-size))
+    );
+  }
+
+  .ds .auth__mobile-banner {
+    position: relative;
+    flex: 0 0 var(--ds-auth-art-height);
+    height: var(--ds-auth-art-height);
+    overflow: hidden;
+    background-color: var(--ds-color-ink);
+  }
+
+  .ds .auth__mobile-banner .auth__art-svg {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 560 / 700;
+    transform: translateY(-17.5%);
+  }
+
+  .ds .auth__banner-wash {
+    position: absolute;
+    inset: 0;
+    background-image: var(--ds-auth-art-wash);
+    pointer-events: none;
+  }
+
+  .ds .auth__mobile-body {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    padding: var(--ds-space-6) var(--ds-space-6) var(--ds-space-10);
+  }
+
+  .ds .auth__mobile-leaf .auth__leaf-shade {
+    z-index: 3;
+  }
+
+  .ds .auth__content {
+    margin-block: var(--ds-space-8) 0;
+  }
+
+  /* Kedua mode menyisakan dua baris judul supaya tinggi halaman tidak
+     berubah saat lembar berbalik. */
+  .ds .auth__title {
+    min-height: calc(2 * 1.08em);
+  }
+}
+
+@media (max-width: 479px) {
+  .ds .auth__mobile-body {
+    padding: var(--ds-space-5) var(--ds-space-5) var(--ds-space-8);
+  }
+
+  .ds .auth__google {
+    gap: var(--ds-space-2);
+    padding-inline: var(--ds-space-4);
+  }
+
+  .ds .auth__title {
+    margin-bottom: var(--ds-space-6);
+  }
+
+  .ds .auth__switch {
+    margin-top: var(--ds-space-5);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Gerak dikurangi: tanpa putaran 3D. Tata letak tetap bercermin, pergantian
+   halaman memakai fade 200ms yang aman.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .ds .auth__book.is-flipping .auth__leaf,
+  .ds .auth__mobile-leaf.is-flipping {
+    animation: none;
+  }
+
+  .ds .auth__leaf-shade,
+  .ds .auth__under-shadow,
+  .ds .auth__spine-deepen {
+    display: none;
+  }
+
+  .ds .auth__desktop.is-redup,
+  .ds .auth__mobile.is-redup {
+    animation: auth-redup var(--ds-auth-settle-duration) ease both;
+  }
+
+  .ds .auth__fold-flap {
+    transition: none;
+  }
+}
+
+@keyframes auth-redup {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}

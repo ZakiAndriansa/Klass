@@ -1,0 +1,193 @@
+/* ==========================================================================
+   Component: Toast & Alert (Highlighter Marks on Text)
+   Sumber alert: Figma 75:1709 — garis tinta kiri 2px, padding kiri 20px,
+   dot 8px, label Space Mono Bold 12/19.2 uppercase, kalimat 14px tersorot.
+   ========================================================================== */
+
+.ds .alert-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
+}
+
+/* Alert bukan kotak: ini baris catatan di kertas, dengan kalimat yang disorot
+   stabilo. Karena sorotan menempel pada teks (inline), panjangnya otomatis
+   mengikuti baris dan tidak menutup seluruh lebar kontainer. */
+.ds .alert {
+  --ds-alert-marker: 229, 154, 60;
+  --ds-alert-angle: 133deg;
+  --ds-alert-accent: var(--ds-color-warning);
+
+  position: relative;
+  padding: var(--ds-space-2) 0 var(--ds-space-2) var(--ds-space-5);
+  border-left: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  background: none;
+  transform: rotate(-0.3deg);
+}
+
+.ds .alert--info {
+  --ds-alert-marker: 126, 184, 218;
+  --ds-alert-angle: 139deg;
+  --ds-alert-accent: var(--ds-color-info);
+}
+
+.ds .alert--success {
+  --ds-alert-marker: 102, 185, 137;
+  --ds-alert-angle: 138deg;
+  --ds-alert-accent: var(--ds-color-success);
+}
+
+.ds .alert--warning {
+  --ds-alert-marker: 229, 154, 60;
+  --ds-alert-angle: 133deg;
+  --ds-alert-accent: var(--ds-color-warning);
+}
+
+.ds .alert--error {
+  --ds-alert-marker: 206, 84, 80;
+  --ds-alert-angle: 130deg;
+  --ds-alert-accent: var(--ds-color-error);
+}
+
+.ds .alert__content {
+  min-width: 0;
+}
+
+.ds .alert__title {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: var(--ds-chip-tracking);
+  text-transform: uppercase;
+  color: var(--ds-color-ink);
+  margin-bottom: var(--ds-space-2);
+}
+
+/* Titik penanda warna, pengganti bingkai berwarna */
+.ds .alert__title::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: var(--ds-radius-pill);
+  background-color: var(--ds-alert-accent);
+  box-shadow: 0 0 0 2px var(--ds-color-paper-bg);
+}
+
+.ds .alert__msg {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  color: var(--ds-color-ink);
+}
+
+/* Sorotan inline: hanya selebar teks, tiap baris disorot terpisah.
+   Opasitas 0.72 (bukan 0.9) supaya garis kertas masih terlihat menembus —
+   ini yang membedakan sorotan stabilo dari blok warna solid. */
+.ds .alert__msg > span {
+  display: inline;
+  padding: 0.08em var(--ds-space-2) 0.14em;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(0, 0, 0, 0) 40%,
+      rgba(0, 0, 0, 0.04) 100%
+    ),
+    linear-gradient(
+      var(--ds-alert-angle),
+      rgba(var(--ds-alert-marker), 0) 1.63%,
+      rgba(var(--ds-alert-marker), 0.72) 4.53%,
+      rgba(var(--ds-alert-marker), 0.72) 95.47%,
+      rgba(var(--ds-alert-marker), 0) 98.37%
+    );
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.ds .toast-demo-bar {
+  margin-top: var(--ds-space-4);
+}
+
+.ds .toast-region {
+  position: fixed;
+  right: var(--ds-space-4);
+  bottom: var(--ds-space-4);
+  z-index: var(--ds-z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--ds-space-3);
+  width: fit-content;
+  max-width: min(18rem, calc(100vw - var(--ds-space-8)));
+}
+
+/* Toast mengambang di atas konten, jadi tetap butuh alas kertas supaya
+   teks di belakangnya tidak menembus. Sorotannya ada pada kalimat. */
+.ds .toast {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-subtle);
+  border-left: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+  box-shadow: 0 6px 16px rgba(28, 25, 23, 0.18);
+  font-size: var(--ds-text-sm);
+  font-weight: 600;
+  transform: rotate(-0.4deg);
+}
+
+.ds .toast__body {
+  margin: 0;
+  min-width: 0;
+}
+
+.ds .toast__msg {
+  display: inline;
+  padding: 0.08em var(--ds-space-2) 0.14em;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(0, 0, 0, 0) 40%,
+      rgba(0, 0, 0, 0.04) 100%
+    ),
+    linear-gradient(
+      133deg,
+      rgba(229, 154, 60, 0) 1.63%,
+      rgba(229, 154, 60, 0.72) 4.53%,
+      rgba(229, 154, 60, 0.72) 95.47%,
+      rgba(229, 154, 60, 0) 98.37%
+    );
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.ds .toast__dismiss {
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.ds .toast__dismiss:active {
+  transform: translateY(1px);
+  box-shadow: var(--ds-shadow-btn-active);
+}

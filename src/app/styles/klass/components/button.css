@@ -1,0 +1,173 @@
+/* ==========================================================================
+   Component: Button (Tactile 3D Push-Button)
+   ========================================================================== */
+
+.ds .btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-3);
+}
+
+.ds .btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-3) var(--ds-space-6);
+  min-height: 44px;
+  font-family: var(--ds-font-sans);
+  font-size: var(--ds-text-sm);
+  font-weight: 600;
+  line-height: 1.45;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  background-color: var(--ds-color-paper-surface);
+  color: var(--ds-color-ink);
+  box-shadow: var(--ds-shadow-cta);
+  transition:
+    transform var(--ds-duration-fast) var(--ds-ease-press),
+    box-shadow var(--ds-duration-fast) var(--ds-ease-press),
+    background-color var(--ds-duration-fast) var(--ds-ease-standard);
+  user-select: none;
+}
+
+/* Border dua lapis (Figma 89:1385): stroke hitam 2px dengan bibir specular 1px
+   di tepi luarnya. Pseudo menutup kotak border penuh (inset negatif), jadi
+   highlight jatuh di atas stroke — bukan tersembunyi di dalamnya — lalu
+   mengikuti lengkung sudut dan memudar di sisi, seperti inner-shadow Figma. */
+.ds .btn::after {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--ds-border-thick));
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 var(--ds-color-highlight-specular);
+  pointer-events: none;
+}
+
+/* Ghost bergaris putus-putus: bibir menerus akan menutup celah garis. */
+.ds .btn--ghost::after {
+  display: none;
+}
+
+.ds .btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--ds-shadow-btn-hover);
+}
+
+.ds .btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: var(--ds-shadow-btn-active);
+}
+
+.ds .btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: 0 1px 0 var(--ds-color-rule-dashed);
+}
+
+/* Variants */
+.ds .btn--primary {
+  background-color: var(--ds-color-primary);
+  color: var(--ds-color-ink);
+}
+
+.ds .btn--primary:hover:not(:disabled) {
+  background-color: var(--ds-color-primary-hover);
+}
+
+.ds .btn--secondary {
+  background-color: var(--ds-color-paper-surface);
+  color: var(--ds-color-ink);
+}
+
+.ds .btn--secondary:hover:not(:disabled) {
+  background-color: var(--ds-color-paper-well);
+}
+
+.ds .btn--ghost {
+  background-color: var(--ds-color-paper-surface);
+  color: var(--ds-color-ink);
+  border-style: dashed;
+  box-shadow: var(--ds-shadow-paper);
+}
+
+.ds .btn--ghost:hover:not(:disabled) {
+  background-color: var(--ds-color-paper-well);
+  border-style: solid;
+  box-shadow: var(--ds-shadow-btn);
+}
+
+.ds .btn--danger {
+  background-color: var(--ds-color-error);
+  color: var(--ds-color-ink-inverse);
+}
+
+/* Sizes */
+.ds .btn--sm {
+  min-height: 36px;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  font-size: var(--ds-text-xs);
+  border-radius: var(--ds-radius-sm);
+}
+
+.ds .btn--md {
+  min-height: 44px;
+  padding: var(--ds-space-3) var(--ds-space-6);
+  font-size: var(--ds-text-sm);
+}
+
+.ds .btn--lg {
+  min-height: 52px;
+  padding: var(--ds-space-4) var(--ds-space-8);
+  font-size: var(--ds-text-base);
+  border-radius: var(--ds-radius-md);
+}
+
+.ds .btn--pill {
+  border-radius: var(--ds-radius-pill);
+}
+
+.ds .btn__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Loading state */
+.ds .btn.is-loading {
+  cursor: wait;
+}
+
+.ds .btn__spinner {
+  width: 16px;
+  height: 16px;
+  border: var(--ds-border-thick) solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--ds-radius-pill);
+  animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Cincin fokus keyboard. Aturan `.btn` di atas menimpa box-shadow dari
+   `.ds :focus-visible`, jadi cincin fokus dipasang ulang di sini agar tombol
+   tetap jelas saat dinavigasi dengan Tab. */
+.ds .btn:focus-visible {
+  transform: translateY(0);
+  box-shadow: var(--ds-shadow-focus);
+}
+
+.ds .btn:focus-visible:hover:not(:disabled),
+.ds .btn:focus-visible:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--ds-shadow-focus);
+}

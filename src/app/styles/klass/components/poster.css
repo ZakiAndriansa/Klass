@@ -1,0 +1,86 @@
+/* ==========================================================================
+   Component: Poster ("Papan informasi")
+   Sumber: Figma 60:752 — bidang biru 1200×262, border tinta 1.5px, radius 8px,
+   label monospace di 26.5/30.5, judul 40/48 di 69.5, kolom kanan di 778.5.
+   Di layar lebar bidang melebar mengikuti konten; tinggi tetap 262px.
+   ========================================================================== */
+
+.ds .poster {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-6);
+  padding: var(--ds-poster-pad-block) var(--ds-space-4);
+  background-color: var(--ds-color-secondary);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: 8px;
+  box-shadow: var(--ds-shadow-poster);
+}
+
+@media (min-width: 900px) {
+  .ds .poster {
+    /* Kolom kiri mengisi sisa ruang, kolom kanan tetap 391px; pada frame
+       1200px jaraknya ±88px seperti Figma (660 + 88 + 391 + padding). */
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--ds-poster-aside-width));
+    column-gap: var(--ds-poster-column-gap);
+    align-items: start;
+    min-height: var(--ds-poster-height);
+    padding: var(--ds-poster-pad-block) var(--ds-poster-pad-inline);
+  }
+}
+
+.ds .poster__label {
+  display: block;
+  margin-bottom: var(--ds-poster-label-gap);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-label);
+  text-transform: uppercase;
+  color: var(--ds-color-ink);
+}
+
+.ds .poster__title {
+  margin: 0;
+  font-size: var(--ds-text-2xl);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+@media (min-width: 768px) {
+  .ds .poster__title {
+    font-size: var(--ds-poster-title-size);
+    line-height: var(--ds-poster-title-leading);
+  }
+}
+
+.ds .poster__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-space-6);
+}
+
+@media (min-width: 900px) {
+  /* Kolom kanan mulai 30px lebih rendah dari label kiri (56.5 vs 26.5) */
+  .ds .poster__aside {
+    gap: var(--ds-poster-aside-gap);
+    padding-top: var(--ds-poster-aside-offset);
+  }
+}
+
+.ds .poster__meta {
+  margin: 0;
+  font-size: var(--ds-text-base);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink);
+}
+
+@media (min-width: 900px) {
+  .ds .poster__meta {
+    line-height: var(--ds-poster-meta-leading);
+  }
+}
+
+/* CTA poster memakai TombolKertas varian secondary; lihat poster.tsx. */

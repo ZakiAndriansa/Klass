@@ -1,0 +1,53 @@
+/* ==========================================================================
+   Component: Community Feed ("Siaran Komunitas")
+   Sumber: Figma 75:1699 — heading kiri + 3 alert satu arah (rotate -0.3°),
+   masing-masing dengan garis tinta kiri, dot warna, dan kalimat tersorot.
+   ========================================================================== */
+
+.ds .feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
+}
+
+.ds .feed__header {
+  padding-bottom: var(--ds-space-4);
+  border-bottom: var(--ds-border-thick) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .feed__eyebrow {
+  display: block;
+  margin-bottom: var(--ds-space-1);
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .feed__title {
+  margin: 0;
+  font-size: var(--ds-text-2xl);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.ds .feed__intro {
+  margin: var(--ds-space-2) 0 0;
+  max-width: 64ch;
+  font-size: var(--ds-text-base);
+  line-height: 1.6;
+  color: var(--ds-color-ink-secondary);
+}
+
+/* Daftar siaran. Gaya tiap baris sepenuhnya milik komponen .alert. */
+.ds .feed__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
+  padding-top: var(--ds-space-8);
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}

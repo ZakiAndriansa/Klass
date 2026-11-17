@@ -1,0 +1,80 @@
+/* ==========================================================================
+   Component: Feature / Index Cards ("Fitur utama")
+   Sumber: Figma 60:699 — tiga kartu 384×266, radius 8px, border tinta 1.5px,
+   label monospace di kiri-atas, judul 22px, isi 16/26.
+   ========================================================================== */
+
+.ds .stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-4);
+}
+
+@media (min-width: 768px) {
+  .ds .stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ds-space-6);
+  }
+}
+
+.ds .stat-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: var(--ds-feature-card-height);
+  padding: var(--ds-feature-card-pad);
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: 8px;
+  box-shadow: var(--ds-shadow-feature-card);
+  transition: transform var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.ds .stat-card--yellow {
+  background-color: var(--ds-color-primary);
+}
+
+.ds .stat-card--blue {
+  background-color: var(--ds-color-secondary);
+}
+
+.ds .stat-card--folder {
+  background-color: var(--ds-color-folder-bg);
+}
+
+.ds .stat-card--orange {
+  background-color: var(--ds-color-accent-orange);
+}
+
+/* Label "01 / MATERI" — Space Mono Regular, bukan badge.
+   Figma: label 18px tinggi di y=24, judul mulai y=75 → jarak 33px. */
+.ds .stat-card__num {
+  display: block;
+  margin-bottom: var(--ds-feature-card-label-gap);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 400;
+  line-height: var(--ds-leading-label);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--ds-color-ink);
+}
+
+.ds .stat-card__title {
+  margin: 0 0 var(--ds-feature-card-title-gap);
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: var(--ds-leading-h3);
+  letter-spacing: 0;
+}
+
+.ds .stat-card__desc {
+  margin: 0;
+  font-size: var(--ds-text-base);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink);
+}
