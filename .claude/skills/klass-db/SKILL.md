@@ -14,7 +14,8 @@ src/server/db/
   index.ts            koneksi (pool mysql2) dan ekspor `db`
   schema/
     index.ts          ekspor ulang semua tabel
-    website.ts        profiles, posters
+    auth.ts           users, sessions, accounts, verifications (Better Auth, milik Zaki, jangan diubah)
+    website.ts        posters, push_subscriptions
     kelas.ts          classes, class_members, class_bans, class_admin_invites
     subkelas.ts       subclasses, subclass_pj, schedules, materials, assignments, assignment_reminders
     interaksi.ts      notes, posts, post_comments, post_reactions, chat_rooms, messages   (P1)
@@ -38,7 +39,14 @@ Model adalah satu-satunya lapisan yang mengimpor `db`. Ahmad dan Bintang menulis
 6. Daftar selalu menerima `page` dan `limit` dan mengembalikan `{ baris, total }`.
 7. Bila controller butuh fungsi baru, sepakati dulu nama, masukan, dan keluarannya, lalu tulis fungsinya di sini.
 
-MVP hanya butuh `website.ts`, `kelas.ts`, dan `subkelas.ts` ditambah tabel auth dan langganan web push. Jangan membuat tabel P1 sebelum fasenya dibuka.
+MVP hanya butuh `auth.ts` (sudah ada), `kelas.ts`, `subkelas.ts`, dan `website.ts`. Jangan membuat tabel P1 sebelum fasenya dibuka.
+
+## Tabel pengguna
+
+1. Tabel pengguna berasal dari Better Auth dan sudah ada di `schema/auth.ts`. Bentuknya mengikuti konfigurasi di `src/server/auth/index.ts`, jadi tidak diubah dengan tangan; bila perlu berubah, minta Zaki.
+2. Tidak ada tabel `profiles`. Nama dan avatar ada di `users.name` dan `users.image`, penanda superadmin di `users.is_superadmin`.
+3. `users.id` bertipe `varchar(36)`. Setiap kolom yang merujuk ke pengguna ditulis `varchar("user_id", { length: 36 }).references(() => users.id, ...)` dengan `users` diimpor dari `./auth`.
+4. Id pengguna dibuat Better Auth dan bukan UUID, tetapi tetap muat di `varchar(36)`. Jangan mengandalkan format id.
 
 ## Konvensi
 
@@ -52,7 +60,7 @@ MVP hanya butuh `website.ts`, `kelas.ts`, dan `subkelas.ts` ditambah tabel auth 
 
 ## Aturan data yang wajib dijaga skema
 
-1. Role disimpan per scope: admin kelas pada `class_members.role`, PJ pada `subclass_pj`. Hanya `is_superadmin` yang global, dan kolom itu tidak pernah diterima dari masukan pengguna.
+1. Role disimpan per scope: admin kelas pada `class_members.role`, PJ pada `subclass_pj`. Hanya `users.is_superadmin` yang global, dan kolom itu tidak pernah diterima dari masukan pengguna.
 2. Tema kelas disimpan pada satu kolom `style` bertipe `json` di `classes` (warna, logo, background, banner). Bentuknya divalidasi Zod di controller dan ukurannya dibatasi.
 3. `class_admin_invites` menyimpan email yang ditunjuk superadmin; undangan aktif saat pemilik email login pertama.
 4. `class_bans` terpisah dari `class_members` agar ban tetap ada setelah anggota dikeluarkan.
@@ -69,14 +77,14 @@ MVP hanya butuh `website.ts`, `kelas.ts`, dan `subkelas.ts` ditambah tabel auth 
 | `jsonb` | `json` |
 | `timestamptz` | `timestamp` dalam UTC |
 | `RETURNING` | Buat id di aplikasi, lalu baca ulang bila perlu |
-| Supabase Auth (`auth.users`) | Tabel Better Auth, dengan `profiles` merujuk ke id penggunanya |
+| Supabase Auth (`auth.users`) dan tabel `profiles` | Tabel `users` dari Better Auth di `schema/auth.ts` |
 
 Aturan "kelas wajib punya minimal satu admin" diperiksa di model dalam transaksi yang sama dengan perubahan role atau kick, bukan lewat trigger.
 
 ## Alur kerja perubahan skema
 
 1. Ubah berkas di `src/server/db/schema/`.
-2. `npm run db:generate`, lalu baca SQL hasilnya di `drizzle/` sebelum di-commit.
+2. `npm run db:generate -- --name=nama_singkat` (misalnya `--name=tabel_kelas`), lalu baca SQL hasilnya di `drizzle/` sebelum di-commit. Migrasi pertama, `0000_tabel_auth`, sudah ada.
 3. `npm run db:migrate` pada database lokal.
 4. Jangan pernah mengubah berkas migrasi yang sudah masuk `main`. Buat migrasi baru.
 5. Jangan memakai `drizzle-kit push` selain pada database lokal milik sendiri.
