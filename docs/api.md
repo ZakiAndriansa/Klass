@@ -59,6 +59,32 @@ Respons 200:
 
 `database` bernilai `"terhubung"` atau `"terputus"`. Tipe: `HealthDto` di `src/types/api/health.ts`.
 
+### Profil
+
+`GET /api/v1/profil`
+
+Mengambil profil pengguna yang sedang login.
+
+| Hal                | Isi                                      |
+| ------------------ | ---------------------------------------- |
+| Siapa yang boleh   | Pengguna yang sudah login                |
+| Body               | Tidak ada                                |
+| Respons berhasil   | 200, `{ "data": ProfilDto }`             |
+| Galat yang mungkin | `UNAUTHORIZED`, `NOT_FOUND`              |
+| Tipe               | `ProfilDto` di `src/types/api/profil.ts` |
+
+`PATCH /api/v1/profil`
+
+Mengubah nama dan avatar pengguna yang sedang login.
+
+| Hal                | Isi                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| Siapa yang boleh   | Pengguna yang sudah login, hanya profilnya sendiri                                          |
+| Body               | `nama` wajib, string 3–50 karakter. `avatarUrl` opsional, URL http/https maks 2048 karakter |
+| Respons berhasil   | 200, `{ "data": ProfilDto }`                                                                |
+| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `NOT_FOUND`                                             |
+| Tipe               | `UbahProfilInput` (masukan), `ProfilDto` (keluaran)                                         |
+
 ### Templat untuk endpoint baru
 
 Salin bagian ini lalu isi.
