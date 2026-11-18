@@ -25,7 +25,7 @@ Tabel lain yang butuh pengguna merujuk ke `users.id` (varchar 36). Tidak ada tab
 | Hal                                              | Status                                             |
 | ------------------------------------------------ | -------------------------------------------------- |
 | Konfigurasi dasar dan skema tabel                | Ada                                                |
-| Migrasi `drizzle/0000_tabel_auth.sql`            | Ada, belum pernah dijalankan ke database           |
+| Migrasi `drizzle/0000_tabel_auth.sql`            | Ada, sudah dicoba di MySQL 8.4 lokal               |
 | URL `/api/auth/...`                              | Belum                                              |
 | Kredensial Google Cloud di `.env`                | Belum (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`) |
 | `BETTER_AUTH_SECRET` di `.env`                   | Belum, wajib diisi sebelum login diaktifkan        |
