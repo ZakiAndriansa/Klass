@@ -26,12 +26,21 @@ Pesan commit selalu diawali `Add:`, `Update:`, `Delete:`, atau `Fix:`. Diputuska
 
 MySQL untuk pengembangan boleh dari Docker atau dari Laragon, asalkan versinya 8. Yang membedakan hanya `DATABASE_URL` di `.env` masing-masing anggota. XAMPP tidak dipakai karena isinya MariaDB. Server produksi tetap memakai MySQL dalam kontainer sesuai PRD.
 
+## 18 November 2026: tabel pengguna
+
+| Keputusan                                                                                         | Alasan                                                               | Diputuskan oleh |
+| ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | --------------- |
+| Tabel pengguna memakai bentuk dari Better Auth (`users`, `sessions`, `accounts`, `verifications`) | Bentuknya ditentukan pustaka; tabel lain cukup merujuk ke `users.id` | Zaki            |
+| Nama tabel auth dijamakkan (`usePlural`)                                                          | Seragam dengan tabel lain                                            | Zaki            |
+| Tidak ada tabel `profiles`; `is_superadmin` menjadi kolom tambahan di `users`                     | Nama dan avatar sudah ada di `users`, menghindari data ganda         | Zaki            |
+| Skema auth dan migrasi pertama dibuat Zaki sebelum tabel lain                                     | Supaya Fadlan bisa memasang kunci asing ke pengguna                  | Zaki            |
+
 ## Ditunda
 
-| Hal                                          | Menunggu                                   |
-| -------------------------------------------- | ------------------------------------------ |
-| Lapisan izin (`src/server/permissions`)      | Kerangka dan tabel dasar selesai           |
-| Login Google (`src/server/auth`)             | Tabel pengguna dan kredensial Google Cloud |
-| PWA dan notifikasi                           | Fitur tugas (F10)                          |
-| Worker pengingat, Dockerfile produksi, HTTPS | Mendekati rilis                            |
-| `.github/CODEOWNERS`                         | Nama pengguna GitHub tiap anggota          |
+| Hal                                                | Menunggu                          |
+| -------------------------------------------------- | --------------------------------- |
+| Lapisan izin (`src/server/permissions`)            | Kerangka dan tabel dasar selesai  |
+| Login Google (URL `/api/auth`, tombol di `/login`) | Kredensial Google Cloud           |
+| PWA dan notifikasi                                 | Fitur tugas (F10)                 |
+| Worker pengingat, Dockerfile produksi, HTTPS       | Mendekati rilis                   |
+| `.github/CODEOWNERS`                               | Nama pengguna GitHub tiap anggota |

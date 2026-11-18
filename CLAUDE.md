@@ -22,7 +22,7 @@ npm run build
 ## Batas lapisan (ditegakkan ESLint)
 
 1. Alur satu arah: halaman atau URL (`route.ts`) memanggil controller, controller memanggil model, model memanggil `db`.
-2. Hanya `src/server/models/**` yang mengimpor `@/server/db` dan menulis query.
+2. Hanya `src/server/models/**` yang mengimpor `@/server/db` dan menulis query. Satu pengecualian: `src/server/auth`, karena Better Auth mengelola tabelnya sendiri.
 3. `src/components/**`, `src/lib/**`, dan `src/types/**` tidak mengimpor dari `@/server`.
 4. Berkas di `src/server/**` diawali `import "server-only";`.
 5. Variabel lingkungan dibaca lewat `env` dari `@/env`, bukan `process.env`.
