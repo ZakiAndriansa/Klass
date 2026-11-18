@@ -1,0 +1,91 @@
+/* ==========================================================================
+   Component: Accordion / FAQ (Stacked Paper Sheets)
+   Sumber: Figma 60:901 — kartu selebar konten (1130px di Figma), border
+   tinta 2px, radius 10px, trigger 16px Bold, tombol persegi 28px (Space Mono)
+   yang berputar 45° dan berubah kuning saat terbuka.
+   ========================================================================== */
+
+.ds .accordion {
+  /* Kartu FAQ mengisi penuh lebar konten; di frame 1200px ia sedikit lebih
+     lebar dari Figma (1130px) agar tidak menyisakan celah di kanan. */
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-faq-item-gap);
+  width: 100%;
+}
+
+.ds .accordion__item {
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-paper);
+  overflow: hidden;
+}
+
+.ds .accordion__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  min-height: 52px;
+  padding: var(--ds-space-4) var(--ds-space-5);
+  text-align: left;
+  font-size: var(--ds-text-base);
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: -0.0195em;
+  color: var(--ds-color-ink);
+  background-color: var(--ds-color-paper-surface);
+  border: 0;
+  border-bottom: var(--ds-border-thin) solid transparent;
+  cursor: pointer;
+  transition: background-color var(--ds-duration-fast) var(--ds-ease-standard);
+}
+
+.ds .accordion__trigger:hover {
+  background-color: var(--ds-color-folder-bg);
+}
+
+/* Saat terbuka, header diberi warna map dan dipisahkan garis tinta tipis */
+.ds .accordion__item.is-open .accordion__trigger {
+  background-color: var(--ds-color-folder-bg);
+  border-bottom-color: var(--ds-color-border-ink);
+}
+
+/* Tombol +/−: persegi kecil dengan bibir 3D. Saat terbuka ia berputar 45°
+   sehingga tanda + terbaca sebagai ×, sama seperti Figma. */
+.ds .accordion__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-base);
+  font-weight: 700;
+  line-height: 1;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+  box-shadow:
+    0 3px 0 var(--ds-color-border-ink),
+    0 5px 5px rgba(28, 25, 23, 0.14);
+  transition:
+    transform var(--ds-duration-base) var(--ds-ease-standard),
+    background-color var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .accordion__item.is-open .accordion__chevron {
+  background-color: var(--ds-color-primary);
+  transform: rotate(45deg);
+}
+
+.ds .accordion__body {
+  padding: var(--ds-space-4) var(--ds-space-5);
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--ds-color-ink-secondary);
+}

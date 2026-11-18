@@ -1,0 +1,78 @@
+/* ==========================================================================
+   Layout: Section rhythm & container
+   Sumber: Figma "Klass · 01 Landing Page" 60:640 — konten 1200px di tengah
+   frame 1440px, jarak antar-section longgar (ritme garis kertas 32px).
+   Di layar yang lebih lebar konten tumbuh sampai 1440px agar tidak ada celah
+   di kanan dan komposisi tetap terpusat.
+   ========================================================================== */
+
+.ds .section {
+  padding-block: var(--ds-section-gap-md);
+}
+
+@media (min-width: 900px) {
+  .ds .section {
+    padding-block: var(--ds-section-gap-lg);
+  }
+}
+
+/* Section tanpa padding atas: menempel ke section sebelumnya */
+.ds .section--flush-top {
+  padding-top: 0;
+}
+
+/* Ritme rapat: dipakai halaman utama, di mana Figma menumpuk section dengan
+   jeda kecil. Diletakkan setelah media query supaya 48px berlaku di semua
+   lebar layar. */
+.ds .section--rapat {
+  padding-block: var(--ds-section-gap-sm);
+}
+
+/* Pembungkus konten. Di layar sempit memakai padding inline agar teks tidak
+   menyentuh tepi. Di layar lebar konten tumbuh dari 1200px (frame 1440px,
+   persis Figma) sampai 1440px pada 1680px ke atas; gutter mengecil mulus
+   sehingga tidak ada lompatan lebar dan konten selalu di tengah. */
+.ds .section__inner {
+  width: 100%;
+  max-width: var(--ds-container-wide-max);
+  margin-inline: auto;
+  padding-inline: var(--ds-space-4);
+}
+
+@media (min-width: 768px) {
+  .ds .section__inner {
+    padding-inline: var(--ds-content-gutter);
+  }
+}
+
+/* Kepala section dua kolom: judul di kiri, tautan aksi di kanan */
+.ds .section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  margin-bottom: var(--ds-space-8);
+}
+
+.ds .section__head-title {
+  margin: 0;
+  font-size: var(--ds-text-2xl);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.ds .section__head-link {
+  font-size: var(--ds-text-sm);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--ds-color-ink);
+  text-decoration: none;
+  border-bottom: var(--ds-border-base) solid transparent;
+  transition: border-color var(--ds-duration-fast) var(--ds-ease-standard);
+}
+
+.ds .section__head-link:hover {
+  border-bottom-color: var(--ds-color-ink);
+}

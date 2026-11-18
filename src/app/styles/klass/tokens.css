@@ -1,0 +1,433 @@
+/* Font dimuat lewat `next/font/local` di src/app/layout.tsx, yang
+   menghasilkan variabel --font-klass-sans, --font-klass-mono,
+   --font-klass-hand, dan --font-klass-pixel. Berkas font ada di
+   src/app/fonts/. */
+
+/* ==========================================================================
+   Design Tokens — Skeumorphic Stationery (Klass)
+   Semua nilai visual hidup di sini. Dilarang hardcode di CSS komponen.
+   ========================================================================== */
+
+/* Font aksen — diunduh lokal agar tidak bergantung jaringan */
+/* Handjet: font piksel untuk wordmark hero */
+:root {
+  /* --- Colors: Paper & Surfaces ---
+     Diselaraskan ke Figma "Klass · 01 Landing Page": kertas hampir putih dengan
+     garis tipis netral, bukan krem hangat. */
+  --ds-color-paper-bg: #fdfdfb;
+  --ds-color-paper-surface: #fffdf8;
+  --ds-color-paper-well: #f3eee2;
+  --ds-color-paper-line: #d8d7d5;
+  --ds-color-paper-margin: #e8b4b4;
+  --ds-color-rule-dashed: #d6ceba;
+
+  /* --- Colors: Manila Folder --- */
+  --ds-color-folder-bg: #ede5d0;
+  --ds-color-folder-tab: #e5dbc0;
+  --ds-color-folder-inner: #d8ceb6;
+  --ds-color-folder-edge: #c9bd9f;
+
+  /* --- Colors: Ink & Text --- */
+  --ds-color-ink: #1c1917;
+  --ds-color-ink-secondary: #44403c;
+  --ds-color-ink-muted: #57534e;
+  --ds-color-ink-inverse: #fffdf8;
+
+  /* --- Colors: Brand & Accents --- */
+  --ds-color-primary: #f5c542;
+  --ds-color-primary-hover: #eab32a;
+  --ds-color-primary-edge: #b8860b;
+  --ds-color-secondary: #7eb8da;
+  --ds-color-secondary-hover: #67a7ce;
+  --ds-color-secondary-soft: #e6f2fa;
+  --ds-color-accent-orange: #e59a3c;
+  --ds-color-accent-orange-soft: #fcecd6;
+  --ds-color-note-blue: #c4d4f7;
+  --ds-color-tape: rgba(245, 224, 150, 0.75);
+  --ds-color-tape-pink: rgba(244, 194, 215, 0.72);
+
+  /* --- Colors: Google (tombol masuk) --- */
+  /* Warna resmi logo Google; jangan diubah agar lambang tetap dikenali. */
+  --ds-color-google-blue: #4285f4;
+  --ds-color-google-red: #ea4335;
+  --ds-color-google-yellow: #fbbc05;
+  --ds-color-google-green: #34a853;
+
+  /* --- Colors: Folder Variegation (dari Figma "Jelajah pilihan") ---
+     Tiap kartu folder punya warna tab + badan berbeda untuk menandai kategori. */
+  --ds-color-folder-lilac: #ddd6fe;
+  --ds-color-folder-lilac-edge: #afabc1;
+  --ds-color-folder-green: #22c55e;
+  --ds-color-folder-green-edge: #22c55e;
+  --ds-color-folder-plain: #ede5d0;
+  --ds-color-folder-plain-edge: #c9bd9f;
+
+  /* --- Colors: Placeholder art di dalam file card --- */
+  --ds-color-well-shape: #c9bd9f;
+  --ds-color-well-shape-alt: #b5aa8f;
+
+  /* --- Highlighter / Stabilo Marker ---
+     Sengaja semi-transparan agar garis kertas tetap tembus, seperti sorotan
+     stabilo asli. Dipakai badge, alert, toast, tooltip, dan header modal. */
+  --ds-color-marker-yellow: rgba(245, 197, 66, 0.9);
+  --ds-color-marker-amber: rgba(233, 170, 48, 0.88);
+  --ds-color-marker-blue: rgba(126, 184, 218, 0.9);
+  --ds-color-marker-green: rgba(102, 185, 137, 0.85);
+  --ds-color-marker-orange: rgba(229, 154, 60, 0.88);
+  --ds-color-marker-red: rgba(206, 84, 80, 0.85);
+  /* Kilau tipis: meniru tekanan spidol yang tidak rata */
+  --ds-marker-streak: linear-gradient(
+    96deg,
+    transparent 0 16%,
+    rgba(255, 255, 255, 0.22) 23%,
+    transparent 34% 62%,
+    rgba(255, 255, 255, 0.16) 71%,
+    transparent 82%
+  );
+  /* Tepi goresan spidol yang tidak lurus sempurna */
+  --ds-marker-clip: polygon(0.5% 8%, 99.2% 0%, 100% 92%, 0.2% 100%);
+  --ds-marker-tilt: -0.6deg;
+
+  /* --- Colors: Semantic --- */
+  --ds-color-success: #2f855a;
+  --ds-color-success-soft: #e3f2e8;
+  --ds-color-warning: #d97706;
+  --ds-color-warning-soft: #fef3c7;
+  --ds-color-error: #c53030;
+  --ds-color-error-soft: #fde8e8;
+  --ds-color-info: #2b6cb0;
+  --ds-color-info-soft: #e6f2fa;
+
+  /* --- Colors: Borders & Overlays --- */
+  --ds-color-border-ink: #1c1917;
+  --ds-color-border-subtle: #d6ceba;
+  --ds-color-backdrop: rgba(28, 25, 23, 0.45);
+  --ds-color-highlight-specular: rgba(255, 255, 255, 0.65);
+  --ds-color-highlight-soft: rgba(255, 255, 255, 0.4);
+
+  /* --- Typography --- */
+  --ds-font-sans:
+    var(--font-klass-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ds-font-display: var(--font-klass-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  --ds-font-mono:
+    var(--font-klass-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --ds-font-hand: var(--font-klass-hand), "Bradley Hand", "Comic Sans MS", cursive;
+  --ds-font-pixel: var(--font-klass-pixel), var(--font-klass-sans), sans-serif;
+
+  --ds-text-xs: 0.75rem; /* 12px */
+  --ds-text-sm: 0.875rem; /* 14px */
+  --ds-text-base: 1rem; /* 16px */
+  --ds-text-lg: 1.125rem; /* 18px */
+  --ds-text-xl: 1.375rem; /* 22px */
+  --ds-text-2xl: 1.875rem; /* 30px */
+  --ds-text-3xl: 2.5rem; /* 40px */
+  --ds-text-4xl: 3.25rem; /* 52px */
+
+  --ds-leading-tight: 1.15;
+  --ds-leading-snug: 1.35;
+  --ds-leading-normal: 1.6;
+
+  /* Line-height eksplisit dari Figma (px) */
+  --ds-leading-hero: 58px;
+  --ds-leading-h1: 48px;
+  --ds-leading-h2: 39px;
+  --ds-leading-h3: 30px;
+  --ds-leading-body: 26px;
+  --ds-leading-label: 18px;
+
+  --ds-tracking-tight: -0.025em;
+  --ds-tracking-normal: 0em;
+  --ds-tracking-wide: 0.06em;
+  --ds-tracking-label: 0.72px;
+
+  /* --- Spacing (4px base) --- */
+  --ds-space-1: 0.25rem; /* 4px */
+  --ds-space-2: 0.5rem; /* 8px */
+  --ds-space-3: 0.75rem; /* 12px */
+  --ds-space-4: 1rem; /* 16px */
+  --ds-space-5: 1.25rem; /* 20px */
+  --ds-space-6: 1.5rem; /* 24px */
+  --ds-space-8: 2rem; /* 32px */
+  --ds-space-10: 2.5rem; /* 40px */
+  --ds-space-12: 3rem; /* 48px */
+  --ds-space-16: 4rem; /* 64px */
+  --ds-space-20: 5rem; /* 80px */
+  --ds-space-24: 6rem; /* 96px */
+
+  /* --- Paper Grid Rhythm ---
+     Figma memakai garis tiap 32px dengan warna #D8D7D5. */
+  --ds-paper-line-gap: 32px;
+  --ds-paper-line-thickness: 1px;
+
+  /* --- Layout --- */
+  --ds-container-max: 1200px;
+  /* Figma "Klass · 01": konten 1200px dengan gutter 120px di frame 1440px */
+  --ds-gutter-figma: 120px;
+  /* Di layar lebar konten boleh tumbuh sampai selebar panggung hero (1440px),
+     dengan gutter tetap 120px seperti frame Figma. */
+  --ds-container-wide: 1440px;
+  --ds-container-wide-max: calc(var(--ds-container-wide) + 2 * var(--ds-gutter-figma));
+  /* Gutter konten: 32px sampai frame 1264px, lalu membesar sampai 120px di
+     1440px. Hasilnya konten 1200px bertahan di frame 1440px (persis Figma),
+     lalu tumbuh menjadi 1440px pada 1680px ke atas. */
+  --ds-content-gutter: clamp(
+    var(--ds-space-8),
+    calc((100vw - var(--ds-container-max)) / 2),
+    var(--ds-gutter-figma)
+  );
+  --ds-section-gap-lg: 96px;
+  --ds-section-gap-md: 64px;
+  /* Ritme rapat khusus halaman utama: Figma menumpuk section hampir tanpa
+     jeda, jadi padding 48px dipakai alih-alih 96px galeri. */
+  --ds-section-gap-sm: 48px;
+
+  /* --- Auth Book (halaman masuk/daftar) ---
+     Buku terbuka 1120×700: dua halaman 560px. Semua warna kertas, bayangan,
+     tebal halaman, lipatan sudut, dan lebar punggung tinggal di sini. */
+  --ds-auth-book-width: 1120px;
+  --ds-auth-page-radius: 30px;
+  --ds-auth-page-radius-inner: 3px;
+  --ds-auth-content-width: 360px;
+  --ds-auth-art-height: clamp(168px, 23vw, 190px);
+  --ds-auth-page-pad: clamp(var(--ds-space-5), 4vw, var(--ds-space-12));
+  --ds-auth-title-size: clamp(var(--ds-text-2xl), 3.4vw, var(--ds-text-3xl));
+  --ds-auth-google-chip: 36px;
+  --ds-auth-google-icon: 18px;
+
+  /* Kertas halaman kanan dan tepi lembaran yang menumpuk di bawahnya. */
+  --ds-auth-paper: #fbf8f1;
+  --ds-auth-paper-center: #fdfaf3;
+  --ds-auth-paper-edge: #f1e9da;
+  --ds-auth-paper-shade: #ece5d3;
+  --ds-auth-paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='.045'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  --ds-auth-page-edge-1: #efe9dc;
+  --ds-auth-page-edge-2: #e6dfcf;
+  --ds-auth-page-edge-3: #ddd5c2;
+  --ds-auth-page-edge-line: rgba(146, 130, 102, 0.55);
+  --ds-auth-cover: #473a2e;
+  --ds-auth-cover-edge: #2f2620;
+  --ds-auth-page-thickness: 9px;
+  --ds-auth-stack-peek-min: 4px;
+  --ds-auth-stack-peek-max: 9px;
+  --ds-auth-stack-depth: 9px;
+  --ds-auth-cover-depth: 15px;
+
+  /* Meja: netral hangat, bukan putih dan tanpa garis buku tulis. */
+  --ds-auth-desk: #e7dfd0;
+  --ds-auth-desk-light: #f3ecdf;
+  --ds-auth-desk-shade: rgba(89, 73, 55, 0.09);
+
+  /* Punggung buku: pita 34px, bayangan tepi dalam, dan garis lipatan. */
+  --ds-auth-spine-width: 34px;
+  --ds-auth-gutter-width: clamp(62px, 7vw, 84px);
+  --ds-auth-spine-band: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(28, 25, 23, 0.13) 22%,
+    rgba(28, 25, 23, 0.28) 40%,
+    rgba(16, 13, 10, 0.48) 50%,
+    rgba(28, 25, 23, 0.28) 60%,
+    rgba(28, 25, 23, 0.13) 78%,
+    transparent 100%
+  );
+  --ds-auth-gutter-art: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.44) 0%,
+    rgba(0, 0, 0, 0.2) 30%,
+    rgba(0, 0, 0, 0.07) 62%,
+    transparent 100%
+  );
+  --ds-auth-gutter-paper: linear-gradient(
+    90deg,
+    rgba(28, 25, 23, 0.22) 0%,
+    rgba(28, 25, 23, 0.09) 38%,
+    rgba(28, 25, 23, 0.03) 68%,
+    transparent 100%
+  );
+  --ds-auth-crease-line: rgba(0, 0, 0, 0.45);
+  --ds-auth-crease-highlight: rgba(255, 255, 255, 0.35);
+  --ds-auth-stitch: rgba(58, 45, 34, 0.22);
+
+  /* Bowing tipis di tepi atas/bawah halaman. */
+  --ds-auth-bow-top: inset 0 20px 26px -24px rgba(28, 25, 23, 0.24);
+  --ds-auth-bow-bottom: inset 0 -22px 30px -24px rgba(28, 25, 23, 0.3);
+  --ds-auth-bow-top-dark: inset 0 22px 28px -24px rgba(0, 0, 0, 0.42);
+  --ds-auth-bow-bottom-dark: inset 0 -24px 32px -24px rgba(0, 0, 0, 0.54);
+
+  /* Bayangan buku di meja + bayangan kontak di bawah tepi. */
+  --ds-auth-book-shadow:
+    0 32px 64px -12px rgba(28, 25, 23, 0.42), 0 14px 26px -6px rgba(28, 25, 23, 0.22);
+  --ds-auth-contact-shadow: radial-gradient(
+    ellipse at center,
+    rgba(28, 25, 23, 0.44) 0%,
+    rgba(28, 25, 23, 0.18) 42%,
+    transparent 72%
+  );
+  --ds-auth-stage-glow: radial-gradient(
+    ellipse 68% 58% at 50% 40%,
+    rgba(255, 250, 240, 0.55) 0%,
+    rgba(255, 250, 240, 0.18) 46%,
+    transparent 72%
+  );
+  --ds-auth-art-wash:
+    linear-gradient(
+      to bottom,
+      rgba(28, 25, 23, 0.22) 0%,
+      transparent 18%,
+      transparent 70%,
+      rgba(28, 25, 23, 0.46) 100%
+    ),
+    linear-gradient(
+      to right,
+      rgba(28, 25, 23, 0.2) 0%,
+      transparent 9%,
+      transparent 88%,
+      rgba(245, 197, 66, 0.05) 100%
+    );
+
+  /* Sudut terlipat dan animasi balik halaman. */
+  --ds-auth-fold-size: clamp(48px, 4.8vw, 58px);
+  --ds-auth-fold-light: #f7f2e6;
+  --ds-auth-fold-dark: #d8ccb3;
+  --ds-auth-flip-duration: 900ms;
+  --ds-auth-settle-duration: 200ms;
+  --ds-auth-ease-flip: cubic-bezier(0.645, 0.045, 0.355, 1);
+  --ds-auth-turn-shadow: linear-gradient(
+    90deg,
+    transparent 6%,
+    rgba(28, 25, 23, 0.16) 24%,
+    rgba(28, 25, 23, 0.4) 50%,
+    rgba(28, 25, 23, 0.16) 76%,
+    transparent 94%
+  );
+
+  /* --- Folder Card (Figma "file card") --- */
+  --ds-folder-card-gap: 41px;
+  /* 2 × 549 + 41 = 1139px: lebar blok grid kartu di Figma "Jelajah pilihan".
+     Kolom kini mengisi konten, jadi di frame 1200px tiap kartu ±579px. */
+  --ds-folder-card-tab-width: 147.719px;
+  --ds-folder-card-tab-height: 36.688px;
+  --ds-folder-card-pad: 16px;
+  --ds-folder-card-well-height: 290.563px;
+  --ds-radius-folder-tab: 14px;
+  --ds-radius-folder-tab-inner: 13px;
+  --ds-radius-folder-body: 10px;
+  --ds-radius-folder-well: 6px;
+  --ds-shadow-folder-card: 0 3px 0 var(--ds-color-folder-edge), 0 10px 20px rgba(28, 25, 23, 0.12);
+  --ds-shadow-folder-card-hover:
+    0 4px 0 var(--ds-color-folder-edge), 0 14px 26px rgba(28, 25, 23, 0.16);
+
+  /* --- Feature / Step Cards (Figma "Fitur utama" 60:699) ---
+     Kartu 384×266: label di y=24, judul di y=75, isi di y=123. */
+  --ds-feature-card-height: 266px;
+  --ds-feature-card-pad: 24px;
+  --ds-feature-card-label-gap: 33px;
+  --ds-feature-card-title-gap: 18px;
+  --ds-shadow-feature-card: 0 7px 8px rgba(28, 26, 23, 0.1);
+
+  /* --- FAQ (Figma 60:757) ---
+     Judul di y=0, subjudul y=48, kartu pertama y=94 (jarak 20px); jarak
+     antar-kartu 34px. Di Figma kartu 1130px, di sini mengisi lebar konten. */
+  --ds-faq-head-gap: 20px;
+  --ds-faq-item-gap: 34px;
+
+  /* --- Invite Band (Figma "Ajakan bergabung" 60:766) ---
+     Pita 1440×250: judul 30/39 di y=43, kalimat di y=98, CTA di y=78. */
+  --ds-invite-height: 250px;
+  --ds-invite-pad-block: 43px;
+  --ds-invite-cta-offset: 35px;
+
+  /* --- Poster (Figma "Papan informasi" 60:752) ---
+     Angka diambil dari posisi absolut Figma: label 26.5/30.5, judul 69.5,
+     kolom kanan 778.5, CTA 150.5. */
+  --ds-poster-height: 262px;
+  --ds-poster-pad-block: 26px;
+  --ds-poster-pad-inline: 30px;
+  --ds-poster-aside-width: 391px;
+  --ds-poster-column-gap: clamp(var(--ds-space-6), 7.7%, 106px);
+  --ds-poster-aside-offset: 30px;
+  --ds-poster-aside-gap: 42px;
+  --ds-poster-label-gap: 25px;
+  --ds-poster-title-size: 40px;
+  --ds-poster-title-leading: 48px;
+  --ds-poster-meta-leading: 26px;
+  --ds-shadow-poster: 0 6px 6px rgba(28, 26, 23, 0.1);
+
+  /* --- Status Chip (badge pada sketsa hero) --- */
+  --ds-chip-height: 27px;
+  --ds-chip-padding-inline: 12px;
+  --ds-chip-padding-block: 4px;
+  --ds-chip-gap: 4px;
+  --ds-chip-dot: 7px;
+  --ds-chip-tracking: 0.72px;
+
+  /* --- Hero ---
+     Frame Figma 1440×680: wordmark di 560/166, CTA di y=476 dengan gap 39px. */
+  --ds-hero-height: 680px;
+  --ds-hero-wordmark-size: 148px;
+  --ds-hero-wordmark-leading: 190px;
+  --ds-hero-cta-gap: 39px;
+  --ds-shadow-cta: 0 4px 0 #1c1a17;
+
+  /* --- Radii --- */
+  --ds-radius-none: 0px;
+  --ds-radius-xs: 3px;
+  --ds-radius-sm: 6px;
+  --ds-radius-md: 10px;
+  --ds-radius-lg: 14px;
+  --ds-radius-pill: 9999px;
+
+  /* --- Borders --- */
+  --ds-border-thin: 1px;
+  --ds-border-base: 1.5px;
+  --ds-border-thick: 2px;
+
+  /* --- Skeumorphic Shadows & Elevation --- */
+  /* Tactile push-button: satu bibir keras 4px, tanpa blur (Figma drop-shadow) */
+  --ds-shadow-btn: 0 4px 0 #1c1a17;
+  --ds-shadow-btn-hover: 0 5px 0 #1c1a17;
+  --ds-shadow-btn-active: 0 1px 0 #1c1a17;
+
+  /* Paper / Card layered shadow */
+  --ds-shadow-paper:
+    inset 0 1px 0 var(--ds-color-highlight-specular), 0 2px 0 var(--ds-color-rule-dashed),
+    0 6px 14px rgba(28, 25, 23, 0.08);
+  --ds-shadow-paper-hover:
+    inset 0 1px 0 var(--ds-color-highlight-specular), 0 3px 0 var(--ds-color-rule-dashed),
+    0 12px 24px rgba(28, 25, 23, 0.13);
+
+  /* Manila folder shadow */
+  --ds-shadow-folder:
+    inset 0 1px 0 var(--ds-color-highlight-specular), 0 3px 0 var(--ds-color-folder-edge),
+    0 10px 20px rgba(28, 25, 23, 0.12);
+
+  /* Recessed well (inputs, checkboxes, toggle track) */
+  --ds-shadow-well:
+    inset 0 2px 4px rgba(28, 25, 23, 0.12), inset 0 1px 1px rgba(28, 25, 23, 0.08),
+    0 1px 0 var(--ds-color-highlight-specular);
+
+  /* Elevated modal / floating note */
+  --ds-shadow-modal:
+    inset 0 1px 0 var(--ds-color-highlight-specular), 0 6px 0 var(--ds-color-border-ink),
+    0 20px 44px rgba(28, 25, 23, 0.25);
+
+  --ds-shadow-tape: 0 1px 2px rgba(28, 25, 23, 0.14);
+
+  --ds-shadow-focus: 0 0 0 3px var(--ds-color-primary), 0 0 0 5px var(--ds-color-ink);
+
+  /* --- Motion --- */
+  --ds-duration-fast: 120ms;
+  --ds-duration-base: 200ms;
+  --ds-duration-slow: 320ms;
+  --ds-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ds-ease-press: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Z-index --- */
+  --ds-z-base: 1;
+  --ds-z-tape: 5;
+  --ds-z-sticky: 20;
+  --ds-z-dropdown: 40;
+  --ds-z-modal: 60;
+  --ds-z-toast: 80;
+  --ds-z-tooltip: 90;
+}

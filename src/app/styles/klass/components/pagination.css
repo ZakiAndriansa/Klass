@@ -1,0 +1,91 @@
+/* ==========================================================================
+   Component: Breadcrumb & Pagination (Physical Page Tabs)
+   ========================================================================== */
+
+.ds .breadcrumb {
+  margin-bottom: var(--ds-space-5);
+}
+
+.ds .breadcrumb__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-2);
+  list-style: none;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+}
+
+.ds .breadcrumb__item + .breadcrumb__item::before {
+  content: "/";
+  margin-right: var(--ds-space-2);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .breadcrumb__link {
+  text-decoration: none;
+  color: var(--ds-color-ink-secondary);
+  border-bottom: var(--ds-border-thin) solid var(--ds-color-border-subtle);
+}
+
+.ds .breadcrumb__link:hover {
+  color: var(--ds-color-ink);
+  border-bottom-color: var(--ds-color-ink);
+}
+
+.ds .breadcrumb__current {
+  font-weight: 700;
+  color: var(--ds-color-ink);
+  background-color: var(--ds-color-folder-bg);
+  padding: 2px var(--ds-space-2);
+  border-radius: var(--ds-radius-xs);
+}
+
+/* Pagination */
+.ds .pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.ds .pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding-inline: var(--ds-space-2);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  text-decoration: none;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-sm);
+  box-shadow: var(--ds-shadow-btn);
+  transition:
+    transform var(--ds-duration-fast) var(--ds-ease-press),
+    box-shadow var(--ds-duration-fast) var(--ds-ease-press);
+}
+
+.ds .pagination__btn:hover:not(.is-active) {
+  background-color: var(--ds-color-folder-bg);
+}
+
+.ds .pagination__btn:active {
+  transform: translateY(2px);
+  box-shadow: var(--ds-shadow-btn-active);
+}
+
+.ds .pagination__btn.is-active {
+  background-color: var(--ds-color-primary);
+  box-shadow: var(--ds-shadow-btn-active);
+  transform: translateY(1px);
+}
+
+.ds .pagination__ellipsis {
+  font-family: var(--ds-font-mono);
+  color: var(--ds-color-ink-muted);
+  padding-inline: var(--ds-space-1);
+}

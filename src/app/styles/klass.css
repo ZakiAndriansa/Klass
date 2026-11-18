@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Design system Klass — kertas & map manila.
+   Diimpor sekali di src/app/layout.tsx. Semua aturan dibatasi di dalam .ds,
+   jadi tidak mengganggu halaman lain yang memakai shadcn/Tailwind.
+   ========================================================================== */
+
+@import "./klass/tokens.css";
+@import "./klass/base.css";
+
+@import "./klass/components/section.css";
+@import "./klass/components/heading.css";
+@import "./klass/components/button.css";
+@import "./klass/components/navbar.css";
+@import "./klass/components/footer.css";
+@import "./klass/components/hero.css";
+@import "./klass/components/card.css";
+@import "./klass/components/stats.css";
+@import "./klass/components/steps.css";
+@import "./klass/components/poster.css";
+@import "./klass/components/feed.css";
+@import "./klass/components/invite.css";
+@import "./klass/components/form.css";
+@import "./klass/components/modal.css";
+@import "./klass/components/accordion.css";
+@import "./klass/components/tabs.css";
+@import "./klass/components/toast.css";
+@import "./klass/components/tooltip.css";
+@import "./klass/components/pagination.css";
+
+/* Aturan susunan khusus halaman utama; diimpor terakhir. */
+@import "./klass/landing.css";
+@import "./klass/auth.css";

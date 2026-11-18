@@ -1,0 +1,57 @@
+/* ==========================================================================
+   Component: Steps ("Cara kerja")
+   Sumber: Figma 60:713 — tiga kolom 384px bergap 24px; nomor 52/58 di y=112,
+   judul 22/30 di y=190, isi 16/32 muted di y=220.
+   Tanpa kartu: teks langsung di atas kertas bergaris.
+   ========================================================================== */
+
+.ds .steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .ds .steps {
+    /* Pitch antar-kolom Figma 408px = 384px kolom + 24px gap */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ds-space-6);
+  }
+}
+
+.ds .step {
+  position: relative;
+}
+
+.ds .step__num {
+  /* Figma: angka berakhir di y=170, judul mulai y=190 */
+  display: block;
+  margin-bottom: var(--ds-space-5);
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-4xl);
+  font-weight: 800;
+  line-height: var(--ds-leading-hero);
+  letter-spacing: -0.02em;
+  color: var(--ds-color-ink);
+}
+
+.ds .step__title {
+  /* Figma: judul y=190 h=30, isi y=220 → tidak ada jarak tambahan */
+  margin: 0;
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: var(--ds-leading-h3);
+  letter-spacing: 0;
+}
+
+.ds .step__desc {
+  /* 32px — Figma memberi ruang lebih longgar di sini */
+  margin: 0;
+  max-width: 34ch;
+  font-size: var(--ds-text-base);
+  line-height: 2;
+  color: var(--ds-color-ink-muted);
+}

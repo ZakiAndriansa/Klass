@@ -1,0 +1,299 @@
+/* ==========================================================================
+   Component: Card
+   Variant utama — "file card": map manila dengan tab kiri-atas, jendela
+   pratinjau cekung, dan keterangan terpusat.
+   Sumber: Figma node 44:260 (Card surface) di dalam 60:724 "Jelajah pilihan".
+   ========================================================================== */
+
+.ds .card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-8);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .ds .card-grid {
+    /* Dua kolom sama besar mengisi seluruh lebar konten. Pada frame 1200px
+       kolom ±579px (Figma 549px); di layar lebih lebar kartu ikut membesar
+       sehingga tidak ada ruang kosong di kanan. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--ds-folder-card-gap);
+    row-gap: var(--ds-space-8);
+  }
+}
+
+/* --- Variant 1: File Card / Manila Folder (Signature) ---
+   Tinggi total 465.828px di Figma, tetapi di sini tumbuh dari konten supaya
+   tetap utuh ketika judul atau deskripsi jadi dua baris di layar sempit. */
+.ds .card--folder {
+  --ds-card-tab-face: var(--ds-color-folder-plain);
+  --ds-card-tab-edge: var(--ds-color-folder-plain-edge);
+  --ds-card-body-face: var(--ds-color-folder-plain);
+  --ds-card-body-edge: var(--ds-color-folder-plain-edge);
+
+  /* Tinggi tab dikurangi 1.5px karena tab menumpuk tepi atas badan kartu */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(var(--ds-folder-card-tab-height) - var(--ds-border-base));
+  transition: transform var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .card--folder:hover {
+  transform: translateY(-2px);
+}
+
+/* Tab: dua lapis. Lapisan luar = tepi 1.5px, lapisan dalam = muka tab.
+   Figma memakai sudut membulat 14px (bukan potongan miring seperti versi
+   komponen sebelumnya). */
+.ds .card__folder-tab {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: var(--ds-folder-card-tab-width);
+  padding: var(--ds-border-base) var(--ds-border-base) 0;
+  background-color: var(--ds-card-tab-edge);
+  border-radius: var(--ds-radius-folder-tab) var(--ds-radius-folder-tab) 0 0;
+}
+
+.ds .card__folder-tab-inner {
+  /* Figma: inner tab 35.188px = tinggi tab 36.688px − 1.5px (hanya sisi atas
+     yang terpotong tepi; bawahnya menumpuk badan kartu). */
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: calc(var(--ds-folder-card-tab-height) - var(--ds-border-base));
+  padding: var(--ds-space-2) var(--ds-space-6) var(--ds-space-2) var(--ds-space-4);
+  background-color: var(--ds-card-tab-face);
+  border-radius: var(--ds-radius-folder-tab-inner) var(--ds-radius-folder-tab-inner) 0 0;
+  box-shadow: inset 0 1px 0 var(--ds-color-highlight-specular);
+}
+
+.ds .card__folder-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: var(--ds-radius-pill);
+  background-color: var(--ds-color-ink);
+  box-shadow: 0 1px 0 var(--ds-color-highlight-specular);
+}
+
+.ds .card__folder-meta {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: var(--ds-chip-tracking);
+  text-transform: uppercase;
+  color: var(--ds-color-ink);
+  white-space: nowrap;
+}
+
+.ds .card__folder-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: var(--ds-folder-card-pad);
+  background-color: var(--ds-card-body-face);
+  border: var(--ds-border-thin) solid var(--ds-card-body-edge);
+  border-radius: 0 var(--ds-radius-folder-body) var(--ds-radius-folder-body)
+    var(--ds-radius-folder-body);
+  box-shadow: var(--ds-shadow-folder-card);
+  transition: box-shadow var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .card--folder:hover .card__folder-body {
+  box-shadow: var(--ds-shadow-folder-card-hover);
+}
+
+/* Jendela pratinjau: cekung, rasio 16:9 seperti Figma (512.999×288.562) */
+.ds .card__media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: var(--ds-border-thin) solid var(--ds-color-folder-edge);
+  border-radius: var(--ds-radius-folder-well);
+  background-color: var(--ds-color-folder-inner);
+  box-shadow: var(--ds-shadow-well);
+}
+
+.ds .card__placeholder-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ds .card__placeholder-bar {
+  fill: var(--ds-color-well-shape-alt);
+}
+
+.ds .card__placeholder-block {
+  fill: var(--ds-color-well-shape);
+}
+
+/* Container teks: Figma 44:268 → pt 20px, px 8px, pb 8px */
+.ds .card__content {
+  padding: var(--ds-space-5) var(--ds-space-2) var(--ds-space-2);
+  text-align: center;
+}
+
+.ds .card__title {
+  /* Figma 44:270 → leading 25.3px, tracking -0.8078px */
+  font-size: var(--ds-text-xl);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.0367em;
+  margin-bottom: 0;
+}
+
+.ds .card__desc {
+  /* Figma 44:272 → padding-top 8px, leading 22.4px, tracking -0.1504px */
+  margin: var(--ds-space-2) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  letter-spacing: -0.0107em;
+  color: var(--ds-color-ink-secondary);
+}
+
+/* --- Varian warna kategori (Figma "Jelajah pilihan") --- */
+.ds .card--lilac {
+  --ds-card-tab-face: var(--ds-color-folder-lilac);
+  --ds-card-tab-edge: var(--ds-color-folder-lilac-edge);
+  --ds-card-body-face: var(--ds-color-folder-lilac);
+  --ds-card-body-edge: var(--ds-color-folder-lilac-edge);
+}
+
+.ds .card--green {
+  /* Figma memakai #afabc1 untuk garis badan kartu hijau; dipertahankan apa
+     adanya agar identik dengan desain. */
+  --ds-card-tab-face: var(--ds-color-folder-green);
+  --ds-card-tab-edge: var(--ds-color-folder-green-edge);
+  --ds-card-body-face: var(--ds-color-folder-green);
+  --ds-card-body-edge: var(--ds-color-folder-lilac-edge);
+}
+
+.ds .card--featured .card__folder-dot {
+  background-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 var(--ds-border-thin) var(--ds-color-ink);
+}
+
+/* --- Variant 2: Sticky Note Card with Masking Tape --- */
+.ds .card--note {
+  position: relative;
+  background-color: var(--ds-color-note-blue);
+  border: var(--ds-border-thin) solid var(--ds-color-border-subtle);
+  border-radius: var(--ds-radius-xs);
+  padding: var(--ds-space-6);
+  box-shadow:
+    inset 0 1px 0 var(--ds-color-highlight-specular),
+    0 10px 20px rgba(28, 25, 23, 0.12);
+  transform: rotate(-0.8deg);
+  transition: transform var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .card--note:hover {
+  transform: rotate(0deg) translateY(-2px);
+}
+
+.ds .card__tape {
+  position: absolute;
+  top: -10px;
+  width: 56px;
+  height: 20px;
+  background-color: var(--ds-color-tape);
+  box-shadow: var(--ds-shadow-tape);
+  z-index: var(--ds-z-tape);
+}
+
+.ds .card__tape--left {
+  left: 16px;
+  transform: rotate(-18deg);
+}
+
+.ds .card__tape--right {
+  right: 16px;
+  background-color: var(--ds-color-tape-pink);
+  transform: rotate(15deg);
+}
+
+.ds .card__note-header {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  margin-bottom: var(--ds-space-3);
+}
+
+.ds .card__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--ds-radius-pill);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  box-shadow: var(--ds-shadow-paper);
+}
+
+.ds .card__note-author {
+  font-size: var(--ds-text-base);
+  margin: 0;
+}
+
+.ds .card__note-role {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .card__note-footer {
+  margin-top: var(--ds-space-4);
+}
+
+/* --- Variant 3: Tactile Paper Content Card --- */
+.ds .card--paper {
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  padding: var(--ds-space-6);
+  box-shadow: var(--ds-shadow-paper);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  transition:
+    transform var(--ds-duration-base) var(--ds-ease-standard),
+    box-shadow var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .card--paper:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ds-shadow-paper-hover);
+}
+
+.ds .card__paper-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+}
+
+.ds .card__paper-code {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  margin-top: auto;
+  padding-top: var(--ds-space-2);
+}

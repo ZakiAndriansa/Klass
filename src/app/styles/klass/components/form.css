@@ -1,0 +1,225 @@
+/* ==========================================================================
+   Component: Form Controls (Recessed Paper Wells & Mechanical Toggles)
+   ========================================================================== */
+
+.ds .form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
+  max-width: 540px;
+}
+
+.ds .field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+}
+
+.ds .field-group {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+}
+
+.ds .field__label {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink);
+}
+
+.ds .field__input,
+.ds .field__select,
+.ds .field__textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  font-family: var(--ds-font-sans);
+  font-size: var(--ds-text-base);
+  color: var(--ds-color-ink);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-sm);
+  box-shadow: var(--ds-shadow-well);
+  transition:
+    border-color var(--ds-duration-fast) var(--ds-ease-standard),
+    background-color var(--ds-duration-fast) var(--ds-ease-standard);
+}
+
+.ds .field__textarea {
+  min-height: 104px;
+  resize: vertical;
+}
+
+.ds .field__input:disabled,
+.ds .field__select:disabled,
+.ds .field__textarea:disabled {
+  background-color: var(--ds-color-paper-well);
+  color: var(--ds-color-ink-muted);
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.ds .field--error .field__input,
+.ds .field--error .field__select,
+.ds .field--error .field__textarea {
+  border-color: var(--ds-color-error);
+  background-color: var(--ds-color-error-soft);
+}
+
+.ds .field__hint {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .field__error {
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  color: var(--ds-color-error);
+}
+
+/* Tactile Checkbox & Radio */
+.ds .check,
+.ds .radio {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  min-height: 32px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ds .check__input,
+.ds .radio__input {
+  position: absolute;
+  opacity: 0;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ds .check__box {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+  box-shadow: var(--ds-shadow-well);
+  transition: background-color var(--ds-duration-fast) var(--ds-ease-standard);
+}
+
+.ds .check__input:checked + .check__box {
+  background-color: var(--ds-color-primary);
+  box-shadow: var(--ds-shadow-btn-active);
+}
+
+.ds .check__input:checked + .check__box::after {
+  content: "";
+  width: 7px;
+  height: 12px;
+  border-right: var(--ds-border-thick) solid var(--ds-color-ink);
+  border-bottom: var(--ds-border-thick) solid var(--ds-color-ink);
+  transform: rotate(40deg) translateY(-1px);
+}
+
+.ds .check__input:focus-visible + .check__box,
+.ds .radio__input:focus-visible + .radio__dot,
+.ds .toggle__input:focus-visible + .toggle__track {
+  box-shadow: var(--ds-shadow-focus);
+}
+
+.ds .radio__dot {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-pill);
+  box-shadow: var(--ds-shadow-well);
+}
+
+.ds .radio__input:checked + .radio__dot {
+  background-color: var(--ds-color-primary);
+}
+
+.ds .radio__input:checked + .radio__dot::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: var(--ds-radius-pill);
+  background-color: var(--ds-color-ink);
+}
+
+.ds .check__label,
+.ds .radio__label,
+.ds .toggle__label {
+  font-size: var(--ds-text-sm);
+  font-weight: 500;
+}
+
+/* Mechanical Toggle Switch */
+.ds .toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.ds .toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 52px;
+  height: 30px;
+  margin: 0;
+}
+
+.ds .toggle__track {
+  position: relative;
+  width: 52px;
+  height: 30px;
+  flex-shrink: 0;
+  background-color: var(--ds-color-folder-inner);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-pill);
+  box-shadow: var(--ds-shadow-well);
+  transition: background-color var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .toggle__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-pill);
+  box-shadow:
+    inset 0 1px 0 var(--ds-color-highlight-specular),
+    0 2px 3px rgba(28, 25, 23, 0.25);
+  transition: transform var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .toggle__input:checked + .toggle__track {
+  background-color: var(--ds-color-primary);
+}
+
+.ds .toggle__input:checked + .toggle__track .toggle__knob {
+  transform: translateX(22px);
+}

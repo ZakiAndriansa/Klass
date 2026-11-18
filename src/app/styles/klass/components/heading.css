@@ -1,0 +1,220 @@
+/* ==========================================================================
+   Component: Section Heading, Badge/Stamp & Ink Link
+   Sumber: Figma 60:699 / 75:1699 / 60:713 / 60:757.
+   ========================================================================== */
+
+.ds .section-heading {
+  padding-bottom: var(--ds-space-4);
+  margin-bottom: var(--ds-space-8);
+  border-bottom: var(--ds-border-thick) dashed var(--ds-color-rule-dashed);
+}
+
+/* Tanpa garis putus-putus: dipakai saat heading berdiri sendiri di atas kartu.
+   Figma 60:757: judul 39px, subjudul mulai 48, kartu pertama 94 → 20px jarak. */
+.ds .section-heading--plain {
+  padding-bottom: 0;
+  margin-bottom: var(--ds-faq-head-gap);
+  border-bottom: 0;
+}
+
+.ds .section-heading__eyebrow {
+  display: block;
+  margin-bottom: var(--ds-space-1);
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .section-heading__title {
+  margin: 0;
+  font-size: var(--ds-text-2xl);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.ds .section-heading__subtitle {
+  /* Figma: judul 30/39, subjudul mulai y=48 → jarak 9px */
+  margin: var(--ds-space-2) 0 0;
+  max-width: 62ch;
+  color: var(--ds-color-ink-secondary);
+  font-size: var(--ds-text-base);
+  line-height: var(--ds-leading-body);
+}
+
+/* --- Varian "split": kutipan tulisan tangan di kiri, penjelasan di kanan ---
+   Figma 60:695 "Prinsip komunitas": judul 650px di x=0, keterangan 400px di
+   x=800 (absolut 920 pada frame 1440), dan keterangan duduk 20px lebih tinggi
+   dari judul. */
+.ds .section-heading--split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-4);
+  align-items: start;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+
+@media (min-width: 900px) {
+  .ds .section-heading--split {
+    /* Proporsi Figma 650 : 400 : 150 (54.17% : 33.33% : 12.5%) dibuat
+       persentase agar komposisinya tetap sama saat konten melebar. */
+    grid-template-columns: minmax(0, 54.1667%) minmax(0, 33.3333%);
+    justify-content: space-between;
+  }
+
+  /* Figma menaruh judul 20px lebih rendah daripada kolom keterangan */
+  .ds .section-heading--split .section-heading__title {
+    padding-top: var(--ds-space-5);
+  }
+}
+
+.ds .section-heading--split .section-heading__title {
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-2xl);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.ds .section-heading--split .section-heading__subtitle {
+  /* 30px — Figma memakai leading lebih longgar di sini, dan warnanya tinta
+     penuh (bukan muted seperti subtitle biasa). */
+  margin: 0;
+  max-width: none;
+  font-size: var(--ds-text-base);
+  line-height: 1.875;
+  color: var(--ds-color-ink);
+}
+
+/* --- Varian "tulisan": satu judul tulisan tangan tanpa garis ---
+   Dipakai "Cara kerja" pada halaman utama. Figma 60:713: judul Caveat Bold
+   30/39 di y=27, langkah pertama mulai y=112 (jarak 46px). */
+.ds .section-heading--tulisan {
+  padding-bottom: 0;
+  margin-bottom: var(--ds-space-12);
+  border-bottom: 0;
+}
+
+.ds .section-heading--tulisan .section-heading__title {
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-2xl);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+/* Badges / Highlighter Marks (sorotan stabilo)
+   Figma "Klass / PJ Matkul" 44:229: 27px tinggi, padding 12/4, dot 7px,
+   Space Mono Bold 12px uppercase tracking 0.72px, rotasi -0.6°, tanpa bingkai.
+   Tepi kiri-kanan gradasi memudar — itu yang membuatnya terlihat seperti
+   goresan spidol, bukan blok warna. */
+.ds .badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-3) var(--ds-space-2);
+  align-items: center;
+}
+
+.ds .badge {
+  --ds-badge-angle: 98deg;
+  --ds-badge-rgb: 245, 197, 66;
+  --ds-badge-solid: 0.9;
+  --ds-badge-fade: 0.45;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-chip-gap);
+  min-height: var(--ds-chip-height);
+  padding: var(--ds-chip-padding-block) var(--ds-chip-padding-inline);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: var(--ds-chip-tracking);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ds-color-ink);
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-image:
+    var(--ds-marker-streak),
+    linear-gradient(
+      var(--ds-badge-angle),
+      rgba(var(--ds-badge-rgb), calc(var(--ds-badge-solid) * 0.44)) 1.63%,
+      rgba(var(--ds-badge-rgb), var(--ds-badge-solid)) 8.4%,
+      rgba(var(--ds-badge-rgb), var(--ds-badge-solid)) 91.6%,
+      rgba(var(--ds-badge-rgb), var(--ds-badge-fade)) 98.37%
+    );
+  box-shadow: none;
+  transform: rotate(var(--ds-marker-tilt));
+}
+
+.ds .badge::before {
+  content: "";
+  width: var(--ds-chip-dot);
+  height: var(--ds-chip-dot);
+  border-radius: var(--ds-radius-pill);
+  background-color: var(--ds-color-ink);
+  flex-shrink: 0;
+}
+
+/* Sudut gradasi tiap varian diambil dari Figma; perbedaannya halus tapi
+   membuat kelima badge di hero tidak tampak seperti satu pola yang di-copy. */
+.ds .badge--primary {
+  --ds-badge-angle: 99deg;
+}
+
+.ds .badge--info {
+  --ds-badge-angle: 98deg;
+  --ds-badge-rgb: 126, 184, 218;
+}
+
+.ds .badge--success {
+  --ds-badge-angle: 98deg;
+  --ds-badge-rgb: 102, 185, 137;
+  --ds-badge-solid: 0.85;
+  --ds-badge-fade: 0.4;
+}
+
+.ds .badge--warning {
+  --ds-badge-angle: 101deg;
+  --ds-badge-rgb: 229, 154, 60;
+  --ds-badge-solid: 0.88;
+}
+
+.ds .badge--error {
+  --ds-badge-angle: 97deg;
+  --ds-badge-rgb: 206, 84, 80;
+  --ds-badge-solid: 0.85;
+  --ds-badge-fade: 0.4;
+}
+
+/* Underlined Ink Link — Figma memakai teks Medium 14/22 tanpa garis bawah;
+   versi ini tetap memberi garis agar jelas bisa diklik di dalam paragraf. */
+.ds .ink-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-family: var(--ds-font-sans);
+  font-size: var(--ds-text-sm);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--ds-color-ink);
+  text-decoration: none;
+  border-bottom: var(--ds-border-base) solid var(--ds-color-ink);
+  padding-bottom: 1px;
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-ease-standard),
+    transform var(--ds-duration-fast) var(--ds-ease-standard);
+}
+
+.ds .ink-link:hover {
+  background-color: var(--ds-color-primary);
+  transform: translateY(-1px);
+}
