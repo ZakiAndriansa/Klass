@@ -301,6 +301,23 @@
     transparent 94%
   );
 
+  /* --- Dasbor (Figma "02 Dashboard Kelas" 60:775 & "03 Dashboard Admin" 60:776) ---
+     Kerangka dua kolom: sidebar 216px + konten 1122px di dalam frame 1440px.
+     Header 80px, jarak antar-blok 40px, kartu ringkasan 170px. */
+  --ds-dash-sidebar: 216px;
+  --ds-dash-head-height: 64px;
+  --ds-dash-pad: var(--ds-space-10);
+  --ds-dash-content-max: 1200px;
+  --ds-dash-paper: #faf7f0;
+  --ds-dash-folder-line: #e6dfd1;
+  --ds-dash-summary-height: 170px;
+  --ds-dash-folder-tab-width: 147.719px;
+  --ds-dash-folder-tab-height: 36.688px;
+  --ds-shadow-dash-card: 0 3px 0 var(--ds-color-border-ink), 0 5px 5px rgba(28, 25, 23, 0.14);
+  --ds-shadow-dash-sheet: 0 2px 0 var(--ds-color-rule-dashed), 0 6px 14px rgba(28, 25, 23, 0.08);
+  --ds-shadow-dash-panel: 0 4px 0 rgba(28, 25, 23, 0.16);
+  --ds-shadow-dash-nav: 0 4px 0 rgba(28, 25, 23, 0.18);
+
   /* --- Folder Card (Figma "file card") --- */
   --ds-folder-card-gap: 41px;
   /* 2 × 549 + 41 = 1139px: lebar blok grid kartu di Figma "Jelajah pilihan".

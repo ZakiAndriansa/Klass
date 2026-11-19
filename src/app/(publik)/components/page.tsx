@@ -44,9 +44,9 @@ export const metadata: Metadata = {
 };
 
 const navigasi = [
-  { label: "Jelajah", href: "#jelajah" },
-  { label: "Fitur", href: "#fitur" },
-  { label: "Cara kerja", href: "#cara-kerja" },
+  { label: "Jelajah", href: "#explore" },
+  { label: "Fitur", href: "#features" },
+  { label: "Cara kerja", href: "#how-it-works" },
   { label: "Tanya jawab", href: "#faq" },
 ];
 
@@ -140,14 +140,14 @@ const faq = [
 ];
 
 const tautanFooter = [
-  { label: "Jelajah", href: "#jelajah" },
-  { label: "Fitur", href: "#fitur" },
-  { label: "Cara kerja", href: "#cara-kerja" },
+  { label: "Jelajah", href: "#explore" },
+  { label: "Fitur", href: "#features" },
+  { label: "Cara kerja", href: "#how-it-works" },
   { label: "Tanya jawab", href: "#faq" },
 ];
 
 /**
- * Galeri komponen design system Klass, alamat `/komponen`.
+ * Galeri komponen design system Klass, alamat `/components`.
  *
  * Halaman ini adalah ruang uji seluruh komponen dan gayanya: hero, kartu,
  * langkah, feed, poster, formulir, tab, dialog, toast, hingga navigasi.
@@ -160,16 +160,16 @@ export default function HalamanKomponen() {
       <Navbar
         merek="Klass"
         item={navigasi.map((item) => ({ ...item, href: `/${item.href}` }))}
-        aksi={{ label: "Ajukan kelas", href: "#ajukan" }}
+        aksi={{ label: "Ajukan kelas", href: "#request" }}
       />
 
-      <main id="atas" className="flex flex-1 flex-col">
+      <main id="top" className="ds-kolom">
         <Hero
           judul="Klass — platform komunitas kelas dan kelompok mandiri"
           lencana={lencanaHero}
           aksi={[
-            { label: "Temukan kelasmu ↗", href: "#jelajah" },
-            { label: "Ajukan kelas baru", href: "#ajukan" },
+            { label: "Temukan kelasmu ↗", href: "#explore" },
+            { label: "Ajukan kelas baru", href: "#request" },
           ]}
         />
 
@@ -189,7 +189,7 @@ export default function HalamanKomponen() {
           </SectionInner>
         </Section>
 
-        <Section id="fitur">
+        <Section id="features">
           <SectionInner>
             <SectionHead judul="Lebih sedikit tercecer. Lebih banyak teratur." />
             <GridFitur>
@@ -200,7 +200,7 @@ export default function HalamanKomponen() {
           </SectionInner>
         </Section>
 
-        <Section id="cara-kerja">
+        <Section id="how-it-works">
           <SectionInner>
             <SectionHeading
               varian="polos"
@@ -211,7 +211,7 @@ export default function HalamanKomponen() {
           </SectionInner>
         </Section>
 
-        <Section id="jelajah">
+        <Section id="explore">
           <SectionInner>
             <SectionHeading
               eyebrow="semester ganjil 2026"
@@ -260,8 +260,8 @@ export default function HalamanKomponen() {
                 }
               />
             </GridKartu>
-            <div className="mt-8">
-              <InkLink href="#jelajah">
+            <div className="komponen-jarak-atas">
+              <InkLink href="#explore">
                 <span>Lihat semua arsip materi</span>
                 <span aria-hidden="true">↗</span>
               </InkLink>
@@ -298,12 +298,12 @@ export default function HalamanKomponen() {
                   Sabtu, 21 November 2026 · 15.00 WIB
                 </>
               }
-              aksi={{ label: "Lihat agenda ↗", href: "#komponen" }}
+              aksi={{ label: "Lihat agenda ↗", href: "#showcase" }}
             />
           </SectionInner>
         </Section>
 
-        <Section id="komponen">
+        <Section id="showcase">
           <SectionInner>
             <SectionHeading
               eyebrow="komponen"
@@ -311,7 +311,7 @@ export default function HalamanKomponen() {
               subjudul="Tombol, lencana, dan kontrol yang menyusun halaman ini — semua dari design system yang sama."
             />
 
-            <div className="flex flex-col gap-6">
+            <div className="komponen-tumpuk">
               <div className="btn-group">
                 <TombolKertas variant="primary">Gabung Kelas</TombolKertas>
                 <TombolKertas variant="secondary">Lihat Jadwal</TombolKertas>
@@ -459,7 +459,7 @@ export default function HalamanKomponen() {
               subjudul="Contoh tab yang memisahkan isi tiap subkelas."
             />
 
-            <div className="flex flex-col gap-8">
+            <div className="komponen-tumpuk komponen-tumpuk--lebar">
               <Tabs
                 label="Menu subkelas"
                 item={[
@@ -498,7 +498,7 @@ export default function HalamanKomponen() {
               subjudul="Komponen overlay yang dipakai untuk aksi penting dan umpan balik."
             />
 
-            <div className="flex flex-col gap-6">
+            <div className="komponen-tumpuk">
               <DemoInteraktif />
 
               <div className="alert-stack">
@@ -527,7 +527,7 @@ export default function HalamanKomponen() {
           </SectionInner>
         </Section>
 
-        <Section id="ajukan">
+        <Section id="request">
           <AjakanBergabung
             judul="Kelas rapi dimulai dari kamu."
             salinan="Bawa teman-temanmu. Sisanya, kita rapikan bareng."
@@ -539,8 +539,8 @@ export default function HalamanKomponen() {
           <SectionInner>
             <Breadcrumb
               remah={[
-                { label: "Beranda", href: "#atas" },
-                { label: "IF-24A", href: "#jelajah" },
+                { label: "Beranda", href: "#top" },
+                { label: "IF-24A", href: "#explore" },
                 { label: "Basis Data" },
               ]}
             />
@@ -550,9 +550,9 @@ export default function HalamanKomponen() {
               // Halaman ini belum punya daftar berhalaman sungguhan, jadi semua
               // nomor menuju bagian jelajah kelas. Halaman fitur nanti mengirim
               // `hrefHalaman` yang sebenarnya.
-              hrefHalaman={() => "#jelajah"}
-              hrefSebelumnya="#jelajah"
-              hrefBerikutnya="#jelajah"
+              hrefHalaman={() => "#explore"}
+              hrefSebelumnya="#explore"
+              hrefBerikutnya="#explore"
             />
           </SectionInner>
         </Section>

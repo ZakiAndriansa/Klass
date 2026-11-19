@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
  *
  * Aturan komponen:
  * 1. Data datang lewat props. Komponen tidak mengambil data dan tidak mengimpor dari `@/server`.
- * 2. Warna memakai token (`text-muted-foreground`, `bg-primary`), bukan warna mentah
- *    seperti `text-gray-500`, supaya tema tiap kelas bisa mengubahnya.
+ * 2. Warna memakai token design system (`var(--ds-color-ink-muted)` di CSS Klass),
+ *    bukan warna mentah seperti `#888`, supaya tema tiap kelas bisa mengubahnya.
  * 3. `className` dari luar selalu diteruskan lewat `cn()`.
  * 4. Sediakan tampilan saat memuat (skeleton) di berkas yang sama.
  */
@@ -25,12 +25,12 @@ type KartuStatusProps = {
 
 export function KartuStatus({ judul, status, label, keterangan, className }: KartuStatusProps) {
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader className="flex items-center justify-between gap-3">
+    <Card className={cn("kartu-status", className)}>
+      <CardHeader className="kartu-status__kepala">
         <CardTitle>{judul}</CardTitle>
         <Badge variant={status === "baik" ? "default" : "destructive"}>{label}</Badge>
       </CardHeader>
-      <CardContent className="text-muted-foreground">{keterangan}</CardContent>
+      <CardContent className="kartu-status__ket">{keterangan}</CardContent>
     </Card>
   );
 }
@@ -38,13 +38,13 @@ export function KartuStatus({ judul, status, label, keterangan, className }: Kar
 /** Tampilan sementara selagi data dimuat. Ukurannya dibuat mirip kartu aslinya. */
 export function KartuStatusSkeleton({ className }: { className?: string }) {
   return (
-    <Card className={cn("w-full", className)} aria-hidden>
-      <CardHeader className="flex items-center justify-between gap-3">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-5 w-20 rounded-full" />
+    <Card className={cn("kartu-status", "kartu-status--memuat", className)} aria-hidden>
+      <CardHeader className="kartu-status__kepala">
+        <Skeleton className="kartu-status__skeleton--judul" />
+        <Skeleton className="kartu-status__skeleton--lencana" />
       </CardHeader>
       <CardContent>
-        <Skeleton className="h-4 w-full" />
+        <Skeleton className="kartu-status__skeleton--teks" />
       </CardContent>
     </Card>
   );

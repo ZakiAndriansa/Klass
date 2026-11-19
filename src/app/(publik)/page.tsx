@@ -20,9 +20,9 @@ export const metadata: Metadata = {
 };
 
 const navigasi = [
-  { label: "Jelajah", href: "#jelajah" },
-  { label: "Fitur", href: "#fitur" },
-  { label: "Cara kerja", href: "#cara-kerja" },
+  { label: "Jelajah", href: "#explore" },
+  { label: "Fitur", href: "#features" },
+  { label: "Cara kerja", href: "#how-it-works" },
   { label: "Tanya jawab", href: "#faq" },
 ];
 
@@ -154,9 +154,9 @@ const faq = [
 ];
 
 const tautanFooter = [
-  { label: "Jelajah", href: "#jelajah" },
-  { label: "Fitur", href: "#fitur" },
-  { label: "Cara kerja", href: "#cara-kerja" },
+  { label: "Jelajah", href: "#explore" },
+  { label: "Fitur", href: "#features" },
+  { label: "Cara kerja", href: "#how-it-works" },
   { label: "Tanya jawab", href: "#faq" },
 ];
 
@@ -170,20 +170,20 @@ const tautanFooter = [
  * jeda.
  *
  * Halaman ini statis (Server Component). Galeri seluruh komponen dan varian
- * ada di `/komponen`; demo dialog dan toast ada di sana.
+ * ada di `/components`; demo dialog dan toast ada di sana.
  */
 export default function HalamanUtama() {
   return (
     <>
-      <Navbar merek="Klass" item={navigasi} aksi={{ label: "Ajukan kelas", href: "#ajukan" }} />
+      <Navbar merek="Klass" item={navigasi} aksi={{ label: "Masuk", href: "/login" }} />
 
-      <main id="atas" className="flex flex-1 flex-col">
+      <main id="top" className="ds-kolom">
         <Hero
           judul="Klass — platform komunitas kelas dan kelompok mandiri"
           lencana={lencanaHero}
           aksi={[
-            { label: "Temukan kelasmu ↗", href: "#jelajah" },
-            { label: "Ajukan kelas baru", href: "#ajukan" },
+            { label: "Temukan kelasmu ↗", href: "#explore" },
+            { label: "Ajukan kelas baru", href: "/login" },
           ]}
         />
 
@@ -203,7 +203,7 @@ export default function HalamanUtama() {
           </SectionInner>
         </Section>
 
-        <Section jarak="rapat" id="fitur">
+        <Section jarak="rapat" id="features">
           <SectionInner>
             <SectionHead judul="Lebih sedikit tercecer. Lebih banyak teratur." />
             <GridFitur>
@@ -214,17 +214,17 @@ export default function HalamanUtama() {
           </SectionInner>
         </Section>
 
-        <Section jarak="rapat" id="cara-kerja">
+        <Section jarak="rapat" id="how-it-works">
           <SectionInner>
             <SectionHeading varian="tulisan" judul="Bagaimana cara kerjanya?" />
             <DaftarLangkah langkah={langkah} />
           </SectionInner>
         </Section>
 
-        <Section jarak="rapat" id="jelajah">
+        <Section jarak="rapat" id="explore">
           <SectionInner>
             <div className="landing-jelajah__head">
-              <InkLink href="#jelajah">
+              <InkLink href="#explore">
                 <span>Jelajahi semua kelas</span>
                 <span aria-hidden="true">↗</span>
               </InkLink>
@@ -240,7 +240,7 @@ export default function HalamanUtama() {
           </SectionInner>
         </Section>
 
-        <Section jarak="rapat" id="siaran">
+        <Section jarak="rapat" id="broadcast">
           <SectionInner>
             <Feed
               eyebrow="jaringan antar-kelas"
@@ -269,7 +269,7 @@ export default function HalamanUtama() {
                   Sabtu, 21 November 2026 · 15.00 WIB
                 </>
               }
-              aksi={{ label: "Lihat agenda ↗", href: "#siaran" }}
+              aksi={{ label: "Lihat agenda ↗", href: "#broadcast" }}
             />
           </SectionInner>
         </Section>
@@ -285,13 +285,14 @@ export default function HalamanUtama() {
           </SectionInner>
         </Section>
 
-        <div id="ajukan">
+        <div id="request">
           <AjakanBergabung
             judul="Kelas rapi dimulai dari kamu."
             salinan="Bawa teman-temanmu. Sisanya, kita rapikan bareng."
-            // Formulir pengajuan sungguhan belum punya rute; untuk sementara
-            // CTA ini menuju formulir yang bisa dicoba di galeri komponen.
-            aksi={{ label: "Ajukan kelas baru ↗", href: "/komponen#form" }}
+            // Formulir pengajuan sekarang ada di dasbor pengguna (`/dashboard`),
+            // karena pengajuan butuh akun: status dan riwayatnya terikat ke
+            // pengguna. Halaman ini mengarahkan ke login lebih dulu.
+            aksi={{ label: "Ajukan kelas baru ↗", href: "/login" }}
           />
         </div>
       </main>

@@ -4,6 +4,7 @@
    jadi tidak mengganggu halaman lain yang memakai shadcn/Tailwind.
    ========================================================================== */
 
+@import "./klass/root.css";
 @import "./klass/tokens.css";
 @import "./klass/base.css";
 
@@ -30,3 +31,5 @@
 /* Aturan susunan khusus halaman utama; diimpor terakhir. */
 @import "./klass/landing.css";
 @import "./klass/auth.css";
+@import "./klass/dashboard.css";
+@import "./klass/shell.css";

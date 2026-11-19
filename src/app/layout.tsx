@@ -69,8 +69,8 @@ const fontVariables = [
 /** Layout paling luar, membungkus semua halaman. Pemilik: Aqil. */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="id" className={`${fontVariables} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+    <html lang="id" className={fontVariables}>
+      <body className="klass-body">{children}</body>
     </html>
   );
 }

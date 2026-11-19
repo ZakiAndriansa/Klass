@@ -1,6 +1,6 @@
 # src/app
 
-Folder ini menentukan **alamat (URL)** aplikasi. Nama folder menjadi alamat: `app/kelas/page.tsx` dibuka di `/kelas`.
+Folder ini menentukan **alamat (URL)** aplikasi. Nama folder menjadi alamat: `app/classes/page.tsx` dibuka di `/classes`.
 
 | Folder                      | Isi                                  | Pemilik        | Reviewer wajib |
 | --------------------------- | ------------------------------------ | -------------- | -------------- |

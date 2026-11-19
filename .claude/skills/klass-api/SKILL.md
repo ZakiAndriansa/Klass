@@ -29,7 +29,7 @@ Aturan batas:
 ## Pola
 
 ```ts
-// src/app/api/v1/subkelas/[subclassId]/materi/route.ts   (URL)
+// src/app/api/v1/subclasses/[subclassId]/materials/route.ts   (URL)
 export const POST = handle(async (req, { params }) => {
   const { subclassId } = await params;
   const materi = await buatMateri(subclassId, await req.json());
@@ -53,9 +53,9 @@ export async function buatMateri(subclassId: string, masukan: unknown) {
 
 ## Penamaan URL
 
-1. Kata benda jamak, huruf kecil, tanda hubung bila dua kata: `/api/v1/kelas`, `/api/v1/kelas/{classId}/anggota`.
-2. Sumber daya bersarang paling dalam dua tingkat: `/kelas/{classId}/subkelas`, lalu `/subkelas/{subclassId}/materi`.
-3. Aksi yang bukan CRUD memakai sub-sumber-daya dengan POST: `POST /kelas/{classId}/join`, `POST /kelas/{classId}/anggota/{userId}/kick`, `POST /pengajuan-kelas/{id}/setujui`.
+1. Bahasa Inggris, kata benda jamak, huruf kecil, tanda hubung bila dua kata: `/api/v1/classes`, `/api/v1/classes/{classId}/members`.
+2. Sumber daya bersarang paling dalam dua tingkat: `/classes/{classId}/subclasses`, lalu `/subclasses/{subclassId}/materials`.
+3. Aksi yang bukan CRUD memakai sub-sumber-daya dengan POST: `POST /classes/{classId}/join`, `POST /classes/{classId}/members/{userId}/kick`, `POST /class-requests/{id}/approve`.
 4. Daftar selalu berhalaman: `?page=1&limit=20`, batas atas `limit` 100.
 
 ## Format respons
