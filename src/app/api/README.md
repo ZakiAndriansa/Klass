@@ -4,11 +4,14 @@
 
 URL backend (REST API). Letak folder menentukan alamat:
 
-| Berkas                        | Alamat                                     |
-| ----------------------------- | ------------------------------------------ |
-| `v1/health/route.ts`          | `GET /api/v1/health`                       |
-| `v1/kelas/route.ts`           | `GET` dan `POST /api/v1/kelas`             |
-| `v1/kelas/[classId]/route.ts` | `GET`, `PATCH`, `DELETE /api/v1/kelas/123` |
+| Berkas                          | Alamat                                       |
+| ------------------------------- | -------------------------------------------- |
+| `v1/health/route.ts`            | `GET /api/v1/health`                         |
+| `v1/classes/route.ts`           | `GET` dan `POST /api/v1/classes`             |
+| `v1/classes/[classId]/route.ts` | `GET`, `PATCH`, `DELETE /api/v1/classes/123` |
+
+Alamat memakai bahasa Inggris huruf kecil, kata benda jamak, mengikuti nama use case
+(`/classes`, `/class-requests`). Teks `message` di dalam respons tetap bahasa Indonesia.
 
 ## Aturan
 

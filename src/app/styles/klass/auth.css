@@ -675,19 +675,10 @@
 }
 
 .ds .auth__logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
+  display: block;
+  width: auto;
   height: 34px;
-  background-color: var(--ds-color-primary);
-  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
-  border-radius: var(--ds-radius-sm);
-  box-shadow: var(--ds-shadow-btn);
-  font-family: var(--ds-font-mono);
-  font-size: var(--ds-text-sm);
-  font-weight: 700;
-  line-height: 1;
+  flex: none;
 }
 
 .ds .auth__content {

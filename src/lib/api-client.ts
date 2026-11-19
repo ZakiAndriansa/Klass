@@ -5,7 +5,7 @@ import type { ApiGagal, ApiSukses } from "@/types/api/umum";
  *
  * Pemakaian:
  *   const { data } = await api<HealthDto>("/health");
- *   await api("/kelas", { method: "POST", body: JSON.stringify(isi) });
+ *   await api("/classes", { method: "POST", body: JSON.stringify(isi) });
  *
  * Bila server menjawab gagal, fungsi ini melempar `ApiError`. Bercabanglah
  * berdasarkan `galat.code`, dan tampilkan `galat.message` ke pengguna.

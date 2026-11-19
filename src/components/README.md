@@ -13,9 +13,10 @@ Potongan tampilan yang dipakai ulang: tombol, kartu, form, navigasi.
 ## Aturan
 
 1. Komponen menerima data lewat props. Komponen tidak mengambil data, tidak memanggil API, dan tidak mengimpor apa pun dari `@/server`. ESLint akan menolak bila dilanggar.
-2. Warna memakai token seperti `bg-primary` dan `text-muted-foreground`, bukan `bg-blue-500` atau kode warna, supaya tema tiap kelas bisa mengubahnya.
-3. Nama berkas `huruf-kecil-bertanda-hubung.tsx`, nama komponen `HurufBesarDiAwal`: `kartu-tugas.tsx` berisi `KartuTugas`.
-4. Sebelum membuat komponen baru, cari dulu di folder ini dan di https://ui.shadcn.com/docs/components.
+2. Warna memakai token Klass (`var(--ds-color-*)` di CSS) atau token shadcn (`bg-primary`) di dalam `ui/`, bukan `bg-blue-500` atau kode warna, supaya tema tiap kelas bisa mengubahnya.
+3. Halaman Klass memakai kelas CSS sendiri (`src/app/styles/klass/`), bukan utilitas Tailwind seperti `flex` atau `mt-8`. Utilitas Tailwind hanya dipakai di dalam `ui/` (komponen shadcn). Alasannya dicatat di `docs/keputusan.md`.
+4. Nama berkas `huruf-kecil-bertanda-hubung.tsx`, nama komponen `HurufBesarDiAwal`: `kartu-tugas.tsx` berisi `KartuTugas`.
+5. Sebelum membuat komponen baru, cari dulu di folder ini dan di https://ui.shadcn.com/docs/components.
 
 Contoh untuk ditiru: `shared/kartu-status.tsx`.
 

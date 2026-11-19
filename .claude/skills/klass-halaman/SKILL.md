@@ -13,23 +13,38 @@ Halaman merakit komponen dari `src/components` dan memberi mereka data. Tampilan
 ```
 src/app/
   (publik)/page.tsx                                   halaman utama dan poster (F11)
+  (publik)/components/page.tsx                        galeri komponen design system
   (auth)/login/page.tsx                               login Google (F1)
+  (auth)/register/page.tsx                            daftar akun baru (F1)
   (app)/layout.tsx                                    wajib login, navigasi utama
-  (app)/beranda/page.tsx                              daftar kelas saya, tenggat terdekat
-  (app)/profil/page.tsx                               nama dan avatar (F1)
-  (app)/kelas/ajukan/page.tsx                         pengajuan kelas (F2)
-  (app)/kelas/gabung/page.tsx                         join dengan kode undangan (F4)
-  (app)/kelas/[classId]/layout.tsx                    pemeriksaan anggota, penerapan tema (F6)
-  (app)/kelas/[classId]/page.tsx                      ringkasan kelas dan daftar subkelas
-  (app)/kelas/[classId]/anggota/page.tsx              anggota, kick, ban (F5)
-  (app)/kelas/[classId]/pengaturan/page.tsx           kelas, tema, subkelas, PJ (F6, F7)
-  (app)/kelas/[classId]/sub/[subclassId]/page.tsx     materi, jadwal, tugas (F8, F9, F10)
+  (app)/dashboard/page.tsx                            dasbor pengguna: kelas saya, ajukan, gabung
+  (app)/profile/page.tsx                              nama dan avatar (F1)
+  (app)/classes/request/page.tsx                      pengajuan kelas (F2)
+  (app)/classes/join/page.tsx                         gabung dengan kode undangan (F4)
+  (app)/classes/[classId]/layout.tsx                  pemeriksaan anggota, penerapan tema (F6)
+  (app)/classes/[classId]/page.tsx                    ringkasan kelas dan daftar subkelas
+  (app)/classes/[classId]/members/page.tsx            anggota, kick, ban (F5)
+  (app)/classes/[classId]/settings/page.tsx           kelas, tema, subkelas, PJ (F6, F7)
+  (app)/classes/[classId]/subclasses/[subclassId]/page.tsx   materi, jadwal, tugas (F8, F9, F10)
   admin/layout.tsx                                    wajib superadmin
-  admin/pengajuan/page.tsx                            setujui atau tolak, tunjuk admin (F3)
-  admin/poster/page.tsx                               kelola poster (F11)
+  admin/page.tsx                                      ringkasan superadmin
+  admin/requests/page.tsx                             setujui atau tolak, tunjuk admin (F3)
+  admin/posters/page.tsx                              kelola poster (F11)
+  admin/moderation/page.tsx                           moderasi dan tema kelas
 ```
 
-URL memakai bahasa Indonesia huruf kecil. Mengubah peta ini berarti mengubah berkas ini juga.
+URL memakai **bahasa Inggris huruf kecil**, mengikuti nama use case yang dikenal pengguna
+(`/dashboard`, `/classes`, `/login`), bukan terjemahan harfiah. Alasannya: alamat lebih mudah
+ditebak dan diketik, dan cocok dengan istilah yang sudah lazim di produk lain. Teks di dalam
+halaman tetap berbahasa Indonesia (skill `klass-komponen`).
+
+Aturannya:
+
+1. Kata benda jamak untuk kumpulan: `/classes`, `/admin/requests`.
+2. Segmen anak memakai nama use case: `/classes/[classId]/members`, `/classes/[classId]/settings`.
+3. Nama folder route group dalam kurung (`(publik)`, `(auth)`, `(app)`) tidak muncul di URL, jadi
+   tidak wajib Inggris.
+4. Mengubah peta ini berarti mengubah berkas ini juga.
 
 ## Aturan App Router
 
@@ -51,7 +66,7 @@ URL memakai bahasa Indonesia huruf kecil. Mengubah peta ini berarti mengubah ber
 
 ## Penerapan tema kelas
 
-`(app)/kelas/[classId]/layout.tsx` membaca field `style` kelas, memvalidasinya, lalu memasang CSS variables pada elemen pembungkus:
+`(app)/classes/[classId]/layout.tsx` membaca field `style` kelas, memvalidasinya, lalu memasang CSS variables pada elemen pembungkus:
 
 ```tsx
 <div style={temaKeCssVars(kelas.style)} className="bg-background text-foreground min-h-dvh">

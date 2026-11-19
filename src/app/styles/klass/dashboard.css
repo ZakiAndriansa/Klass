@@ -1,0 +1,1027 @@
+/* ==========================================================================
+   Layout: Dasbor (admin kelas & superadmin)
+   Sumber: Figma "Klass · 02 Dashboard Kelas" 60:775 dan
+   "Klass · 03 Dashboard Admin — Superadmin" 60:776.
+
+   Kerangkanya sama untuk dua peran: header tab folder, sidebar 216px, dan
+   kolom konten. Yang berbeda hanya isi sidebar dan kartu di kolom konten.
+   Semua aturan dibatasi di dalam .ds seperti stylesheet Klass lainnya.
+   ========================================================================== */
+
+.ds .dash-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+/* Header dasbor: hanya logo dan tombol keluar, jadi dibuat lebih tipis dari
+   header halaman publik. Navigasi peran ada di sidebar. */
+.ds .navbar--dash .navbar__inner {
+  min-height: var(--ds-dash-head-height);
+}
+
+.ds .dash {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  flex: 1;
+}
+
+@media (min-width: 1024px) {
+  .ds .dash {
+    grid-template-columns: var(--ds-dash-sidebar) minmax(0, 1fr);
+    /* Kolom sidebar dicat setinggi grid, bukan setinggi isinya. Tanpa ini
+       sidebar berhenti di item terakhir dan menyisakan pita kertas kosong di
+       halaman pendek. Warna dan garisnya sama dengan .dash-side. */
+    background-image: linear-gradient(
+      to right,
+      var(--ds-dash-paper) 0,
+      var(--ds-dash-paper) calc(var(--ds-dash-sidebar) - var(--ds-border-thin)),
+      var(--ds-dash-folder-line) calc(var(--ds-dash-sidebar) - var(--ds-border-thin)),
+      var(--ds-dash-folder-line) var(--ds-dash-sidebar),
+      transparent var(--ds-dash-sidebar)
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar
+   -------------------------------------------------------------------------- */
+
+.ds .dash-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  min-width: 0;
+  padding: var(--ds-space-6) var(--ds-space-4);
+  background-color: var(--ds-dash-paper);
+  border-bottom: var(--ds-border-base) solid var(--ds-dash-folder-line);
+}
+
+@media (min-width: 1024px) {
+  .ds .dash-side {
+    position: sticky;
+    top: 0;
+    z-index: var(--ds-z-sticky);
+    max-height: 100vh;
+    overflow-y: auto;
+    align-self: start;
+    gap: var(--ds-space-6);
+    padding: var(--ds-space-8) var(--ds-space-6) var(--ds-space-6);
+    border-bottom: 0;
+    border-right: var(--ds-border-thin) solid var(--ds-dash-folder-line);
+  }
+}
+
+.ds .dash-side__eyebrow {
+  display: block;
+  margin-bottom: var(--ds-space-2);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-label);
+  text-transform: uppercase;
+  color: var(--ds-color-ink);
+}
+
+.ds .dash-side__title {
+  margin: 0;
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.ds .dash-side__meta {
+  margin: var(--ds-space-2) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-nav {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--ds-space-1);
+  margin: 0;
+  padding: var(--ds-space-1) 0;
+  overflow-x: auto;
+  list-style: none;
+  scrollbar-width: none;
+}
+
+.ds .dash-nav::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .ds .dash-nav {
+    flex-direction: column;
+    padding: 0;
+    overflow: visible;
+  }
+}
+
+.ds .dash-nav__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  font-size: var(--ds-text-sm);
+  font-weight: 500;
+  line-height: var(--ds-leading-body);
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--ds-color-ink);
+  border: var(--ds-border-base) solid transparent;
+  border-radius: var(--ds-radius-sm);
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-ease-standard),
+    transform var(--ds-duration-fast) var(--ds-ease-press);
+}
+
+.ds .dash-nav__link:hover {
+  background-color: var(--ds-color-folder-bg);
+}
+
+.ds .dash-nav__link.is-active {
+  background-color: var(--ds-color-primary);
+  border-color: var(--ds-color-border-ink);
+  box-shadow: var(--ds-shadow-dash-nav);
+}
+
+.ds .dash-nav__link.is-active:hover {
+  background-color: var(--ds-color-primary-hover);
+}
+
+/* Cincin fokus dipasang ulang karena `.is-active` sudah memakai box-shadow;
+   tanpa aturan ini item aktif kehilangan penanda fokus keyboard. */
+.ds .dash-nav__link:focus-visible,
+.ds .dash-nav__link.is-active:focus-visible {
+  box-shadow: var(--ds-shadow-focus);
+}
+
+/* Tahap berikutnya: fitur yang belum dibangun, sengaja tidak bisa diklik. */
+.ds .dash-side__soon {
+  margin-top: var(--ds-space-4);
+  padding-top: var(--ds-space-4);
+  border-top: var(--ds-border-base) dashed var(--ds-color-border-subtle);
+}
+
+.ds .dash-side__soon-label {
+  display: block;
+  margin-bottom: var(--ds-space-3);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-label);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-side__soon-item {
+  margin: 0 0 var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-side__foot {
+  margin-top: auto;
+  padding-top: var(--ds-space-6);
+}
+
+@media (min-width: 1024px) {
+  .ds .dash-side__foot {
+    padding-top: var(--ds-space-10);
+  }
+}
+
+.ds .dash-side__name {
+  margin: var(--ds-space-3) 0 0;
+  font-size: var(--ds-text-sm);
+  font-weight: 500;
+  line-height: var(--ds-leading-body);
+}
+
+.ds .dash-side__note {
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Kolom konten
+   -------------------------------------------------------------------------- */
+
+.ds .dash-main {
+  min-width: 0;
+  padding: var(--ds-space-6) var(--ds-space-4) var(--ds-space-12);
+}
+
+@media (min-width: 768px) {
+  .ds .dash-main {
+    padding: var(--ds-dash-pad);
+  }
+}
+
+.ds .dash-main__inner {
+  width: 100%;
+  max-width: var(--ds-dash-content-max);
+}
+
+.ds .dash-head {
+  margin-bottom: var(--ds-space-10);
+}
+
+.ds .dash-eyebrow {
+  display: block;
+  margin-bottom: var(--ds-space-4);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-label);
+  text-transform: uppercase;
+  color: var(--ds-color-ink);
+}
+
+.ds .dash-title {
+  margin: 0;
+  font-size: var(--ds-text-2xl);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+  .ds .dash-title {
+    font-size: var(--ds-text-3xl);
+    line-height: var(--ds-leading-h1);
+    letter-spacing: -0.018em;
+  }
+}
+
+.ds .dash-lede {
+  margin: var(--ds-space-4) 0 0;
+  max-width: 68ch;
+  font-size: var(--ds-text-base);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-meta {
+  display: block;
+  margin-top: var(--ds-space-4);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-label);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-3);
+  margin-top: var(--ds-space-6);
+}
+
+/* --------------------------------------------------------------------------
+   Kartu ringkasan angka (tiga warna Figma)
+   -------------------------------------------------------------------------- */
+
+.ds .dash-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-4);
+  margin-top: var(--ds-space-10);
+}
+
+/* Tiga kartu: satu kolom di ponsel, tiga kolom mulai 768px. Jumlah kolom
+   sengaja eksplisit, bukan `auto-fit`, supaya tidak pernah tersisa satu kartu
+   yatim di baris kedua (kejadian dengan 2 kolom + 3 kartu). */
+@media (min-width: 768px) {
+  .ds .dash-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ds-space-6);
+  }
+}
+
+.ds .dash-stat {
+  display: flex;
+  flex-direction: column;
+  /* Figma memakai tinggi tetap 170px; isinya rata atas, jadi ada ruang
+     lega di bawah angka penjelas. */
+  min-height: var(--ds-dash-summary-height);
+  padding: var(--ds-space-6);
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-dash-card);
+}
+
+.ds .dash-stat--kuning {
+  background-color: var(--ds-color-primary);
+}
+
+.ds .dash-stat--oranye {
+  background-color: var(--ds-color-accent-orange);
+}
+
+.ds .dash-stat--biru {
+  background-color: var(--ds-color-secondary);
+}
+
+.ds .dash-stat__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: flex-start;
+  width: 44px;
+  min-height: 32px;
+  padding: 3px var(--ds-space-2);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  line-height: 1.6;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+}
+
+.ds .dash-stat__title {
+  margin: var(--ds-space-2) 0 0;
+  font-size: var(--ds-text-xl);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.0367em;
+}
+
+.ds .dash-stat__desc {
+  margin: var(--ds-space-2) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  letter-spacing: -0.0107em;
+}
+
+/* --------------------------------------------------------------------------
+   Judul bagian di dalam dasbor
+   -------------------------------------------------------------------------- */
+
+.ds .dash-section {
+  margin-top: var(--ds-space-12);
+}
+
+.ds .dash-section__title {
+  margin: 0;
+  font-size: var(--ds-text-2xl);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.ds .dash-section__sub {
+  margin: var(--ds-space-2) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-section__body {
+  margin-top: var(--ds-space-6);
+}
+
+/* --------------------------------------------------------------------------
+   Folder subkelas (tab map manila)
+   -------------------------------------------------------------------------- */
+
+.ds .dash-folders {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-6);
+}
+
+@media (min-width: 768px) {
+  .ds .dash-folders {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ds-space-5) var(--ds-space-6);
+  }
+}
+
+.ds .dash-folder {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(var(--ds-dash-folder-tab-height) - var(--ds-border-thin));
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .dash-folder:hover {
+  transform: translateY(-2px);
+}
+
+.ds .dash-folder:focus-visible {
+  border-radius: var(--ds-radius-md);
+}
+
+.ds .dash-folder__tab {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  /* Figma 60:860: wadah tab 147.7×36.7, dengan muka tab 1.5px di dalamnya. */
+  width: var(--ds-dash-folder-tab-width);
+  max-width: calc(100% - var(--ds-space-8));
+  height: var(--ds-dash-folder-tab-height);
+  background-color: var(--ds-color-folder-inner);
+  border-radius: var(--ds-radius-sm) var(--ds-radius-sm) 0 0;
+}
+
+.ds .dash-folder__tab-face {
+  position: absolute;
+  top: var(--ds-border-thin);
+  left: var(--ds-border-thin);
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  max-width: 100%;
+  padding: var(--ds-space-2) var(--ds-space-6) var(--ds-space-2) var(--ds-space-4);
+  background-color: var(--ds-color-folder-bg);
+}
+
+.ds .dash-folder__dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: var(--ds-radius-pill);
+  background-color: var(--ds-color-ink);
+  box-shadow: 0 1px 0 var(--ds-color-highlight-specular);
+}
+
+.ds .dash-folder__tab-text {
+  overflow: hidden;
+  min-width: 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-label);
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ds .dash-folder__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  /* Figma 60:849: badan folder 549×144 dengan isi rata atas. */
+  min-height: 144px;
+  padding: var(--ds-space-5);
+  text-align: center;
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-thin) solid var(--ds-dash-folder-line);
+  border-radius: 0 var(--ds-radius-md) var(--ds-radius-md) var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-folder-card);
+}
+
+.ds .dash-folder__title {
+  margin: var(--ds-space-4) 0 0;
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.36;
+  letter-spacing: 0;
+}
+
+.ds .dash-folder__desc {
+  margin: var(--ds-space-2) 0 0;
+  font-size: var(--ds-text-sm);
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .dash-folder__desc-line {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Kartu kertas umum (agenda, jadwal, poster, moderasi)
+   -------------------------------------------------------------------------- */
+
+.ds .dash-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-6);
+}
+
+@media (min-width: 900px) {
+  .ds .dash-grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+/* Untuk pasangan kartu yang tingginya jauh berbeda (formulir panjang di
+   sebelah formulir pendek). Tanpa ini kartu pendek ikut melar dan menyisakan
+   bidang kosong besar di bawah isinya. */
+.ds .dash-grid-2--start {
+  align-items: start;
+}
+
+.ds .dash-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--ds-space-6);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-dash-sheet);
+}
+
+.ds .dash-card__title {
+  margin: 0;
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.ds .dash-card__desc {
+  margin: var(--ds-space-2) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-card__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  margin-top: auto;
+  padding-top: var(--ds-space-5);
+}
+
+/* Kartu tugas: lencana tenggat + kode di kanan atas */
+.ds .dash-task__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  margin-bottom: var(--ds-space-3);
+}
+
+.ds .dash-task__code {
+  flex-shrink: 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-task__lines {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .dash-task__lines > span {
+  display: block;
+}
+
+/* Jadwal mingguan: hari di kiri, jam dan ruang di kanan */
+.ds .dash-jadwal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  margin: var(--ds-space-5) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .dash-jadwal__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-1);
+}
+
+@media (min-width: 420px) {
+  .ds .dash-jadwal__row {
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: var(--ds-space-4);
+    align-items: baseline;
+  }
+}
+
+.ds .dash-jadwal__day {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-label);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-jadwal__what {
+  margin: 0;
+  font-size: var(--ds-text-base);
+  line-height: var(--ds-leading-body);
+}
+
+.ds .dash-jadwal__where {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Pengingat PWA
+   -------------------------------------------------------------------------- */
+
+.ds .dash-pwa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  margin-top: var(--ds-space-8);
+  padding: var(--ds-space-6);
+  background-color: var(--ds-color-success-soft);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-sm);
+  box-shadow: var(--ds-shadow-dash-panel);
+}
+
+@media (min-width: 900px) {
+  .ds .dash-pwa {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-8);
+  }
+}
+
+.ds .dash-pwa__title {
+  margin: 0;
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ds .dash-pwa__desc {
+  margin: var(--ds-space-2) 0 0;
+  max-width: 60ch;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-pwa__control {
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Tabel pengajuan (superadmin)
+   -------------------------------------------------------------------------- */
+
+.ds .dash-table {
+  overflow: hidden;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-sm);
+  box-shadow: var(--ds-shadow-dash-panel);
+}
+
+.ds .dash-table__head {
+  display: none;
+}
+
+/* Tabel lima kolom baru muat saat kolom konten >= 900px. Dengan sidebar 216px
+   dan padding 40px, itu berarti viewport 1200px; di bawahnya tabel menjadi
+   daftar kartu bertumpuk (label kolom tampil di tiap baris) supaya tanggal dan
+   dua tombol tidak berdesakan. */
+@media (min-width: 1200px) {
+  .ds .dash-table__head {
+    display: grid;
+    /* Kolom mengikuti posisi Figma 60:1253 (24 / 322 / 602 / 742 / 886)
+       dengan lebar proporsional, bukan persentase tetap, supaya tetap rapi
+       saat kolom konten menyempit. */
+    grid-template-columns:
+      minmax(0, 298fr) minmax(0, 280fr) minmax(0, 140fr) minmax(0, 144fr)
+      minmax(0, 212fr);
+    gap: var(--ds-space-6);
+    align-items: center;
+    min-height: 52px;
+    padding: 0 var(--ds-space-6);
+    background-color: var(--ds-color-folder-bg);
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-xs);
+    line-height: var(--ds-leading-label);
+    text-transform: uppercase;
+  }
+}
+
+.ds .dash-table__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-5);
+}
+
+/* Di antara ponsel dan tabel penuh, tiap baris jadi kartu dua kolom supaya
+   tidak terlalu memanjang: identitas kiri-kanan, lalu status, lalu tindakan. */
+@media (min-width: 768px) {
+  .ds .dash-table__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ds-space-4) var(--ds-space-6);
+    padding: var(--ds-space-5) var(--ds-space-6);
+  }
+
+  .ds .dash-table__row > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Baris berselang-seling: putih kertas, lalu kertas gading. Figma tidak
+   memakai garis pemisah, hanya pergantian warna latar. `:nth-child(odd)`
+   karena anak pertama `.dash-table` adalah baris judul kolom. */
+.ds .dash-table__row:nth-child(odd) {
+  background-color: var(--ds-dash-paper);
+}
+
+@media (min-width: 1200px) {
+  .ds .dash-table__row {
+    grid-template-columns:
+      minmax(0, 298fr) minmax(0, 280fr) minmax(0, 140fr) minmax(0, 144fr)
+      minmax(0, 212fr);
+    gap: var(--ds-space-6);
+    align-items: center;
+    min-height: 96px;
+    padding: var(--ds-space-3) var(--ds-space-6);
+  }
+
+  /* Batalkan rentang penuh dari tata letak dua kolom di atas; tindakan
+     kembali menjadi sel terakhir di baris yang sama. */
+  .ds .dash-table__row > :last-child {
+    grid-column: auto;
+  }
+}
+
+.ds .dash-table__cell {
+  min-width: 0;
+}
+
+/* Label kolom versi ponsel; disembunyikan saat tabel sudah berkolom. */
+.ds .dash-table__label {
+  display: block;
+  margin-bottom: var(--ds-space-1);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-label);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+@media (min-width: 1200px) {
+  .ds .dash-table__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+.ds .dash-table__name {
+  margin: 0;
+  font-size: var(--ds-text-base);
+  line-height: var(--ds-leading-body);
+}
+
+.ds .dash-table__sub {
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-table__date {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .dash-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: var(--ds-space-1) var(--ds-space-2);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-label);
+  color: var(--ds-color-ink);
+  background-color: var(--ds-color-folder-bg);
+  border-radius: 0;
+}
+
+.ds .dash-status--disetujui {
+  background-color: var(--ds-color-success-soft);
+}
+
+.ds .dash-status--ditolak {
+  background-color: var(--ds-color-error-soft);
+}
+
+.ds .dash-table__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+}
+
+.ds .dash-table__empty {
+  margin: 0;
+  padding: var(--ds-space-8) var(--ds-space-6);
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Poster & moderasi (superadmin)
+   -------------------------------------------------------------------------- */
+
+.ds .dash-poster {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--ds-space-3);
+  /* Figma 60:1324: bidang biru 501×114, judul di 14, meta di 66. */
+  min-height: 114px;
+  margin-top: var(--ds-space-4);
+  padding: var(--ds-space-4);
+  background-color: var(--ds-color-secondary);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-sm);
+  box-shadow: var(--ds-shadow-dash-panel);
+}
+
+.ds .dash-poster__title {
+  margin: 0;
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ds .dash-poster__meta {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  font-weight: 500;
+  line-height: var(--ds-leading-body);
+}
+
+/* --------------------------------------------------------------------------
+   Catatan kaki dasbor
+   -------------------------------------------------------------------------- */
+
+.ds .dash-note {
+  margin: var(--ds-space-10) 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-label);
+  color: var(--ds-color-ink-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Rangka muat (fallback Suspense)
+
+   Dipakai selama `params` dan data kelas dimuat, supaya kerangka dasbor tetap
+   tampil dan isinya tidak melompat saat data siap.
+   -------------------------------------------------------------------------- */
+
+.ds .dash-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+
+.ds .dash-loading__bar {
+  height: 16px;
+  background-color: var(--ds-color-paper-well);
+  border-radius: var(--ds-radius-xs);
+}
+
+.ds .dash-loading__bar--eyebrow {
+  width: 38%;
+  height: 12px;
+}
+
+.ds .dash-loading__bar--title {
+  height: 40px;
+  max-width: 460px;
+}
+
+.ds .dash-loading__bar--lede {
+  max-width: 560px;
+}
+
+.ds .dash-loading__cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-6);
+  margin-top: var(--ds-space-6);
+}
+
+@media (min-width: 640px) {
+  .ds .dash-loading__cards {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+.ds .dash-loading__card {
+  height: var(--ds-dash-summary-height);
+  background-color: var(--ds-color-paper-well);
+  border: var(--ds-border-thin) solid var(--ds-color-border-subtle);
+  border-radius: var(--ds-radius-md);
+}
+
+/* --------------------------------------------------------------------------
+   Dasbor pengguna (belum punya peran)
+
+   Hanya tiga tambahan: formulir di dalam kartu, daftar riwayat pengajuan, dan
+   pembungkus form. Sisanya memakai `.dash-card`, `.dash-grid-2`, dan `.dash-*`
+   yang sudah ada.
+   -------------------------------------------------------------------------- */
+
+/* Formulir di dalam kartu: `FormStack` punya batas 540px sendiri, jadi di sini
+   cukup dirapatkan dan dihilangkan batasnya agar mengikuti lebar kartu. */
+.ds .dash-card__body {
+  margin-top: var(--ds-space-5);
+}
+
+.ds .dash-card__body .form-stack,
+.ds .dash-form {
+  max-width: none;
+}
+
+.ds .dash-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
+}
+
+.ds .dash-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-3);
+  padding-top: var(--ds-space-1);
+}
+
+/* Riwayat pengajuan: baris kertas sederhana, bukan tabel, karena isinya
+   pendek dan hanya perlu dibaca. */
+.ds .dash-list {
+  overflow: hidden;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-sm);
+  box-shadow: var(--ds-shadow-dash-panel);
+}
+
+.ds .dash-list__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-5) var(--ds-space-6);
+}
+
+.ds .dash-list__row:nth-child(odd) {
+  background-color: var(--ds-dash-paper);
+}
+
+.ds .dash-list__main {
+  min-width: 0;
+}
+
+.ds .dash-list__title {
+  margin: 0;
+  font-size: var(--ds-text-base);
+  font-weight: 500;
+  line-height: var(--ds-leading-body);
+}
+
+.ds .dash-list__meta {
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}

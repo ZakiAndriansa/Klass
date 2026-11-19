@@ -4,6 +4,15 @@ Dokumen ini adalah kesepakatan antara backend dan frontend. Setiap URL baru dica
 
 Alamat dasar: `/api/v1`
 
+## Penamaan URL
+
+1. Bahasa Inggris, kata benda jamak, huruf kecil, tanda hubung bila dua kata: `/api/v1/classes`, `/api/v1/classes/{classId}/members`.
+2. Sumber daya bersarang paling dalam dua tingkat: `/classes/{classId}/subclasses`, lalu `/subclasses/{subclassId}/materials`.
+3. Aksi yang bukan CRUD memakai sub-sumber-daya dengan POST: `POST /classes/{classId}/join`, `POST /class-requests/{id}/approve`.
+4. Daftar selalu berhalaman: `?page=1&limit=20`, batas atas `limit` 100.
+
+`message` pada respons galat tetap berbahasa Indonesia karena ditampilkan ke pengguna; `code` berbahasa Inggris huruf besar.
+
 ## Bentuk respons
 
 Berhasil:
