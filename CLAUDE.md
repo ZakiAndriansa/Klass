@@ -6,7 +6,7 @@ Platform komunitas pengelola kelas. Kebutuhan ada di `docs/PRD-Klass.md`. Tim be
 
 ## Stack
 
-Next.js 16 App Router dengan Cache Components aktif, TypeScript, Tailwind CSS 4, design system Klass (CSS berlingkup `.ds`), shadcn/ui (terpasang tetapi belum dipakai halaman mana pun), MySQL 8.4, Drizzle ORM (`drizzle-orm/mysql2`), Better Auth (belum dikonfigurasi), Zod 4, Vitest, npm.
+Next.js 16 App Router dengan Cache Components aktif, TypeScript, Tailwind CSS 4, design system Klass (CSS berlingkup `.ds`), shadcn/ui (terpasang tetapi belum dipakai halaman mana pun), MySQL 8.4, Drizzle ORM (`drizzle-orm/mysql2`), Better Auth (akun contoh untuk pengembangan lewat `/dev/login`; login Google belum tersambung), Zod 4, Vitest, npm.
 
 ## Perintah
 

@@ -17,6 +17,8 @@ npm run dev            # 4. jalankan aplikasi
 
 Buka http://localhost:3000 untuk melihat halaman utama. Halaman lain yang sudah ada: `/login`, `/register`, dan `/components` (galeri semua komponen).
 
+Login Google belum tersambung. Untuk masuk saat pengembangan, buka http://localhost:3000/dev/login lalu klik salah satu akun contoh (satu akun per peran: superadmin, admin kelas, PJ, anggota, dan pengguna baru).
+
 Untuk memastikan database tersambung, buka http://localhost:3000/api/v1/health. Jawabannya harus memuat `"database":"terhubung"`. Bila tertulis `"terputus"`, MySQL belum menyala atau `DATABASE_URL` di `.env` tidak cocok dengan pilihanmu.
 
 **Setelah `git pull`, jalankan `npm ci` lagi** supaya paket di laptopmu sama dengan yang dipakai tim. Pakai `npm install <nama-paket>` hanya saat menambah paket baru, dan itu harus disetujui lead. Bila `package-lock.json` berubah padahal kamu tidak menambah paket, jangan ikut di-commit; kembalikan dengan `git checkout -- package-lock.json`.

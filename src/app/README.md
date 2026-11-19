@@ -9,6 +9,7 @@ Folder ini menentukan **alamat (URL)** aplikasi. Nama folder menjadi alamat: `ap
 | `(app)/`                    | Halaman setelah login                                          | Aqil           | Aqil           |
 | `admin/`                    | Halaman superadmin                                             | Aqil           | Aqil           |
 | `api/`                      | URL backend (REST API)                                         | Ahmad, Bintang | Zaki           |
+| `dev/`                      | Halaman bantu pengembangan (`/dev/login`), mati di produksi    | Zaki           | Zaki, Aqil     |
 | `layout.tsx`, `globals.css` | Bingkai dan gaya seluruh aplikasi                              | Aqil           | Aqil           |
 | `styles/`                   | Gaya design system Klass: `klass.css`, token, CSS per komponen | Aqil           | Aqil           |
 | `fonts/`                    | Berkas font lokal, dimuat di `layout.tsx`                      | Aqil           | Aqil           |
