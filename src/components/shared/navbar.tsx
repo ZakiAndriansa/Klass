@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { LambangKlass } from "@/components/shared/lambang-klass";
+import { TombolKeluar } from "@/components/shared/tombol-keluar";
 import { TautanTombolKertas } from "@/components/shared/tombol-kertas";
 
 /**
@@ -13,6 +15,10 @@ import { TautanTombolKertas } from "@/components/shared/tombol-kertas";
  * - tombol menu mengubah `aria-expanded` dan menyembunyikan drawer;
  * - menekan Escape menutup drawer;
  * - menu otomatis tertutup bila layar dilebarkan ke >= 768px.
+ *
+ * `item` boleh kosong. Di dasbor navigasi peran sudah ada di sidebar, jadi
+ * header cukup menampilkan logo dan tombol keluar — tanpa tab tengah, tanpa
+ * tombol drawer.
  *
  * `Client Component` karena butuh state. Jangan taruh pengambilan data di sini.
  */
@@ -25,13 +31,26 @@ type ItemNavigasi = {
 
 type NavbarProps = {
   merek?: string;
-  item: ItemNavigasi[];
-  /** Tombol di kanan, misalnya "Ajukan kelas". */
-  aksi?: { label: string; href: string };
+  /** Tujuan logo. Di halaman publik cukup `#top`; di dasbor arahkan ke `/`. */
+  merekHref?: string;
+  /** Tautan tengah. Kosongkan bila navigasi sudah ada di tempat lain. */
+  item?: ItemNavigasi[];
+  /**
+   * Tombol di kanan, misalnya "Ajukan kelas".
+   * Dengan `keluar: true` tombol ini mengakhiri sesi dulu, baru pindah ke `href`.
+   */
+  aksi?: { label: string; href: string; keluar?: boolean };
   className?: string;
 };
 
-export function Navbar({ merek = "Klass", item, aksi, className }: NavbarProps) {
+export function Navbar({
+  merek = "Klass",
+  merekHref = "#top",
+  item = [],
+  aksi,
+  className,
+}: NavbarProps) {
+  const adaMenu = item.length > 0;
   const [terbuka, setTerbuka] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -58,75 +77,81 @@ export function Navbar({ merek = "Klass", item, aksi, className }: NavbarProps) 
   return (
     <header className={cn("navbar", className)}>
       <div className="navbar__inner container">
-        <a href="#atas" className="navbar__brand" aria-label={`${merek} Beranda`}>
-          <span className="navbar__logo" aria-hidden="true">
-            K
-          </span>
+        <a href={merekHref} className="navbar__brand" aria-label={`${merek} Beranda`}>
+          <LambangKlass className="navbar__logo" />
           <span className="navbar__brand-text">{merek}</span>
         </a>
 
-        <nav className="navbar__nav" aria-label="Navigasi utama">
-          {item.map((tautan) => (
-            <a
-              key={tautan.href}
-              href={tautan.href}
-              className={cn("navbar__tab", tautan.aktif && "is-active")}
-              aria-current={tautan.aktif ? "page" : undefined}
-            >
-              {tautan.label}
-            </a>
-          ))}
-        </nav>
+        {adaMenu ? (
+          <nav className="navbar__nav" aria-label="Navigasi utama">
+            {item.map((tautan) => (
+              <a
+                key={tautan.label}
+                href={tautan.href}
+                className={cn("navbar__tab", tautan.aktif && "is-active")}
+                aria-current={tautan.aktif ? "page" : undefined}
+              >
+                {tautan.label}
+              </a>
+            ))}
+          </nav>
+        ) : null}
 
         <div className="navbar__actions">
-          {aksi ? (
+          {aksi?.keluar ? (
+            <TombolKeluar label={aksi.label} tujuan={aksi.href} />
+          ) : aksi ? (
             <TautanTombolKertas href={aksi.href} variant="primary" size="sm">
               {aksi.label}
             </TautanTombolKertas>
           ) : null}
 
-          <button
-            type="button"
-            className="navbar__toggle"
-            onClick={() => setTerbuka((nilai) => !nilai)}
-            aria-expanded={terbuka}
-            aria-controls="navbar-drawer"
-            aria-label={terbuka ? "Tutup menu navigasi" : "Buka menu navigasi"}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="22"
-              height="22"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              aria-hidden="true"
+          {adaMenu ? (
+            <button
+              type="button"
+              className="navbar__toggle"
+              onClick={() => setTerbuka((nilai) => !nilai)}
+              aria-expanded={terbuka}
+              aria-controls="navbar-drawer"
+              aria-label={terbuka ? "Tutup menu navigasi" : "Buka menu navigasi"}
             >
-              {terbuka ? (
-                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-              ) : (
-                <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
-              )}
-            </svg>
-          </button>
+              <svg
+                viewBox="0 0 24 24"
+                width="22"
+                height="22"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                aria-hidden="true"
+              >
+                {terbuka ? (
+                  <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+                ) : (
+                  <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+                )}
+              </svg>
+            </button>
+          ) : null}
         </div>
       </div>
 
-      <div ref={panelRef} className="navbar__drawer" id="navbar-drawer" hidden={!terbuka}>
-        <nav className="navbar__drawer-nav" aria-label="Navigasi seluler">
-          {item.map((tautan) => (
-            <a
-              key={tautan.href}
-              href={tautan.href}
-              className={cn("navbar__drawer-link", tautan.aktif && "is-active")}
-              aria-current={tautan.aktif ? "page" : undefined}
-              onClick={() => setTerbuka(false)}
-            >
-              {tautan.label}
-            </a>
-          ))}
-        </nav>
-      </div>
+      {adaMenu ? (
+        <div ref={panelRef} className="navbar__drawer" id="navbar-drawer" hidden={!terbuka}>
+          <nav className="navbar__drawer-nav" aria-label="Navigasi seluler">
+            {item.map((tautan) => (
+              <a
+                key={tautan.label}
+                href={tautan.href}
+                className={cn("navbar__drawer-link", tautan.aktif && "is-active")}
+                aria-current={tautan.aktif ? "page" : undefined}
+                onClick={() => setTerbuka(false)}
+              >
+                {tautan.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      ) : null}
     </header>
   );
 }

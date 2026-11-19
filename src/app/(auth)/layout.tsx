@@ -5,5 +5,5 @@
  * token design system Klass berlaku, tanpa navbar atau footer.
  */
 export default function LayoutAuth({ children }: { children: React.ReactNode }) {
-  return <div className="ds flex min-h-dvh flex-1 flex-col">{children}</div>;
+  return <div className="ds ds-kolom ds-kolom--layar">{children}</div>;
 }

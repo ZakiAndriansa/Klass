@@ -26,6 +26,17 @@ Pesan commit selalu diawali `Add:`, `Update:`, `Delete:`, atau `Fix:`. Diputuska
 
 MySQL untuk pengembangan boleh dari Docker atau dari Laragon, asalkan versinya 8. Yang membedakan hanya `DATABASE_URL` di `.env` masing-masing anggota. XAMPP tidak dipakai karena isinya MariaDB. Server produksi tetap memakai MySQL dalam kontainer sesuai PRD.
 
+## 18 November 2026: design system Klass dan Docker penuh
+
+| Keputusan                                                                                          | Alasan                                                                  | Diputuskan oleh                     |
+| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------- |
+| Tampilan memakai design system Klass (CSS berlingkup `.ds`, token `--ds-*`), bukan komponen shadcn | Gaya kertas dan map manila dari rancangan Figma                         | Aqil, masuk lewat PR #1             |
+| Font dimuat lokal dari `src/app/fonts`                                                             | Tidak bergantung jaringan                                               | Aqil, masuk lewat PR #1             |
+| `docker compose up` menjalankan aplikasi dan MySQL sekaligus                                       | Anggota bisa menjalankan proyek tanpa memasang Node.js                  | Commit 903c4f0, belum ditinjau Zaki |
+| Setelah `git pull` memakai `npm ci`, bukan `npm install`                                           | Versi npm yang berbeda menulis ulang `package-lock.json` secara berbeda | Usulan, menunggu Zaki               |
+
+Belum diputuskan: bagaimana tema kelas (F6) dihubungkan dengan token `--ds-*`.
+
 ## 18 November 2026: tabel pengguna
 
 | Keputusan                                                                                         | Alasan                                                               | Diputuskan oleh |
@@ -34,6 +45,45 @@ MySQL untuk pengembangan boleh dari Docker atau dari Laragon, asalkan versinya 8
 | Nama tabel auth dijamakkan (`usePlural`)                                                          | Seragam dengan tabel lain                                            | Zaki            |
 | Tidak ada tabel `profiles`; `is_superadmin` menjadi kolom tambahan di `users`                     | Nama dan avatar sudah ada di `users`, menghindari data ganda         | Zaki            |
 | Skema auth dan migrasi pertama dibuat Zaki sebelum tabel lain                                     | Supaya Fadlan bisa memasang kunci asing ke pengguna                  | Zaki            |
+
+## 18 November 2026: URL memakai bahasa Inggris
+
+Alamat halaman dan API memakai bahasa Inggris huruf kecil, mengikuti nama use case yang dikenal
+pengguna (`/dashboard`, `/classes`, `/login`, `/admin/requests`), bukan terjemahan harfiah dari
+bahasa Indonesia.
+
+Alasan: alamat lebih mudah ditebak dan diketik, cocok dengan istilah yang sudah lazim di produk
+lain sehingga pengguna baru tidak perlu menghafal terjemahan, dan memudahkan penamaan berkas serta
+tautan antar-halaman.
+
+Yang **tidak** berubah:
+
+- Teks di dalam halaman tetap bahasa Indonesia (skill `klass-komponen`).
+- `message` pada respons galat tetap bahasa Indonesia; hanya `code` yang berbahasa Inggris.
+- Nama komponen, variabel, dan komentar tetap seperti sebelumnya.
+
+Rujukannya skill `klass-halaman` (peta route) dan `klass-api` (penamaan URL). Mengubah alamat
+berarti mengubah kedua skill itu juga.
+
+## 19 November 2026: halaman Klass memakai kelas CSS sendiri, bukan utilitas Tailwind
+
+Halaman yang memakai design system Klass (`.ds`: landing, galeri komponen, login, dasbor, dan
+seluruh halaman kelas) hanya memakai nama kelas dari `src/app/styles/klass/`. Utilitas Tailwind
+seperti `flex`, `gap-6`, atau `mt-8` tidak dipakai lagi di markup halaman dan layout.
+
+Alasan: tampilan Klass sudah ditulis sebagai CSS biasa dengan token `--ds-*`. Mencampurnya dengan
+utilitas Tailwind membuat dua sumber kebenaran untuk hal yang sama, dan perubahan kelas utilitas
+(atau plugin yang merapikan urutan kelas) bisa diam-diam mengubah tampilan tanpa ada yang menyentuh
+stylesheet Klass. Satu nama kelas yang jelas juga lebih mudah dicari saat memperbaiki tampilan.
+
+Yang **tidak** berubah:
+
+- Tailwind dan shadcn/ui tetap terpasang dan tetap dipakai di `src/components/ui` (area shadcn).
+  Komponen contoh `src/components/shared/kartu-status.tsx` masih merakit `Card`/`Badge`/`Skeleton` dari
+  sana, tetapi `className` miliknya sendiri sudah memakai kelas Klass (`kartu-status__*`).
+- Token warna, jarak, dan tipografi tetap `--ds-*`; tidak ada warna mentah baru.
+- Kelas baru ditulis di berkas yang sesuai: `shell.css` untuk cangkang halaman, `kelas.css` untuk
+  halaman kelas, `dashboard.css` untuk dasbor.
 
 ## Ditunda
 

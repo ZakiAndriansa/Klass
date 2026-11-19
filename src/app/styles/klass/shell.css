@@ -1,0 +1,148 @@
+/* ==========================================================================
+   Cangkang halaman dan pembantu susunan.
+   Kelas di sini menggantikan utilitas Tailwind (flex, gap, mt-*) yang tadinya
+   dipakai di layout dan halaman Klass. Semua aturan dibatasi `.ds`, termasuk
+   saat kelas yang sama dipasang pada elemen pembungkus `.ds` itu sendiri.
+   ========================================================================== */
+
+/* Kolom penuh: dipakai layout (app), (publik), admin, dan (auth) supaya isi
+   memanjang mengisi sisa tinggi layar dan footer menempel di bawah.
+   Dua pemilih karena pembungkus layout membawa `ds` dan `ds-kolom` sekaligus,
+   sedangkan `<main>` di dalamnya hanya membawa `ds-kolom`. */
+.ds.ds-kolom,
+.ds .ds-kolom {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ds.ds-kolom--layar,
+.ds .ds-kolom--layar {
+  min-height: 100dvh;
+}
+
+/* Susunan bertumpuk untuk galeri komponen. Jarak mengikuti skala --ds-space. */
+.ds .komponen-tumpuk {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-6);
+}
+
+.ds .komponen-tumpuk--lebar {
+  gap: var(--ds-space-8);
+}
+
+.ds .komponen-jarak-atas {
+  margin-top: var(--ds-space-8);
+}
+
+/* Kartu status contoh (`src/components/shared/kartu-status.tsx`). Menggantikan
+   utilitas Tailwind yang dulu menempel pada kartu shadcn. */
+.ds .kartu-status {
+  width: 100%;
+}
+
+.ds .kartu-status__kepala {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+}
+
+.ds .kartu-status__ket {
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .kartu-status--memuat {
+  width: 100%;
+}
+
+.ds .kartu-status__skeleton--judul {
+  width: 6rem;
+  height: 1rem;
+}
+
+.ds .kartu-status__skeleton--lencana {
+  width: 5rem;
+  height: 1.25rem;
+  border-radius: var(--ds-radius-pill);
+}
+
+.ds .kartu-status__skeleton--teks {
+  width: 100%;
+  height: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   Halaman 404
+   -------------------------------------------------------------------------- */
+
+.ds .halaman-404 {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  padding-block: var(--ds-space-12);
+}
+
+.ds .halaman-404__kartu {
+  position: relative;
+  max-width: 620px;
+  margin-inline: auto;
+  padding: clamp(var(--ds-space-6), 6vw, var(--ds-space-12));
+  text-align: center;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thick) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-modal);
+}
+
+.ds .halaman-404__kartu::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 110px;
+  height: 20px;
+  background-color: var(--ds-color-tape);
+  box-shadow: var(--ds-shadow-tape);
+  transform: translateX(-50%) rotate(-1deg);
+}
+
+.ds .halaman-404__kode {
+  display: inline-block;
+  padding: 0 var(--ds-space-3);
+  font-family: var(--ds-font-mono);
+  font-size: clamp(4rem, 13vw, 7rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background-color: var(--ds-color-marker-yellow);
+  transform: rotate(-1.5deg);
+}
+
+.ds .halaman-404__judul {
+  margin: var(--ds-space-5) 0 var(--ds-space-2);
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: var(--ds-tracking-tight);
+}
+
+.ds .halaman-404__teks {
+  max-width: 46ch;
+  margin: 0 auto var(--ds-space-6);
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .halaman-404__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ds-space-3);
+}
+
+.ds .halaman-404__aksi .btn {
+  gap: var(--ds-space-2);
+}

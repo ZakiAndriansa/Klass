@@ -7,7 +7,7 @@ gayanya ada di `src/app/styles/klass/components/` dan seluruh nilainya memakai
 token `--ds-*` dari `src/app/styles/klass/tokens.css`.
 
 Halaman `/` memakai komponen ini untuk menyusun landing page; galeri lengkap
-beserta semua variannya ada di `/komponen`.
+beserta semua variannya ada di `/components`.
 
 | Berkas                 | Isi                                                        |
 | ---------------------- | ---------------------------------------------------------- |
@@ -24,6 +24,7 @@ beserta semua variannya ada di `/komponen`.
 | `kartu-status.tsx`     | Kartu status ringkas untuk dashboard                       |
 | `kartu.tsx`            | Map manila (`KartuFolder`), catatan, kertas, dan gridnya   |
 | `langkah.tsx`          | Daftar langkah bernomor ("Cara kerja")                     |
+| `lambang-klass.tsx`    | Lambang map Klass (SVG dari Figma) untuk navbar dan auth   |
 | `lencana.tsx`          | Lencana/stabilo dengan enam varian                         |
 | `navbar.tsx`           | Navigasi tab folder + drawer seluler                       |
 | `pagination.tsx`       | Penomoran halaman                                          |
@@ -32,6 +33,7 @@ beserta semua variannya ada di `/komponen`.
 | `section.tsx`          | `Section`, `SectionInner`, `SectionHead`                   |
 | `tabs.tsx`             | Tab subkelas                                               |
 | `toast.tsx`            | Notifikasi mengambang + `useToast`                         |
+| `tombol-keluar.tsx`    | Tombol keluar: mengakhiri sesi, lalu pindah halaman        |
 | `tombol-kertas.tsx`    | Tombol kertas (primary, secondary, ghost, danger)          |
 | `tooltip.tsx`          | Tooltip CSS untuk hover dan fokus                          |
 

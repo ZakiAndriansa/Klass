@@ -13,3 +13,6 @@
 
 // users, sessions, accounts, verifications. Dibuat dari konfigurasi Better Auth, jangan diubah.
 export * from "./auth";
+export * from "./kelas";
+export * from "./subkelas";
+export * from "./website";

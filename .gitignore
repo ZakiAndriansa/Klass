@@ -10,6 +10,7 @@
 !.yarn/releases
 !.yarn/versions
 /.commandcode/
+/graphify-out
 
 # testing
 /coverage
@@ -41,3 +42,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# skill Claude Code: hanya dipakai di lokal Zaki, tidak dibagikan ke tim
+/.claude/skills/

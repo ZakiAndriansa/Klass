@@ -1,0 +1,18 @@
+/* ==========================================================================
+   Cangkang akar: html dan body.
+   Ini satu-satunya stylesheet Klass yang tidak dibatasi `.ds`, karena html
+   dan body berada di luar pembungkus halaman. Isinya hanya tinggi layar dan
+   kolom flex supaya footer bisa menempel di bawah.
+   ========================================================================== */
+
+html {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body.klass-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
