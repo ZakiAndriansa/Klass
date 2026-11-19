@@ -6,5 +6,5 @@
  * juga flex-column penuh supaya footer selalu menempel di bawah layar.
  */
 export default function LayoutPublik({ children }: { children: React.ReactNode }) {
-  return <div className="ds flex flex-1 flex-col">{children}</div>;
+  return <div className="ds ds-kolom">{children}</div>;
 }

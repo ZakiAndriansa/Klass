@@ -9,7 +9,7 @@ import { TombolKertas } from "@/components/shared/tombol-kertas";
 import { Tooltip } from "@/components/shared/tooltip";
 
 /**
- * Bagian "Modal, Alert/Toast & Tooltip" di galeri `/komponen`. Dipisah jadi
+ * Bagian "Modal, Alert/Toast & Tooltip" di galeri `/components`. Dipisah jadi
  * Client Component karena dialog dan toast butuh state; halaman galeri tetap
  * Server Component.
  *
@@ -21,7 +21,7 @@ export function DemoInteraktif() {
   const { daftar, tampilkan, tutup } = useToast();
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="komponen-tumpuk">
       <div className="btn-group">
         <TombolKertas variant="primary" onClick={() => setDialogTerbuka(true)}>
           Buka Dialog Pengajuan

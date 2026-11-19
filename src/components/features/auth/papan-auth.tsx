@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 
 import { IlustrasiBuku } from "@/components/features/auth/ilustrasi-buku";
+import { LambangKlass } from "@/components/shared/lambang-klass";
 import { TombolKertas } from "@/components/shared/tombol-kertas";
 
 type ModeAuth = "masuk" | "daftar";
@@ -100,16 +101,12 @@ function KontenAuth({ mode, interaktif, idJudul, onTautan }: KontenAuthProps) {
     <>
       {interaktif ? (
         <Link className="auth__brand" href="/" aria-label="Klass, kembali ke beranda">
-          <span className="auth__logo" aria-hidden="true">
-            K
-          </span>
+          <LambangKlass className="auth__logo" />
           <span>Klass</span>
         </Link>
       ) : (
         <span className="auth__brand">
-          <span className="auth__logo" aria-hidden="true">
-            K
-          </span>
+          <LambangKlass className="auth__logo" />
           <span>Klass</span>
         </span>
       )}
