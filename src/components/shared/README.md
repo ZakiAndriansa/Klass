@@ -33,6 +33,7 @@ beserta semua variannya ada di `/components`.
 | `section.tsx`          | `Section`, `SectionInner`, `SectionHead`                   |
 | `tabs.tsx`             | Tab subkelas                                               |
 | `toast.tsx`            | Notifikasi mengambang + `useToast`                         |
+| `tombol-keluar.tsx`    | Tombol keluar: mengakhiri sesi, lalu pindah halaman        |
 | `tombol-kertas.tsx`    | Tombol kertas (primary, secondary, ghost, danger)          |
 | `tooltip.tsx`          | Tooltip CSS untuk hover dan fokus                          |
 

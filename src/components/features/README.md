@@ -9,6 +9,7 @@ features/
   kelas/        daftar kelas, beranda kelas, jadwal, materi, progress, anggota
   dasbor/       kerangka + isi dasbor pengguna dan superadmin
   admin/        tabel pengajuan kelas
+  dev/          daftar akun contoh untuk /dev/login (khusus pengembangan)
 ```
 
 Satu subfolder dikerjakan satu orang supaya Rehan dan Darrel tidak mengubah berkas yang sama.

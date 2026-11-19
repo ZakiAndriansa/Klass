@@ -68,6 +68,78 @@ Respons 200:
 
 `database` bernilai `"terhubung"` atau `"terputus"`. Tipe: `HealthDto` di `src/types/api/health.ts`.
 
+### Akun contoh (hanya saat pengembangan)
+
+Untuk masuk sebagai peran tertentu tanpa login Google. Halamannya ada di `/dev/login`. Di produksi semua alamat di bawah menjawab 404.
+
+Tipe: `AkunDevDto` dan `SesiDevDto` di `src/types/api/dev-auth.ts`.
+
+`GET /api/v1/dev/accounts`
+
+Daftar akun contoh, satu per peran. Tidak butuh login.
+
+```json
+{
+  "data": [
+    {
+      "id": "dev-superadmin",
+      "nama": "Superadmin Contoh",
+      "email": "superadmin@klass.test",
+      "peran": "superadmin",
+      "labelPeran": "Superadmin",
+      "keterangan": "Mengurus website: menyetujui pengajuan kelas dan mengelola poster.",
+      "tujuan": "/admin"
+    }
+  ]
+}
+```
+
+`peran` bernilai `superadmin`, `admin_kelas`, `pj`, `anggota`, atau `pengguna`. `id` yang tersedia: `dev-superadmin`, `dev-admin-kelas`, `dev-pj`, `dev-anggota`, `dev-pengguna`.
+
+`POST /api/v1/dev/session`
+
+Masuk sebagai salah satu akun contoh. Server memasang cookie sesi, jadi permintaan berikutnya dari peramban yang sama sudah dianggap login.
+
+| Hal                | Isi                                                           |
+| ------------------ | ------------------------------------------------------------- |
+| Siapa yang boleh   | Siapa saja, hanya saat pengembangan                           |
+| Body               | `{ "idAkun": "dev-pj" }`                                      |
+| Respons berhasil   | 200, `data` berbentuk `SesiDevDto`                            |
+| Galat yang mungkin | `VALIDATION_ERROR` (body salah), `NOT_FOUND` (akun tidak ada) |
+
+```json
+{
+  "data": {
+    "idPengguna": "dev-pj",
+    "nama": "PJ Contoh",
+    "email": "pj@klass.test",
+    "isSuperadmin": false,
+    "peran": "pj"
+  }
+}
+```
+
+`GET /api/v1/dev/session`
+
+Siapa yang sedang login. Respons 200 dengan `data` berbentuk `SesiDevDto`, atau `{ "data": null }` bila belum login. `peran` bernilai `null` bila yang login bukan akun contoh.
+
+`DELETE /api/v1/dev/session`
+
+Keluar. Respons 200 dengan `{ "data": null }`.
+
+Contoh pemakaian dari Client Component:
+
+```ts
+import { api } from "@/lib/api-client";
+import type { SesiDevDto } from "@/types/api/dev-auth";
+
+await api<SesiDevDto>("/dev/session", {
+  method: "POST",
+  body: JSON.stringify({ idAkun: "dev-pj" }),
+});
+const { data: sesi } = await api<SesiDevDto | null>("/dev/session");
+```
+
 ### Templat untuk endpoint baru
 
 Salin bagian ini lalu isi.

@@ -51,7 +51,7 @@ export function RangkaKelas({
         className="navbar--dash"
         merek="Klass"
         merekHref="/dashboard"
-        aksi={{ label: "Keluar", href: "/login" }}
+        aksi={{ label: "Keluar", href: "/login", keluar: true }}
       />
 
       <header className="kelas-hero">

@@ -9,6 +9,9 @@ import { z } from "zod";
  * supaya salah ketik atau nilai kosong ketahuan saat aplikasi mulai, bukan saat dipakai.
  */
 const skemaEnv = z.object({
+  // Diisi otomatis oleh Next.js: `development` saat `npm run dev`, `production` saat build dan start.
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+
   DATABASE_URL: z
     .string({ error: "DATABASE_URL belum diisi." })
     .startsWith("mysql://", "DATABASE_URL harus diawali mysql://"),
@@ -32,3 +35,9 @@ if (!hasil.success) {
 }
 
 export const env = hasil.data;
+
+/**
+ * `true` selama aplikasi tidak berjalan sebagai produksi.
+ * Dipakai untuk fitur khusus pengembangan, misalnya akun contoh di `/dev/login`.
+ */
+export const modePengembangan = env.NODE_ENV !== "production";
