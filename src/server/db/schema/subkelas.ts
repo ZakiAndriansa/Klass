@@ -200,7 +200,7 @@ export const assignments = mysqlTable(
       onDelete: "set null",
     }),
 
-    dueAt: timestamp("due_at"),
+    dueAt: timestamp("due_at").notNull(),
 
     createdAt: timestamp("created_at").notNull().defaultNow(),
 

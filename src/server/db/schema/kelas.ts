@@ -155,7 +155,7 @@ export const classAdminInvites = mysqlTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => [
-    uniqueIndex("class_admin_invites_class_email_uidx").on(table.classId, table.email),
+    uniqueIndex("class_admin_invites_email_class_uidx").on(table.email, table.classId),
 
     index("class_admin_invites_invited_by_idx").on(table.invitedBy),
   ],
