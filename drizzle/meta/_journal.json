@@ -8,6 +8,13 @@
       "when": 1795009652053,
       "tag": "0000_tabel_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1795098397113,
+      "tag": "0001_tabel_mvp",
+      "breakpoints": true
     }
   ]
 }
