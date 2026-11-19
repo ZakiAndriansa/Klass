@@ -2,11 +2,11 @@
 
 Potongan tampilan yang dipakai ulang: tombol, kartu, form, navigasi.
 
-| Folder      | Isi                                                    | Pemilik       | Reviewer wajib |
-| ----------- | ------------------------------------------------------ | ------------- | -------------- |
-| `ui/`       | Komponen dasar dari shadcn/ui (tombol, kartu, lencana) | Aqil          | Aqil           |
-| `shared/`   | Komponen buatan tim yang dipakai lebih dari satu fitur | Rehan, Darrel | Aqil           |
-| `features/` | Komponen milik satu fitur, satu subfolder per fitur    | Rehan, Darrel | Aqil           |
+| Folder      | Isi                                                               | Pemilik       | Reviewer wajib |
+| ----------- | ----------------------------------------------------------------- | ------------- | -------------- |
+| `shared/`   | Komponen design system Klass yang dipakai lebih dari satu halaman | Rehan, Darrel | Aqil           |
+| `features/` | Komponen milik satu fitur, satu subfolder per fitur               | Rehan, Darrel | Aqil           |
+| `ui/`       | Komponen shadcn/ui, belum dipakai halaman mana pun                | Aqil          | Aqil           |
 
 **Semua komponen harus disetujui Aqil sebelum digabung.**
 
@@ -18,6 +18,6 @@ Potongan tampilan yang dipakai ulang: tombol, kartu, form, navigasi.
 4. Nama berkas `huruf-kecil-bertanda-hubung.tsx`, nama komponen `HurufBesarDiAwal`: `kartu-tugas.tsx` berisi `KartuTugas`.
 5. Sebelum membuat komponen baru, cari dulu di folder ini dan di https://ui.shadcn.com/docs/components.
 
-Contoh untuk ditiru: `shared/kartu-status.tsx`.
+Contoh untuk ditiru: `shared/tombol-kertas.tsx` dan `shared/lencana.tsx`.
 
 Skill: `klass-komponen`, `klass-review-komponen`.

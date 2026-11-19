@@ -6,16 +6,20 @@ Baru bergabung? Baca dulu [`docs/panduan-belajar.md`](docs/panduan-belajar.md).
 
 ## Menjalankan di laptop
 
-Yang perlu terpasang: Node.js 22 atau lebih baru, Git, dan MySQL 8. MySQL boleh dari Docker Desktop atau dari Laragon; pilih salah satu.
+Yang perlu terpasang: Node.js 22 atau lebih baru, Git, dan MySQL 8. MySQL boleh dari Docker Desktop atau dari Laragon; pilih salah satu. Bila tidak ingin memasang Node.js, lihat Pilihan C.
 
 ```bash
-npm install            # 1. pasang paket
+npm ci                 # 1. pasang paket persis sesuai package-lock.json
 cp .env.example .env   # 2. siapkan pengaturan lokal (di CMD Windows: copy .env.example .env)
                        # 3. nyalakan MySQL, lihat Pilihan A atau Pilihan B di bawah
 npm run dev            # 4. jalankan aplikasi
 ```
 
-Buka http://localhost:3000. Dua kartu di halaman itu harus menunjukkan "Berjalan" dan "Terhubung". Bila kartu database menunjukkan "Terputus", MySQL belum menyala atau `DATABASE_URL` di `.env` tidak cocok dengan pilihanmu.
+Buka http://localhost:3000 untuk melihat halaman utama. Halaman lain yang sudah ada: `/login`, `/register`, dan `/components` (galeri semua komponen).
+
+Untuk memastikan database tersambung, buka http://localhost:3000/api/v1/health. Jawabannya harus memuat `"database":"terhubung"`. Bila tertulis `"terputus"`, MySQL belum menyala atau `DATABASE_URL` di `.env` tidak cocok dengan pilihanmu.
+
+**Setelah `git pull`, jalankan `npm ci` lagi** supaya paket di laptopmu sama dengan yang dipakai tim. Pakai `npm install <nama-paket>` hanya saat menambah paket baru, dan itu harus disetujui lead. Bila `package-lock.json` berubah padahal kamu tidak menambah paket, jangan ikut di-commit; kembalikan dengan `git checkout -- package-lock.json`.
 
 Folder proyek boleh diletakkan di mana saja, tidak harus di `C:\laragon\www`.
 
@@ -94,23 +98,24 @@ Catatan:
 
 Setiap folder punya `README.md` sendiri yang menjelaskan isinya. Tabel ini ringkasannya.
 
-| Folder                                                                          | Isi                                                  | Pemilik        | Reviewer wajib |
-| ------------------------------------------------------------------------------- | ---------------------------------------------------- | -------------- | -------------- |
-| **Frontend**                                                                    |                                                      |                |                |
-| `src/components/shared`, `src/components/features`                              | Komponen tampilan                                    | Rehan, Darrel  | Aqil           |
-| `src/components/ui`                                                             | Komponen dasar shadcn/ui                             | Aqil           | Aqil           |
-| `src/app` selain `api`                                                          | Halaman dan alamatnya (slicing)                      | Aqil           | Aqil           |
-| **Backend**                                                                     |                                                      |                |                |
-| `src/app/api`                                                                   | URL backend                                          | Ahmad, Bintang | Zaki           |
-| `src/server/controllers`                                                        | Logika tiap endpoint                                 | Ahmad, Bintang | Zaki           |
-| `src/types/api`                                                                 | Bentuk data yang dikirim API                         | Ahmad, Bintang | Zaki           |
-| `src/server/models`                                                             | Query ke database                                    | Fadlan         | Zaki           |
-| `src/server/db`, `drizzle`                                                      | Tabel dan migrasi                                    | Fadlan         | Zaki           |
-| `src/server/http`, `permissions`, `auth`                                        | Alat bantu API, izin, login                          | Zaki           | Zaki           |
-| **Umum**                                                                        |                                                      |                |                |
-| `src/lib`, `src/env.ts`                                                         | Fungsi bantu, pengaturan lingkungan                  | Zaki           | Zaki           |
-| Berkas config di akar, `compose.yaml`, `docker`, `worker`, `.github`, `.claude` | Struktur, format, template                           | Zaki           | Zaki           |
-| `docs`                                                                          | PRD, panduan belajar, kontrak API, catatan keputusan | Semua          | Lead terkait   |
+| Folder                                                                          | Isi                                                        | Pemilik        | Reviewer wajib |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------- | -------------- | -------------- |
+| **Frontend**                                                                    |                                                            |                |                |
+| `src/components/shared`, `src/components/features`                              | Komponen design system Klass                               | Rehan, Darrel  | Aqil           |
+| `src/app/styles`, `src/app/fonts`, `public`                                     | Gaya design system (token, CSS per komponen), font, gambar | Aqil           | Aqil           |
+| `src/components/ui`                                                             | Komponen shadcn/ui, belum dipakai halaman mana pun         | Aqil           | Aqil           |
+| `src/app` selain `api`                                                          | Halaman dan alamatnya (slicing)                            | Aqil           | Aqil           |
+| **Backend**                                                                     |                                                            |                |                |
+| `src/app/api`                                                                   | URL backend                                                | Ahmad, Bintang | Zaki           |
+| `src/server/controllers`                                                        | Logika tiap endpoint                                       | Ahmad, Bintang | Zaki           |
+| `src/types/api`                                                                 | Bentuk data yang dikirim API                               | Ahmad, Bintang | Zaki           |
+| `src/server/models`                                                             | Query ke database                                          | Fadlan         | Zaki           |
+| `src/server/db`, `drizzle`                                                      | Tabel dan migrasi                                          | Fadlan         | Zaki           |
+| `src/server/http`, `permissions`, `auth`                                        | Alat bantu API, izin, login                                | Zaki           | Zaki           |
+| **Umum**                                                                        |                                                            |                |                |
+| `src/lib`, `src/env.ts`                                                         | Fungsi bantu, pengaturan lingkungan                        | Zaki           | Zaki           |
+| Berkas config di akar, `compose.yaml`, `docker`, `worker`, `.github`, `.claude` | Struktur, format, template                                 | Zaki           | Zaki           |
+| `docs`                                                                          | PRD, panduan belajar, kontrak API, catatan keputusan       | Semua          | Lead terkait   |
 
 Aqil adalah lead frontend dan Zaki lead backend. Tidak ada perubahan yang digabung ke `main` tanpa persetujuan lead bagiannya.
 
@@ -124,33 +129,40 @@ URL (src/app/api)  ----/
 
 Komponen hanya menerima data lewat props. Halaman dan URL memanggil controller. Controller memanggil model. Hanya model yang menyentuh database. `npm run lint` menolak impor yang melanggar alur ini.
 
-Satu contoh lengkap yang bisa ditiru sudah ada, yaitu cek kesehatan:
+Contoh yang bisa ditiru untuk tiap lapisan:
 
-| Lapisan               | Berkas                                               |
-| --------------------- | ---------------------------------------------------- |
-| Halaman               | `src/app/(publik)/page.tsx`                          |
-| Komponen              | `src/components/shared/kartu-status.tsx`             |
-| URL                   | `src/app/api/v1/health/route.ts`                     |
-| Controller dan ujinya | `src/server/controllers/health.ts`, `health.test.ts` |
-| Model                 | `src/server/models/health.ts`                        |
-| Bentuk data           | `src/types/api/health.ts`                            |
+| Lapisan               | Berkas                                                                                  |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| Halaman               | `src/app/(publik)/page.tsx` (merakit komponen, belum mengambil data)                    |
+| Komponen dan gayanya  | `src/components/shared/tombol-kertas.tsx`, `src/app/styles/klass/components/button.css` |
+| URL                   | `src/app/api/v1/health/route.ts`                                                        |
+| Controller dan ujinya | `src/server/controllers/health.ts`, `health.test.ts`                                    |
+| Model                 | `src/server/models/health.ts`                                                           |
+| Bentuk data           | `src/types/api/health.ts`                                                               |
+
+Belum ada halaman yang mengambil data dari controller. Polanya (komponen `async` di dalam `<Suspense>`) dicatat di `.claude/skills/klass-halaman/SKILL.md`.
+
+## Tampilan
+
+Tampilan memakai **design system Klass** bergaya kertas dan map manila. Gayanya ditulis sebagai CSS biasa di `src/app/styles/klass/`, semua nilai visual ada di `tokens.css` (variabel `--ds-*`), dan hanya berlaku di dalam elemen berkelas `ds` yang dipasang di `layout.tsx` tiap kelompok halaman. Daftar komponen ada di `src/components/shared/README.md`, dan semuanya bisa dilihat di http://localhost:3000/components.
 
 ## Perintah
 
-| Perintah              | Guna                                     |
-| --------------------- | ---------------------------------------- |
-| `npm run dev`         | Menjalankan aplikasi untuk pengembangan  |
-| `npm run lint`        | Memeriksa kode dan batas folder          |
-| `npm run typecheck`   | Memeriksa tipe TypeScript                |
-| `npm run test`        | Menjalankan uji                          |
-| `npm run format`      | Merapikan kode                           |
-| `npm run build`       | Membangun versi produksi                 |
-| `npm run db:up`       | Menyalakan MySQL saja                    |
-| `npm run db:down`     | Mematikan semua layanan Docker           |
-| `docker compose up`   | Menjalankan aplikasi dan MySQL di Docker |
-| `npm run db:generate` | Membuat migrasi dari perubahan tabel     |
-| `npm run db:migrate`  | Menerapkan migrasi ke database           |
-| `npm run db:studio`   | Melihat isi database di peramban         |
+| Perintah              | Guna                                                          |
+| --------------------- | ------------------------------------------------------------- |
+| `npm ci`              | Memasang paket sesuai lockfile, dijalankan setelah `git pull` |
+| `npm run dev`         | Menjalankan aplikasi untuk pengembangan                       |
+| `npm run lint`        | Memeriksa kode dan batas folder                               |
+| `npm run typecheck`   | Memeriksa tipe TypeScript                                     |
+| `npm run test`        | Menjalankan uji                                               |
+| `npm run format`      | Merapikan kode                                                |
+| `npm run build`       | Membangun versi produksi                                      |
+| `npm run db:up`       | Menyalakan MySQL saja                                         |
+| `npm run db:down`     | Mematikan semua layanan Docker                                |
+| `docker compose up`   | Menjalankan aplikasi dan MySQL di Docker                      |
+| `npm run db:generate` | Membuat migrasi dari perubahan tabel                          |
+| `npm run db:migrate`  | Menerapkan migrasi ke database                                |
+| `npm run db:studio`   | Melihat isi database di peramban                              |
 
 Sebelum membuka pull request, jalankan `npm run lint`, `npm run typecheck`, dan `npm run test`.
 
@@ -199,4 +211,4 @@ Commit pertama repo ini (`chore: setup awal proyek Klass`) dibuat sebelum standa
 
 ## Teknologi
 
-Next.js 16 (App Router), TypeScript, Tailwind CSS 4, shadcn/ui, MySQL 8.4, Drizzle ORM, Better Auth, Zod, Vitest. Alasan pemilihannya dicatat di [`docs/keputusan.md`](docs/keputusan.md).
+Next.js 16 (App Router), TypeScript, Tailwind CSS 4, design system Klass (CSS dengan token `--ds-*`), MySQL 8.4, Drizzle ORM, Better Auth, Zod, Vitest. Alasan pemilihannya dicatat di [`docs/keputusan.md`](docs/keputusan.md).

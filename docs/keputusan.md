@@ -26,6 +26,17 @@ Pesan commit selalu diawali `Add:`, `Update:`, `Delete:`, atau `Fix:`. Diputuska
 
 MySQL untuk pengembangan boleh dari Docker atau dari Laragon, asalkan versinya 8. Yang membedakan hanya `DATABASE_URL` di `.env` masing-masing anggota. XAMPP tidak dipakai karena isinya MariaDB. Server produksi tetap memakai MySQL dalam kontainer sesuai PRD.
 
+## 18 November 2026: design system Klass dan Docker penuh
+
+| Keputusan                                                                                          | Alasan                                                                  | Diputuskan oleh                     |
+| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------- |
+| Tampilan memakai design system Klass (CSS berlingkup `.ds`, token `--ds-*`), bukan komponen shadcn | Gaya kertas dan map manila dari rancangan Figma                         | Aqil, masuk lewat PR #1             |
+| Font dimuat lokal dari `src/app/fonts`                                                             | Tidak bergantung jaringan                                               | Aqil, masuk lewat PR #1             |
+| `docker compose up` menjalankan aplikasi dan MySQL sekaligus                                       | Anggota bisa menjalankan proyek tanpa memasang Node.js                  | Commit 903c4f0, belum ditinjau Zaki |
+| Setelah `git pull` memakai `npm ci`, bukan `npm install`                                           | Versi npm yang berbeda menulis ulang `package-lock.json` secara berbeda | Usulan, menunggu Zaki               |
+
+Belum diputuskan: bagaimana tema kelas (F6) dihubungkan dengan token `--ds-*`.
+
 ## 18 November 2026: tabel pengguna
 
 | Keputusan                                                                                         | Alasan                                                               | Diputuskan oleh |
