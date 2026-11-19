@@ -1,0 +1,46 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import { TombolKertas } from "@/components/shared/tombol-kertas";
+import { api } from "@/lib/api-client";
+
+/**
+ * Tombol keluar: mengakhiri sesi di server, lalu pindah ke halaman tujuan.
+ *
+ * Berbeda dari tautan biasa ke `/login`, tombol ini benar-benar menghapus sesi
+ * lewat `DELETE /api/v1/dev/session`, jadi pengguna tidak lagi tercatat login.
+ *
+ * TODO(auth): endpoint di atas hanya ada saat pengembangan. Setelah login
+ * Google tersambung, ganti dengan endpoint keluar yang berlaku di produksi.
+ */
+type TombolKeluarProps = {
+  label?: string;
+  /** Halaman yang dibuka setelah keluar. */
+  tujuan?: string;
+};
+
+export function TombolKeluar({ label = "Keluar", tujuan = "/login" }: TombolKeluarProps) {
+  const router = useRouter();
+  const [sedangKeluar, setSedangKeluar] = useState(false);
+
+  async function keluar() {
+    setSedangKeluar(true);
+
+    try {
+      await api<null>("/dev/session", { method: "DELETE" });
+    } catch {
+      // Sesi mungkin memang sudah tidak ada. Pengguna tetap dibawa ke halaman tujuan.
+    }
+
+    router.push(tujuan);
+    router.refresh();
+  }
+
+  return (
+    <TombolKertas variant="primary" size="sm" sedangMemproses={sedangKeluar} onClick={keluar}>
+      {label}
+    </TombolKertas>
+  );
+}

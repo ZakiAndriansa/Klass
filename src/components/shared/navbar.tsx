@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 import { LambangKlass } from "@/components/shared/lambang-klass";
+import { TombolKeluar } from "@/components/shared/tombol-keluar";
 import { TautanTombolKertas } from "@/components/shared/tombol-kertas";
 
 /**
@@ -34,8 +35,11 @@ type NavbarProps = {
   merekHref?: string;
   /** Tautan tengah. Kosongkan bila navigasi sudah ada di tempat lain. */
   item?: ItemNavigasi[];
-  /** Tombol di kanan, misalnya "Ajukan kelas". */
-  aksi?: { label: string; href: string };
+  /**
+   * Tombol di kanan, misalnya "Ajukan kelas".
+   * Dengan `keluar: true` tombol ini mengakhiri sesi dulu, baru pindah ke `href`.
+   */
+  aksi?: { label: string; href: string; keluar?: boolean };
   className?: string;
 };
 
@@ -94,7 +98,9 @@ export function Navbar({
         ) : null}
 
         <div className="navbar__actions">
-          {aksi ? (
+          {aksi?.keluar ? (
+            <TombolKeluar label={aksi.label} tujuan={aksi.href} />
+          ) : aksi ? (
             <TautanTombolKertas href={aksi.href} variant="primary" size="sm">
               {aksi.label}
             </TautanTombolKertas>

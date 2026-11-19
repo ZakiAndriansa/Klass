@@ -21,7 +21,7 @@ export function KepalaDasbor() {
       className="navbar--dash"
       merek="Klass"
       merekHref="/"
-      aksi={{ label: "Keluar", href: "/login" }}
+      aksi={{ label: "Keluar", href: "/login", keluar: true }}
     />
   );
 }

@@ -30,7 +30,7 @@ export default function HalamanDaftarKelas() {
         className="navbar--dash"
         merek="Klass"
         merekHref="/dashboard"
-        aksi={{ label: "Keluar", href: "/login" }}
+        aksi={{ label: "Keluar", href: "/login", keluar: true }}
       />
 
       <main className="kelas-daftar-halaman">
