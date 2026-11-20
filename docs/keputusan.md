@@ -85,6 +85,18 @@ Yang **tidak** berubah:
 - Kelas baru ditulis di berkas yang sesuai: `shell.css` untuk cangkang halaman, `kelas.css` untuk
   halaman kelas, `dashboard.css` untuk dasbor.
 
+## 20 November 2026: setiap koneksi MySQL dipaksa memakai UTC
+
+`src/server/db/index.ts` menjalankan `SET time_zone = '+00:00'` pada setiap koneksi baru.
+
+Alasan: opsi `timezone: "Z"` hanya mengatur cara aplikasi mengirim dan membaca waktu. MySQL tetap
+memakai zona waktu komputernya, sehingga di Laragon (WIB) kolom yang diisi MySQL sendiri
+(`created_at`, `updated_at`) terbaca tujuh jam lebih maju, sedangkan di Docker (UTC) tidak. Dengan
+sesi dipaksa UTC, hasilnya sama di semua laptop dan di server.
+
+Akibat untuk data lokal yang sudah ada di Laragon: waktu yang dulu ditulis aplikasi (misalnya masa
+berlaku sesi) terbaca tujuh jam lebih awal. Untuk data contoh ini tidak perlu diperbaiki.
+
 ## Ditunda
 
 | Hal                                                | Menunggu                          |

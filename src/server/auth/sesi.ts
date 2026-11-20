@@ -23,7 +23,7 @@ export async function ambilSesi(): Promise<Sesi | null> {
  *
  * Pemakaian di controller:
  *   const pengguna = await requireAuth();
- *   const profil = await profilModel.cariPerId(pengguna.id);
+ *   const profil = await profileModel.cariPerId(pengguna.id);
  */
 export async function requireAuth(): Promise<Sesi["user"]> {
   const sesi = await ambilSesi();
