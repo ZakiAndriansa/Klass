@@ -113,13 +113,40 @@ describe("anggotaKelasModel", () => {
     ]);
   });
 
-  it("menolak undangan admin duplikat dalam kelas yang sama", async () => {
-    siapkan(hasilTulis, hasilBaca(kelas), hasilHitung(1), hasilTulis);
+  it("menolak undangan admin ulang jika status masih pending", async () => {
+    const email = "uji@example.test";
+    const undanganPending = ["undangan", "kelas", email, "pending", "pengundang-lama", waktu];
+    siapkan(hasilTulis, hasilBaca(kelas), hasilBaca(undanganPending), hasilTulis);
 
     await expect(
-      anggotaKelasModel.buatUndanganAdmin({ classId: "kelas", email: "uji@example.test" }),
+      anggotaKelasModel.buatUndanganAdmin({ classId: "kelas", email, invitedBy: "pengundang-baru" }),
     ).rejects.toThrow(ConflictError);
+    expect(sqlDijalankan().at(-1)).toBe("rollback");
   });
+
+  it.each(["revoked", "accepted"])(
+    "mengaktifkan kembali undangan %s menjadi pending dan mengganti pengundang",
+    async (status) => {
+      const email = "uji@example.test";
+      const undanganLama = ["undangan", "kelas", email, status, "pengundang-lama", waktu];
+      siapkan(hasilTulis, hasilBaca(kelas), hasilBaca(undanganLama), hasilTulis, hasilTulis);
+
+      await expect(
+        anggotaKelasModel.buatUndanganAdmin({
+          classId: "kelas",
+          email,
+          invitedBy: "pengundang-baru",
+        }),
+      ).resolves.toMatchObject({
+        id: "undangan",
+        status: "pending",
+        invitedBy: "pengundang-baru",
+      });
+      expect(query.mock.calls[3][1]).toEqual(["pending", "pengundang-baru", "undangan"]);
+      expect(sqlDijalankan()[3]).toContain("update `class_admin_invites`");
+      expect(sqlDijalankan().at(-1)).toBe("commit");
+    },
+  );
 
   it("menolak penerimaan undangan jika akan menambah keanggotaan melebihi kuota", async () => {
     const email = "uji@example.test";

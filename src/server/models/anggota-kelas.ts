@@ -166,9 +166,27 @@ export const anggotaKelasModel = {
         eq(classAdminInvites.classId, classId),
         eq(classAdminInvites.email, email),
       );
-      if (await transaksi.$count(classAdminInvites, filter)) {
-        throw new ConflictError("Undangan admin untuk email ini sudah tercatat di kelas ini.");
+      // Email yang masih menunggu penerimaan tidak boleh diundang ulang.
+      const [undanganLama] = await transaksi
+        .select()
+        .from(classAdminInvites)
+        .where(filter)
+        .limit(1);
+      if (undanganLama?.status === "pending") {
+        throw new ConflictError("Undangan admin untuk email ini masih menunggu penerimaan.");
       }
+
+      // Undangan lama yang dicabut atau sudah diterima dapat digunakan kembali.
+      if (undanganLama) {
+        const perubahan = { status: "pending" as const, invitedBy: invitedBy ?? null };
+        await transaksi
+          .update(classAdminInvites)
+          .set(perubahan)
+          .where(eq(classAdminInvites.id, undanganLama.id));
+        return { ...undanganLama, ...perubahan };
+      }
+
+      // Belum pernah diundang: buat baris baru.
       await transaksi.insert(classAdminInvites).values({ classId, email, invitedBy });
       const [undangan] = await transaksi.select().from(classAdminInvites).where(filter).limit(1);
       if (!undangan) throw new Error("Undangan yang baru dibuat tidak ditemukan.");
