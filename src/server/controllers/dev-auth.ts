@@ -1,15 +1,19 @@
 import "server-only";
 
 import { modePengembangan } from "@/env";
-import { AKUN_DEV, ambilSesi, cariAkunDev, keluar, masukAkunDev } from "@/server/auth";
+import { AKUN_DEV, cariAkunDev, masukAkunDev } from "@/server/auth";
 import { NotFoundError } from "@/server/http/errors";
-import { masukDevSchema, type AkunDevDto, type SesiDevDto } from "@/types/api/dev-auth";
+import { masukDevSchema, type AkunDevDto } from "@/types/api/dev-auth";
+import type { SesiDto } from "@/types/api/session";
 
 /**
  * Controller akun contoh untuk pengembangan. Pemilik: Zaki.
  *
  * Dipakai tim frontend dan backend untuk masuk sebagai peran tertentu tanpa
  * login Google. Semua fungsi di sini menolak bekerja di produksi.
+ *
+ * Membaca sesi dan keluar tidak ada di sini; keduanya berlaku juga di produksi,
+ * jadi tempatnya di `session.ts` (`/api/v1/session`).
  */
 
 /** Dipakai halaman `/dev/login` untuk memutuskan tampil atau 404. */
@@ -32,12 +36,12 @@ export async function daftarAkunDev(): Promise<AkunDevDto[]> {
 }
 
 /** Masuk sebagai salah satu akun contoh. */
-export async function masukDev(masukan: unknown): Promise<SesiDevDto> {
+export async function masukDev(masukan: unknown): Promise<SesiDto> {
   pastikanModePengembangan();
 
-  const { idAkun } = masukDevSchema.parse(masukan);
+  const { accountId } = masukDevSchema.parse(masukan);
 
-  const akun = cariAkunDev(idAkun);
+  const akun = cariAkunDev(accountId);
   if (!akun) {
     throw new NotFoundError("Akun contoh tidak ditemukan.");
   }
@@ -45,37 +49,10 @@ export async function masukDev(masukan: unknown): Promise<SesiDevDto> {
   await masukAkunDev(akun);
 
   return {
-    idPengguna: akun.id,
-    nama: akun.nama,
+    id: akun.id,
+    name: akun.name,
     email: akun.email,
-    isSuperadmin: akun.peran === "superadmin",
-    peran: akun.peran,
+    image: null,
+    isSuperadmin: akun.role === "superadmin",
   };
-}
-
-/** Siapa yang sedang login. `null` berarti belum login. */
-export async function sesiDev(): Promise<SesiDevDto | null> {
-  pastikanModePengembangan();
-
-  const sesi = await ambilSesi();
-  if (!sesi) return null;
-
-  const { user } = sesi;
-
-  return {
-    idPengguna: user.id,
-    nama: user.name,
-    email: user.email,
-    isSuperadmin: user.isSuperadmin,
-    peran: cariAkunDev(user.id)?.peran ?? null,
-  };
-}
-
-/** Keluar dari akun yang sedang dipakai. */
-export async function keluarDev(): Promise<null> {
-  pastikanModePengembangan();
-
-  await keluar();
-
-  return null;
 }

@@ -173,4 +173,21 @@ describe("subkelasModel", () => {
     expect(hasil).toBe(false);
     expect(sqlDijalankan().at(-1)).toBe("commit");
   });
+
+  it("mengambil ID subkelas yang dipegang seorang PJ di satu kelas", async () => {
+    siapkan(hasilBaca(["subkelas-a"], ["subkelas-b"]));
+
+    await expect(subkelasModel.daftarIdPerPj("kelas", "pj")).resolves.toEqual([
+      "subkelas-a",
+      "subkelas-b",
+    ]);
+    expect(query.mock.calls[0][1]).toEqual(["kelas", "pj"]);
+    expect(sqlDijalankan()[0]).toContain("inner join `subclasses`");
+  });
+
+  it("mengembalikan daftar kosong bila pengguna bukan PJ di kelas itu", async () => {
+    siapkan(hasilBaca());
+
+    await expect(subkelasModel.daftarIdPerPj("kelas", "anggota")).resolves.toEqual([]);
+  });
 });

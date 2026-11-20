@@ -6,7 +6,7 @@ Platform komunitas pengelola kelas. Kebutuhan ada di `docs/PRD-Klass.md`. Tim be
 
 ## Stack
 
-Next.js 16 App Router dengan Cache Components aktif, TypeScript, Tailwind CSS 4, design system Klass (CSS berlingkup `.ds`), shadcn/ui (terpasang tetapi belum dipakai halaman mana pun), MySQL 8.4, Drizzle ORM (`drizzle-orm/mysql2`), Better Auth (akun contoh untuk pengembangan lewat `/dev/login`; login Google belum tersambung), Zod 4, Vitest, npm.
+Next.js 16 App Router dengan Cache Components aktif, TypeScript, Tailwind CSS 4, design system Klass (CSS berlingkup `.ds`), shadcn/ui (terpasang tetapi belum dipakai halaman mana pun), MySQL 8.4, Drizzle ORM (`drizzle-orm/mysql2`), Better Auth (akun contoh untuk pengembangan lewat `/dev/login`; login Google aktif setelah kredensialnya diisi di `.env`), Zod 4, Vitest, npm.
 
 ## Perintah
 
@@ -29,6 +29,7 @@ npm run build
 4. Berkas di `src/server/**` diawali `import "server-only";`.
 5. Variabel lingkungan dibaca lewat `env` dari `@/env`, bukan `process.env`.
 6. Karena Cache Components aktif, bagian halaman yang mengambil data dibungkus `<Suspense>`; polanya ada di skill `klass-halaman`. Jangan memakai `export const dynamic`.
+7. Pemeriksaan peran hanya ditulis di `src/server/permissions`. Controller memanggil `requireAuth()` atau salah satu `require...` sebelum model; halaman memanggil controller lewat `untukHalaman()`. `route.ts` membaca body dengan `bacaJson(req)`, bukan `req.json()`.
 
 ## Tampilan
 
@@ -37,6 +38,7 @@ npm run build
 3. Nilai visual tidak ditulis langsung di CSS komponen atau TSX; tambahkan token. Tombol selalu memakai `TombolKertas`.
 4. Halaman dan layout memakai nama kelas CSS Klass, bukan utilitas Tailwind. Tailwind dan shadcn hanya dipakai di `src/components/ui` (lihat `docs/keputusan.md`).
 5. URL halaman dan API memakai bahasa Inggris huruf kecil (`/dashboard`, `/classes`, `/api/v1/classes`); teks di halaman dan `message` galat tetap bahasa Indonesia.
+6. Nama field JSON dan nilai pilihannya juga bahasa Inggris (`name`, `classId`, `"admin"`), mengikuti nama kolom database. Aturannya di `docs/api.md` bagian "Penamaan field".
 
 ## Pemilik dan reviewer
 
@@ -52,7 +54,7 @@ Zaki adalah lead backend dan Aqil lead frontend. Tabel pemilik per folder ada di
 
 ## Skill proyek
 
-`klass-setup` (struktur dan config), `klass-api` (URL dan controller), `klass-db` (tabel dan model), `klass-komponen`, `klass-halaman`, `klass-review-komponen`, `klass-pr` (Git dan PR), `klass-izin` (ditunda, belum dipakai).
+`klass-setup` (struktur dan config), `klass-api` (URL dan controller), `klass-db` (tabel dan model), `klass-komponen`, `klass-halaman`, `klass-review-komponen`, `klass-pr` (Git dan PR), `klass-izin` (siapa boleh apa; kodenya di `src/server/permissions`).
 
 ## Aturan Git
 
