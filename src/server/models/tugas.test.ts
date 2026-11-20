@@ -95,4 +95,58 @@ describe("tugasModel", () => {
     await expect(tugasModel.tandaiPengingatTerkirim("pengingat", dueAt)).resolves.toBe(false);
     expect(sqlDijalankan()[0]).toContain("`assignment_reminders`.`sent_at` is null");
   });
+
+  it("mengambil pengingat tugas termasuk yang sudah terkirim", async () => {
+    siapkan(
+      hasilBaca(
+        [
+          "pengingat-1",
+          "tugas",
+          "2026-11-23 12:00:00",
+          null,
+          waktu,
+        ],
+        [
+          "pengingat-2",
+          "tugas",
+          "2026-11-24 12:00:00",
+          "2026-11-24 13:00:00",
+          waktu,
+        ],
+      ),
+    );
+
+    const hasil = await tugasModel.daftarPengingat("tugas");
+
+    expect(hasil).toHaveLength(2);
+    expect(hasil.map((pengingat) => pengingat.id)).toEqual([
+      "pengingat-1",
+      "pengingat-2",
+    ]);
+
+    expect(hasil[0].sentAt).toBeNull();
+    expect(hasil[1].sentAt).not.toBeNull();
+  });
+
+  it("mengembalikan daftar kosong jika tugas tidak punya pengingat", async () => {
+    siapkan(hasilBaca());
+
+    const hasil = await tugasModel.daftarPengingat("tugas");
+
+    expect(hasil).toEqual([]);
+  });
+
+  it("hanya mencari pengingat berdasarkan ID tugas yang diberikan", async () => {
+    siapkan(hasilBaca());
+
+    await tugasModel.daftarPengingat("tugas-123");
+
+    expect(query.mock.calls[0][1]).toEqual(["tugas-123"]);
+
+    const sql = sqlDijalankan()[0];
+
+    expect(sql).toContain("`assignment_reminders`.`assignment_id` = ?");
+    expect(sql).toContain("order by");
+    expect(sql).not.toContain("`assignment_reminders`.`sent_at` is null");
+  });
 });
