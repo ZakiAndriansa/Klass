@@ -57,6 +57,16 @@ describe("tugasModel", () => {
     expect(sqlDijalankan().at(-1)).toBe("rollback");
   });
 
+  it("menolak pengingat yang tidak sebelum tenggat sebagai salah masukan (400)", async () => {
+    siapkan(hasilTulis, hasilTulis, hasilTulis);
+
+    await expect(tugasModel.buat(data, [dueAt])).rejects.toMatchObject({
+      status: 400,
+      message: "Waktu pengingat harus sebelum tenggat tugas.",
+    });
+    expect(sqlDijalankan().at(-1)).toBe("rollback");
+  });
+
   it("mengembalikan null untuk tugas di kelas lain", async () => {
     siapkan(hasilTulis, hasilBaca(), hasilTulis);
 

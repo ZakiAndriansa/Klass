@@ -24,6 +24,13 @@ function detikDalamHari(waktu: string) {
   return jam * 3600 + menit * 60 + detik;
 }
 
+// 1 = Senin sampai 7 = Minggu, sama dengan CHECK `schedules_weekday_check` di database.
+function pastikanHari(weekday: number) {
+  if (!Number.isInteger(weekday) || weekday < 1 || weekday > 7) {
+    throw new ValidationError("Hari jadwal harus antara 1 (Senin) dan 7 (Minggu).");
+  }
+}
+
 function pastikanUrutanJam(startTime: string, endTime: string) {
   if (detikDalamHari(endTime) <= detikDalamHari(startTime)) {
     throw new ValidationError("Jam selesai harus setelah jam mulai pada hari yang sama.");
@@ -65,6 +72,7 @@ export const jadwalModel = {
   },
 
   async buat({ subclassId, weekday, startTime, endTime }: JadwalBaru) {
+    pastikanHari(weekday);
     pastikanUrutanJam(startTime, endTime);
     return db.transaction(async (transaksi) => {
       const [hasil] = await transaksi
@@ -82,6 +90,7 @@ export const jadwalModel = {
     const perubahan = { weekday, startTime, endTime };
     if (Object.values(perubahan).every((nilai) => nilai === undefined))
       return bacaJadwal(db, subclassId, id);
+    if (weekday !== undefined) pastikanHari(weekday);
 
     return db.transaction(async (transaksi) => {
       const filter = idJadwal(subclassId, id);

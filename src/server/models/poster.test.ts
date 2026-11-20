@@ -67,7 +67,7 @@ describe("posterModel", () => {
         { id: "satu", sortOrder: 1 },
         { id: "satu", sortOrder: 2 },
       ]),
-    ).rejects.toThrow("muncul sekali");
+    ).rejects.toMatchObject({ status: 400 });
     expect(query).not.toHaveBeenCalled();
   });
 

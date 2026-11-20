@@ -3,7 +3,7 @@ import { asc, eq, inArray, type SQL } from "drizzle-orm";
 
 import { db } from "@/server/db";
 import { posters } from "@/server/db/schema/website";
-import { ConflictError } from "@/server/http/errors";
+import { ValidationError } from "@/server/http/errors";
 
 import { ambilHalaman, type Halaman } from "./query";
 
@@ -72,7 +72,7 @@ export const posterModel = {
     if (!urutan.length) return true;
     const ids = urutan.map(({ id }) => id);
     if (new Set(ids).size !== ids.length) {
-      throw new ConflictError("Satu poster hanya boleh muncul sekali dalam perubahan urutan.");
+      throw new ValidationError("Satu poster hanya boleh muncul sekali dalam perubahan urutan.");
     }
 
     return db.transaction(async (transaksi) => {
