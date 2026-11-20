@@ -140,6 +140,15 @@ export const tugasModel = {
     return hasil.affectedRows > 0;
   },
 
+  // Menampilkan semua pengingat yang terhubung dengan satu tugas
+  async daftarPengingat(assignmentId: string) {
+    return db
+      .select()
+      .from(assignmentReminders)
+      .where(eq(assignmentReminders.assignmentId, assignmentId))
+      .orderBy(asc(assignmentReminders.remindAt), asc(assignmentReminders.id));
+  },
+
   // Daftar ini tidak mengklaim pekerjaan. Worker harus mencegah pemrosesan paralel
   // terhadap pengingat yang sama sebelum memanggil layanan push.
   async daftarPengingatSiapKirim(batas: Date, halaman: Halaman) {

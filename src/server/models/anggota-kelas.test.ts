@@ -207,4 +207,75 @@ describe("anggotaKelasModel", () => {
       "commit",
     ]);
   });
+
+  it("menampilkan semua status undangan admin dalam satu kelas", async () => {
+    const undanganPending = ["undangan-1", "kelas", "a@example.com", "pending", null, waktu];
+    const undanganAccepted = ["undangan-2", "kelas", "b@example.com", "accepted", null, waktu];
+    const undanganRevoked = ["undangan-3", "kelas", "c@example.com", "revoked", null, waktu];
+
+    siapkan(hasilHitung(3), hasilBaca(undanganPending, undanganAccepted, undanganRevoked));
+
+    const hasil = await anggotaKelasModel.daftarUndanganPerKelas("kelas", { page: 1, limit: 10 });
+
+    expect(hasil.total).toBe(3);
+    expect(hasil.baris).toHaveLength(3);
+    expect(hasil.baris.map((undangan) => undangan.status)).toEqual([
+      "pending",
+      "accepted",
+      "revoked",
+    ]);
+
+    expect(query.mock.calls[1][1]).toEqual(["kelas", 10]);
+  });
+
+  it("mengembalikan daftar kosong jika kelas tidak punya undangan", async () => {
+    siapkan(hasilHitung(0));
+
+    const hasil = await anggotaKelasModel.daftarUndanganPerKelas("kelas", { page: 1, limit: 10 });
+
+    expect(hasil).toEqual({
+      baris: [],
+      total: 0,
+    });
+
+    // Tidak perlu menjalankan SELECT ketika jumlah undangan nol.
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+
+  it("menggunakan ID kelas yang benar saat mencari undangan", async () => {
+    siapkan(
+      hasilHitung(1),
+      hasilBaca(["undangan-1", "kelas-a", "a@example.com", "pending", null, waktu]),
+    );
+
+    await anggotaKelasModel.daftarUndanganPerKelas("kelas-a", { page: 1, limit: 5 });
+
+    // Query perhitungan dan pengambilan data harus memakai kelas yang sama.
+    expect(query.mock.calls[0][1]).toEqual(["kelas-a"]);
+    expect(query.mock.calls[1][1]).toEqual(["kelas-a", 5]);
+  });
+
+  it("menolak nomor halaman yang tidak valid", async () => {
+    await expect(
+      anggotaKelasModel.daftarUndanganPerKelas("kelas", { page: 0, limit: 10 }),
+    ).rejects.toThrow("Halaman harus berupa bilangan bulat positif.");
+  });
+
+  it("menolak limit lebih dari 100", async () => {
+    await expect(
+      anggotaKelasModel.daftarUndanganPerKelas("kelas", { page: 1, limit: 101 }),
+    ).rejects.toThrow("Jumlah baris per halaman harus antara 1 dan 100.");
+  });
+  it("mengambil undangan pada halaman kedua", async () => {
+    siapkan(
+      hasilHitung(6),
+      hasilBaca(["undangan-3", "kelas", "c@example.com", "revoked", null, waktu]),
+    );
+
+    const hasil = await anggotaKelasModel.daftarUndanganPerKelas("kelas", { page: 2, limit: 2 });
+
+    expect(hasil.total).toBe(6);
+    expect(hasil.baris).toHaveLength(1);
+    expect(query.mock.calls[1][1]).toEqual(["kelas", 2, 2]);
+  });
 });
