@@ -11,6 +11,10 @@
 
 `db` hanya boleh diimpor dari `src/server/models`.
 
+## Waktu
+
+Semua waktu disimpan dan dibaca sebagai UTC. `index.ts` memaksa setiap koneksi memakai zona waktu UTC (`SET time_zone = '+00:00'`), jadi hasilnya sama di Laragon (zona WIB) maupun Docker (zona UTC). Pengubahan ke WIB dilakukan saat menampilkan, bukan di database.
+
 ## Mengubah tabel
 
 1. Ubah atau tambah berkas di `schema/`.

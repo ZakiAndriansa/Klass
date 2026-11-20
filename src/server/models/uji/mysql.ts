@@ -8,7 +8,8 @@ export const query = vi.fn<(perintah: { sql: string }, params: unknown[]) => Pro
 
 export const release = vi.fn();
 export const getConnection = vi.fn(async () => ({ query, release }));
-export const driver = { default: { createPool: () => ({ query, getConnection }) } };
+// `on` dipakai `src/server/db/index.ts` untuk mengatur zona waktu tiap koneksi baru.
+export const driver = { default: { createPool: () => ({ query, getConnection, on: vi.fn() }) } };
 export const hasilTulis = [{ affectedRows: 1, insertId: 0 }, []];
 export const tanpaPerubahan = [{ affectedRows: 0, insertId: 0 }, []];
 export const waktu = "2026-11-19 03:00:00";
