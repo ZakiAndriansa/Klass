@@ -116,12 +116,7 @@ export const subkelasModel = {
 
       const [hasil] = await transaksi
         .delete(subclasses)
-        .where(
-          and(
-            eq(subclasses.classId, classId),
-            eq(subclasses.id, subclassId),
-          ),
-        );
+        .where(and(eq(subclasses.classId, classId), eq(subclasses.id, subclassId)));
 
       return hasil.affectedRows > 0;
     });

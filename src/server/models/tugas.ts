@@ -146,10 +146,7 @@ export const tugasModel = {
       .select()
       .from(assignmentReminders)
       .where(eq(assignmentReminders.assignmentId, assignmentId))
-      .orderBy(
-        asc(assignmentReminders.remindAt),
-        asc(assignmentReminders.id),
-      );
+      .orderBy(asc(assignmentReminders.remindAt), asc(assignmentReminders.id));
   },
 
   // Daftar ini tidak mengklaim pekerjaan. Worker harus mencegah pemrosesan paralel

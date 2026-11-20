@@ -197,20 +197,14 @@ export const anggotaKelasModel = {
   async daftarUndanganPerKelas(classId: string, halaman: Halaman) {
     const filter = eq(classAdminInvites.classId, classId);
 
-    return ambilHalaman(
-      halaman,
-      db.$count(classAdminInvites, filter),
-      (limit, offset) =>
-        db
-          .select()
-          .from(classAdminInvites)
-          .where(filter)
-          .orderBy(
-            asc(classAdminInvites.createdAt),
-            asc(classAdminInvites.id),
-          )
-          .limit(limit)
-          .offset(offset),
+    return ambilHalaman(halaman, db.$count(classAdminInvites, filter), (limit, offset) =>
+      db
+        .select()
+        .from(classAdminInvites)
+        .where(filter)
+        .orderBy(asc(classAdminInvites.createdAt), asc(classAdminInvites.id))
+        .limit(limit)
+        .offset(offset),
     );
   },
 

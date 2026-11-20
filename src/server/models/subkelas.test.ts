@@ -89,18 +89,18 @@ describe("subkelasModel", () => {
 
   it("berhasil menghapus subkelas dari kelas yang benar", async () => {
     siapkan(
-      hasilTulis,          // Mulai transaksi
-      hasilBaca(kelas),    // Kelas ditemukan
+      hasilTulis, // Mulai transaksi
+      hasilBaca(kelas), // Kelas ditemukan
       hasilBaca(subkelas), // Subkelas ditemukan
-      hasilTulis,          // DELETE berhasil
-      hasilTulis,          // Commit
+      hasilTulis, // DELETE berhasil
+      hasilTulis, // Commit
     );
 
     const hasil = await subkelasModel.hapus("kelas", "subkelas");
 
     expect(hasil).toBe(true);
-    const queryHapus = query.mock.calls.find(
-      ([perintah]) => perintah.sql.includes("delete from `subclasses`"),
+    const queryHapus = query.mock.calls.find(([perintah]) =>
+      perintah.sql.includes("delete from `subclasses`"),
     );
 
     expect(queryHapus).toBeDefined();
@@ -158,21 +158,15 @@ describe("subkelasModel", () => {
       hasilTulis,
     );
 
-    await expect(
-      subkelasModel.hapus("kelas", "subkelas"),
-    ).rejects.toThrow("Failed query: delete from");
+    await expect(subkelasModel.hapus("kelas", "subkelas")).rejects.toThrow(
+      "Failed query: delete from",
+    );
 
     expect(sqlDijalankan().at(-1)).toBe("rollback");
   });
 
   it("mengembalikan false jika DELETE tidak menghapus baris", async () => {
-    siapkan(
-      hasilTulis,
-      hasilBaca(kelas),
-      hasilBaca(subkelas),
-      tanpaPerubahan,
-      hasilTulis,
-    );
+    siapkan(hasilTulis, hasilBaca(kelas), hasilBaca(subkelas), tanpaPerubahan, hasilTulis);
 
     const hasil = await subkelasModel.hapus("kelas", "subkelas");
 

@@ -99,30 +99,15 @@ describe("tugasModel", () => {
   it("mengambil pengingat tugas termasuk yang sudah terkirim", async () => {
     siapkan(
       hasilBaca(
-        [
-          "pengingat-1",
-          "tugas",
-          "2026-11-23 12:00:00",
-          null,
-          waktu,
-        ],
-        [
-          "pengingat-2",
-          "tugas",
-          "2026-11-24 12:00:00",
-          "2026-11-24 13:00:00",
-          waktu,
-        ],
+        ["pengingat-1", "tugas", "2026-11-23 12:00:00", null, waktu],
+        ["pengingat-2", "tugas", "2026-11-24 12:00:00", "2026-11-24 13:00:00", waktu],
       ),
     );
 
     const hasil = await tugasModel.daftarPengingat("tugas");
 
     expect(hasil).toHaveLength(2);
-    expect(hasil.map((pengingat) => pengingat.id)).toEqual([
-      "pengingat-1",
-      "pengingat-2",
-    ]);
+    expect(hasil.map((pengingat) => pengingat.id)).toEqual(["pengingat-1", "pengingat-2"]);
 
     expect(hasil[0].sentAt).toBeNull();
     expect(hasil[1].sentAt).not.toBeNull();
