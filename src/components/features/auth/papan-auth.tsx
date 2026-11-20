@@ -7,6 +7,7 @@ import type { MouseEvent } from "react";
 import { IlustrasiBuku } from "@/components/features/auth/ilustrasi-buku";
 import { LambangKlass } from "@/components/shared/lambang-klass";
 import { TombolKertas } from "@/components/shared/tombol-kertas";
+import { masukDenganGoogle } from "@/lib/auth-client";
 
 type ModeAuth = "masuk" | "daftar";
 type Flip = { ke: ModeAuth } | null;
@@ -89,10 +90,23 @@ type KontenAuthProps = {
   interaktif: boolean;
   idJudul: string;
   onTautan?: (event: MouseEvent<HTMLAnchorElement>, ke: ModeAuth) => void;
+  /** Aksi tombol Google. Masuk dan daftar memakai aksi yang sama. */
+  onGoogle?: () => void;
+  sedangGoogle?: boolean;
+  /** Pesan bila login Google gagal atau belum aktif. */
+  pesanGoogle?: string | null;
 };
 
 /** Merek, sapaan, tombol Google, dan tautan ganti halaman. */
-function KontenAuth({ mode, interaktif, idJudul, onTautan }: KontenAuthProps) {
+function KontenAuth({
+  mode,
+  interaktif,
+  idJudul,
+  onTautan,
+  onGoogle,
+  sedangGoogle = false,
+  pesanGoogle = null,
+}: KontenAuthProps) {
   const { eyebrow, judul } = teks[mode];
   const modeLain: ModeAuth = mode === "masuk" ? "daftar" : "masuk";
   const labelLain = modeLain === "masuk" ? "Masuk" : "Daftar";
@@ -117,12 +131,25 @@ function KontenAuth({ mode, interaktif, idJudul, onTautan }: KontenAuthProps) {
           {judul}
         </h1>
 
-        <TombolKertas type="button" variant="primary" size="lg" className="auth__google">
+        <TombolKertas
+          type="button"
+          variant="primary"
+          size="lg"
+          className="auth__google"
+          sedangMemproses={interaktif && sedangGoogle}
+          onClick={interaktif ? onGoogle : undefined}
+        >
           <span className="auth__google-chip" aria-hidden="true">
             <IkonGoogle />
           </span>
           <span lang="en">Continue with Google</span>
         </TombolKertas>
+
+        {interaktif && pesanGoogle ? (
+          <p className="auth__switch" role="alert">
+            {pesanGoogle}
+          </p>
+        ) : null}
 
         <p className="auth__switch">
           {mode === "masuk" ? "Belum punya akun?" : "Sudah punya akun?"}{" "}
@@ -185,14 +212,29 @@ type PapanAuthProps = {
  * formulir daftar. Saat dibalik, seluruh bentangan ikut bercermin: formulir
  * pindah ke halaman kiri dan ilustrasi menempati halaman kanan.
  *
- * Tombol Google belum diberi penanganan karena Better Auth dan kredensial
- * Google belum dikonfigurasi (lihat src/server/auth/README.md, kebutuhan F1).
+ * Tombol Google memanggil `masukDenganGoogle()` (`src/lib/auth-client.ts`). Akun
+ * baru dibuat otomatis saat pertama kali masuk, jadi masuk dan daftar memakai aksi
+ * yang sama. Bila kredensial Google belum diisi di server, pesannya tampil di bawah tombol.
  */
 export function PapanAuth({ mode: modeAwal }: PapanAuthProps) {
   const [mode, setMode] = useState(modeAwal);
   const [flip, setFlip] = useState<Flip>(null);
   const [redup, setRedup] = useState(false);
+  const [sedangGoogle, setSedangGoogle] = useState(false);
+  const [pesanGoogle, setPesanGoogle] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
+
+  async function masukGoogle() {
+    setSedangGoogle(true);
+    setPesanGoogle(null);
+
+    // Bila berhasil, peramban pindah ke halaman Google dan baris di bawah tidak berjalan.
+    const pesan = await masukDenganGoogle();
+    if (pesan) {
+      setPesanGoogle(pesan);
+      setSedangGoogle(false);
+    }
+  }
 
   function bersihkanTimer() {
     timers.current.forEach((timer) => window.clearTimeout(timer));
@@ -348,6 +390,9 @@ export function PapanAuth({ mode: modeAwal }: PapanAuthProps) {
                         interaktif={aktifDepan}
                         idJudul={idJudulDesktop("masuk")}
                         onTautan={gantiLewatTautan}
+                        onGoogle={masukGoogle}
+                        sedangGoogle={sedangGoogle}
+                        pesanGoogle={pesanGoogle}
                       />
                     </div>
                     <span className="auth__leaf-shade auth__leaf-shade--kiri" aria-hidden="true" />
@@ -373,6 +418,9 @@ export function PapanAuth({ mode: modeAwal }: PapanAuthProps) {
                         interaktif={aktifBelakang}
                         idJudul={idJudulDesktop("daftar")}
                         onTautan={gantiLewatTautan}
+                        onGoogle={masukGoogle}
+                        sedangGoogle={sedangGoogle}
+                        pesanGoogle={pesanGoogle}
                       />
                     </div>
                     <span className="auth__leaf-shade auth__leaf-shade--kanan" aria-hidden="true" />
@@ -446,6 +494,9 @@ export function PapanAuth({ mode: modeAwal }: PapanAuthProps) {
                         interaktif={!sedangBerbalik}
                         idJudul={idJudulMobile(mode)}
                         onTautan={gantiLewatTautan}
+                        onGoogle={masukGoogle}
+                        sedangGoogle={sedangGoogle}
+                        pesanGoogle={pesanGoogle}
                       />
                     </div>
                     <span className="auth__leaf-shade auth__leaf-shade--kiri" aria-hidden="true" />

@@ -205,9 +205,10 @@ describe("kelasModel", () => {
       .mockResolvedValueOnce([[barisDariMySQL(idKelas)], []])
       .mockResolvedValueOnce(hasilTulis);
 
-    await expect(kelasModel.ubahPengaturan(idKelas, { isListed: false })).rejects.toThrow(
-      "kode undangan",
-    );
+    await expect(kelasModel.ubahPengaturan(idKelas, { isListed: false })).rejects.toMatchObject({
+      status: 400,
+      message: "Kelas yang tidak terdaftar harus memiliki kode undangan.",
+    });
     expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ sql: "rollback" }), []);
   });
 

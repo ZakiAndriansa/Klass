@@ -10,10 +10,8 @@ import { api } from "@/lib/api-client";
  * Tombol keluar: mengakhiri sesi di server, lalu pindah ke halaman tujuan.
  *
  * Berbeda dari tautan biasa ke `/login`, tombol ini benar-benar menghapus sesi
- * lewat `DELETE /api/v1/dev/session`, jadi pengguna tidak lagi tercatat login.
- *
- * TODO(auth): endpoint di atas hanya ada saat pengembangan. Setelah login
- * Google tersambung, ganti dengan endpoint keluar yang berlaku di produksi.
+ * lewat `DELETE /api/v1/session`, jadi pengguna tidak lagi tercatat login.
+ * Berlaku untuk akun contoh maupun login Google, saat pengembangan maupun produksi.
  */
 type TombolKeluarProps = {
   label?: string;
@@ -29,7 +27,7 @@ export function TombolKeluar({ label = "Keluar", tujuan = "/login" }: TombolKelu
     setSedangKeluar(true);
 
     try {
-      await api<null>("/dev/session", { method: "DELETE" });
+      await api<null>("/session", { method: "DELETE" });
     } catch {
       // Sesi mungkin memang sudah tidak ada. Pengguna tetap dibawa ke halaman tujuan.
     }

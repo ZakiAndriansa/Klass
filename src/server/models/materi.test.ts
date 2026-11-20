@@ -60,9 +60,10 @@ describe("materiModel", () => {
   it("membatalkan perubahan jika tautan satu-satunya dihapus", async () => {
     siapkan(hasilTulis, hasilBaca(barisMateri), hasilTulis);
 
-    await expect(materiModel.ubah("subkelas", "materi", { linkUrl: null })).rejects.toThrow(
-      "file atau tautan",
-    );
+    await expect(materiModel.ubah("subkelas", "materi", { linkUrl: null })).rejects.toMatchObject({
+      status: 400,
+      message: "Materi harus memiliki file atau tautan.",
+    });
     expect(sqlDijalankan().at(-1)).toBe("rollback");
   });
 });

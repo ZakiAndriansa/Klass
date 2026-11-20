@@ -104,8 +104,38 @@ export const subkelasModel = {
     });
   },
 
+  async hapus(classId: string, subclassId: string) {
+    return db.transaction(async (transaksi) => {
+      if (!(await kunciKelas(transaksi, classId))) {
+        return false;
+      }
+
+      if (!(await bacaSubkelas(transaksi, subclassId, classId))) {
+        return false;
+      }
+
+      const [hasil] = await transaksi
+        .delete(subclasses)
+        .where(and(eq(subclasses.classId, classId), eq(subclasses.id, subclassId)));
+
+      return hasil.affectedRows > 0;
+    });
+  },
+
   cariPj(subclassId: string, userId: string) {
     return bacaPj(db, subclassId, userId);
+  },
+
+  // ID subkelas di satu kelas yang PJ-nya pengguna ini. Dipakai lapisan izin
+  // untuk memberi tahu frontend subkelas mana yang boleh dikelola pengguna.
+  async daftarIdPerPj(classId: string, userId: string) {
+    const baris = await db
+      .select({ id: subclasses.id })
+      .from(subclassPj)
+      .innerJoin(subclasses, eq(subclassPj.subclassId, subclasses.id))
+      .where(and(eq(subclasses.classId, classId), eq(subclassPj.userId, userId)))
+      .orderBy(asc(subclasses.name), asc(subclasses.id));
+    return baris.map(({ id }) => id);
   },
 
   async daftarPj(subclassId: string, halaman: Halaman) {

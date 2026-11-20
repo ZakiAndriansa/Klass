@@ -8,7 +8,7 @@ import type { HealthDto } from "@/types/api/health";
  *
  * Urutan kerja controller pada fitur sungguhan:
  * 1. Validasi masukan dengan Zod.
- * 2. Periksa izin (lapisan izin, dikerjakan nanti).
+ * 2. Periksa izin lewat `@/server/permissions` (endpoint ini terbuka, jadi tidak ada).
  * 3. Panggil fungsi model. Controller tidak pernah menulis query sendiri.
  * 4. Kembalikan DTO, yaitu data yang bentuknya sudah disepakati dengan frontend.
  *
@@ -16,13 +16,13 @@ import type { HealthDto } from "@/types/api/health";
  * dari URL (`route.ts`) maupun langsung dari halaman (Server Component).
  */
 export async function cekKesehatan(): Promise<HealthDto> {
-  let database: HealthDto["database"] = "terhubung";
+  let database: HealthDto["database"] = "connected";
 
   try {
     await healthModel.ping();
   } catch {
-    database = "terputus";
+    database = "disconnected";
   }
 
-  return { aplikasi: "berjalan", database };
+  return { app: "running", database };
 }

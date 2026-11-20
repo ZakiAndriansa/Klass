@@ -10,9 +10,10 @@ import * as skemaAuth from "@/server/db/schema/auth";
 /**
  * Konfigurasi login (Better Auth). Pemilik: Zaki.
  *
- * STATUS: login Google belum tersambung karena kredensial Google Cloud belum dibuat dan
- * URL `/api/auth` belum ada. Untuk sementara, saat pengembangan, masuknya lewat akun
- * contoh di `/dev/login` (lihat `akun-dev.ts`).
+ * STATUS: alur login Google sudah tersambung (`/api/auth/*` dan tombol di `/login`),
+ * tetapi baru aktif setelah `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` diisi di `.env`
+ * (caranya ada di `README.md` folder ini). Sebelum itu, saat pengembangan, masuknya
+ * lewat akun contoh di `/dev/login` (lihat `akun-dev.ts`).
  *
  * Konfigurasi ini dan `src/server/db/schema/auth.ts` adalah satu pasang. Mengubah
  * `additionalFields`, `usePlural`, atau menambah plugin berarti skema harus dibuat ulang
@@ -78,6 +79,14 @@ let tersimpan: Auth | undefined;
 export function ambilAuth(): Auth {
   tersimpan ??= buatAuth();
   return tersimpan;
+}
+
+/**
+ * Menjalankan permintaan ke `/api/auth/*` (login Google dan callback-nya).
+ * Hanya dipakai `src/app/api/auth/[...all]/route.ts`.
+ */
+export function penanganAuth(req: Request): Promise<Response> {
+  return ambilAuth().handler(req);
 }
 
 /** Bentuk sesi dan pengguna yang dikembalikan Better Auth, termasuk `isSuperadmin`. */

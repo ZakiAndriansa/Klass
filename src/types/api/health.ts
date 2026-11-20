@@ -3,6 +3,6 @@
  * Backend dan frontend sama-sama mengimpor tipe dari sini, jadi keduanya selalu sepakat.
  */
 export type HealthDto = {
-  aplikasi: "berjalan";
-  database: "terhubung" | "terputus";
+  app: "running";
+  database: "connected" | "disconnected";
 };
