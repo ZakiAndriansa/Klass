@@ -14,7 +14,7 @@ const kolomProfil = {
 };
 
 /** Satu baris profil pengguna, seperti yang dikembalikan model ini. */
-export type Profil = {
+export type Profile = {
   id: string;
   name: string;
   email: string;
@@ -27,22 +27,22 @@ type DataUbahProfil = {
   image?: string | null;
 };
 
-export const profilModel = {
+export const profileModel = {
   // Mencari profil pengguna berdasarkan ID
-  async cariPerId(id: string): Promise<Profil | null> {
+  async cariPerId(id: string): Promise<Profile | null> {
     const [profil] = await db.select(kolomProfil).from(users).where(eq(users.id, id)).limit(1);
 
     return profil ?? null;
   },
 
   // Mengubah nama atau foto profil
-  async ubah(id: string, data: DataUbahProfil): Promise<Profil | null> {
+  async ubah(id: string, data: DataUbahProfil): Promise<Profile | null> {
     if (data.name !== undefined || data.image !== undefined) {
       // Kolomnya ditulis satu per satu, bukan `.set(data)`. Dengan begitu kunci lain
       // yang ikut terkirim (misalnya `isSuperadmin` atau `email`) tidak pernah tersimpan.
       await db.update(users).set({ name: data.name, image: data.image }).where(eq(users.id, id));
     }
 
-    return profilModel.cariPerId(id);
+    return profileModel.cariPerId(id);
   },
 };

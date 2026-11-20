@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { profilModel } from "./profil";
+import { profileModel } from "./profile";
 
 // Membuat database tiruan agar tidak mengubah MySQL asli
 const mock = vi.hoisted(() => ({
@@ -28,7 +28,7 @@ const pengguna = {
   isSuperadmin: false,
 };
 
-describe("profilModel", () => {
+describe("profileModel", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -44,7 +44,7 @@ describe("profilModel", () => {
   it("mengambil profil berdasarkan ID", async () => {
     mock.limit.mockResolvedValue([pengguna]);
 
-    const hasil = await profilModel.cariPerId("user-1");
+    const hasil = await profileModel.cariPerId("user-1");
 
     expect(hasil).toEqual(pengguna);
   });
@@ -52,7 +52,7 @@ describe("profilModel", () => {
   it("hanya membaca kolom profil, termasuk penanda superadmin", async () => {
     mock.limit.mockResolvedValue([pengguna]);
 
-    await profilModel.cariPerId("user-1");
+    await profileModel.cariPerId("user-1");
 
     const kolom = Object.keys(mock.select.mock.calls[0][0]);
     expect(kolom).toEqual(["id", "name", "email", "image", "isSuperadmin"]);
@@ -61,7 +61,7 @@ describe("profilModel", () => {
   it("mengembalikan null jika pengguna tidak ada", async () => {
     mock.limit.mockResolvedValue([]);
 
-    const hasil = await profilModel.cariPerId("tidak-ada");
+    const hasil = await profileModel.cariPerId("tidak-ada");
 
     expect(hasil).toBeNull();
   });
@@ -69,7 +69,7 @@ describe("profilModel", () => {
   it("mengubah nama pengguna", async () => {
     mock.limit.mockResolvedValue([{ ...pengguna, name: "Fadlan Baru" }]);
 
-    const hasil = await profilModel.ubah("user-1", {
+    const hasil = await profileModel.ubah("user-1", {
       name: "Fadlan Baru",
     });
 
@@ -83,7 +83,7 @@ describe("profilModel", () => {
   it("menghapus foto bila image diisi null", async () => {
     mock.limit.mockResolvedValue([pengguna]);
 
-    await profilModel.ubah("user-1", { image: null });
+    await profileModel.ubah("user-1", { image: null });
 
     expect(mock.set).toHaveBeenCalledWith({ image: null });
   });
@@ -93,7 +93,7 @@ describe("profilModel", () => {
 
     // Meniru controller yang keliru meneruskan objek berisi kunci tambahan.
     const masukan = { name: "Fadlan", isSuperadmin: true, email: "lain@example.com" };
-    await profilModel.ubah("user-1", masukan);
+    await profileModel.ubah("user-1", masukan);
 
     expect(mock.set).toHaveBeenCalledWith({ name: "Fadlan" });
   });
@@ -101,7 +101,7 @@ describe("profilModel", () => {
   it("tidak menjalankan UPDATE bila tidak ada yang diubah", async () => {
     mock.limit.mockResolvedValue([pengguna]);
 
-    const hasil = await profilModel.ubah("user-1", {});
+    const hasil = await profileModel.ubah("user-1", {});
 
     expect(mock.update).not.toHaveBeenCalled();
     expect(hasil).toEqual(pengguna);
