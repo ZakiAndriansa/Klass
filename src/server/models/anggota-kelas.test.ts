@@ -119,7 +119,11 @@ describe("anggotaKelasModel", () => {
     siapkan(hasilTulis, hasilBaca(kelas), hasilBaca(undanganPending), hasilTulis);
 
     await expect(
-      anggotaKelasModel.buatUndanganAdmin({ classId: "kelas", email, invitedBy: "pengundang-baru" }),
+      anggotaKelasModel.buatUndanganAdmin({
+        classId: "kelas",
+        email,
+        invitedBy: "pengundang-baru",
+      }),
     ).rejects.toThrow(ConflictError);
     expect(sqlDijalankan().at(-1)).toBe("rollback");
   });
