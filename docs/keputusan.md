@@ -97,12 +97,45 @@ sesi dipaksa UTC, hasilnya sama di semua laptop dan di server.
 Akibat untuk data lokal yang sudah ada di Laragon: waktu yang dulu ditulis aplikasi (misalnya masa
 berlaku sesi) terbaca tujuh jam lebih awal. Untuk data contoh ini tidak perlu diperbaiki.
 
+## 20 November 2026: nama field API memakai bahasa Inggris
+
+Sebelumnya tidak seragam: akun contoh memakai `nama` dan `idPengguna`, endpoint subkelas memakai
+`name` dan `classId`. Diputuskan Zaki: yang dibaca program berbahasa Inggris (URL, nama field JSON,
+nilai pilihan, `code`), yang dibaca orang berbahasa Indonesia (`message`, teks tampilan). Nama field
+mengikuti nama kolom database dalam `camelCase`, supaya tidak ada dua nama untuk hal yang sama.
+Nama berkas di `src/app/api`, `src/server/controllers`, dan `src/types/api` mengikuti nama sumber
+daya di URL. Nama fungsi dan variabel di kode tidak berubah. Rinciannya di `docs/api.md`.
+
+Yang ikut diubah: `HealthDto` dan `AkunDevDto`, serta body `POST /api/v1/dev/session`
+(`idAkun` menjadi `accountId`).
+
+## 20 November 2026: lapisan izin dan penjagaan halaman
+
+| Keputusan                                                                           | Alasan                                                                                                                                            |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pemeriksaan peran hanya ditulis di `src/server/permissions`, dipanggil controller   | Satu tempat untuk diuji per peran; controller tidak menulis `if (role === ...)`                                                                   |
+| Peran tidak diperiksa di proxy (dulu middleware)                                    | Peran berlaku per kelas dan harus dibaca dari database; proxy hanya mengalihkan pengunjung tanpa cookie sesi                                      |
+| Penjagaan halaman ditaruh di halaman, bukan di `layout.tsx`                         | Dicoba di layout: Next.js merender layout dan halaman terpisah, sehingga isi halaman tetap terkirim ke yang tidak berhak                          |
+| Orang luar di kelas privat mendapat 404, di kelas terdaftar 403                     | Keberadaan kelas privat tidak boleh bisa ditebak                                                                                                  |
+| Kelas yang diarsipkan hanya bisa dibaca; mengubahnya dijawab 409                    | PRD menyebut datanya disimpan, tetapi tidak menyebut boleh diubah. Bila tim memutuskan lain, ubah `pastikanBolehDiubah` di `permissions/kelas.ts` |
+| `forbidden()` milik Next.js tidak dipakai; 403 di halaman dialihkan ke `/forbidden` | `forbidden()` masih eksperimental di Next.js 16.4                                                                                                 |
+| Sesi dibaca frontend lewat `/api/v1/session`, bukan `/api/v1/dev/session`           | Alamat `dev` menjawab 404 di produksi, sehingga tombol Keluar tidak berfungsi di sana                                                             |
+
+## 20 November 2026: 400 untuk kiriman yang salah
+
+Body yang bukan JSON dulu dijawab 500. Sekarang `route.ts` membaca body dengan `bacaJson(req)` dan
+jawabannya 400. Empat pesan di model yang sebenarnya salah masukan dipindah dari 409 ke 400 (materi
+tanpa file dan tautan, kelas privat tanpa kode undangan, pengingat tidak sebelum tenggat, poster
+berulang dalam satu perubahan urutan), dan hari jadwal di luar 1 sampai 7 sekarang dijawab 400,
+bukan 500. Patokannya: 400 bila kiriman yang sama tidak akan pernah berhasil, 409 bila kirimannya
+benar tetapi keadaan datanya tidak memungkinkan.
+
 ## Ditunda
 
-| Hal                                                | Menunggu                          |
-| -------------------------------------------------- | --------------------------------- |
-| Lapisan izin (`src/server/permissions`)            | Kerangka dan tabel dasar selesai  |
-| Login Google (URL `/api/auth`, tombol di `/login`) | Kredensial Google Cloud           |
-| PWA dan notifikasi                                 | Fitur tugas (F10)                 |
-| Worker pengingat, Dockerfile produksi, HTTPS       | Mendekati rilis                   |
-| `.github/CODEOWNERS`                               | Nama pengguna GitHub tiap anggota |
+| Hal                                           | Menunggu                          |
+| --------------------------------------------- | --------------------------------- |
+| Login Google aktif (kodenya sudah tersambung) | Kredensial Google Cloud           |
+| Data contoh keanggotaan untuk akun contoh     | Disusun Fadlan dan Zaki           |
+| PWA dan notifikasi                            | Fitur tugas (F10)                 |
+| Worker pengingat, Dockerfile produksi, HTTPS  | Mendekati rilis                   |
+| `.github/CODEOWNERS`                          | Nama pengguna GitHub tiap anggota |

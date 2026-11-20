@@ -4,7 +4,7 @@ import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema/auth";
 import { classMembers, classes } from "@/server/db/schema/kelas";
-import { ConflictError } from "@/server/http/errors";
+import { ConflictError, ValidationError } from "@/server/http/errors";
 
 import { kunciKelas } from "./keanggotaan";
 import { ambilHalaman, entriDuplikat, type Halaman, type Transaksi } from "./query";
@@ -29,7 +29,7 @@ async function bacaKelasPerId(
 
 function pastikanKodeKelasPrivat(isListed: boolean, inviteCode: KelasBaru["inviteCode"]) {
   if (!isListed && !inviteCode) {
-    throw new ConflictError("Kelas yang tidak terdaftar harus memiliki kode undangan.");
+    throw new ValidationError("Kelas yang tidak terdaftar harus memiliki kode undangan.");
   }
 }
 

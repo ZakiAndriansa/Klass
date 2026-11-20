@@ -4,7 +4,7 @@ import { and, asc, eq, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
 import { db } from "@/server/db";
 import { classes } from "@/server/db/schema/kelas";
 import { assignmentReminders, assignments, subclasses } from "@/server/db/schema/subkelas";
-import { ConflictError } from "@/server/http/errors";
+import { ConflictError, ValidationError } from "@/server/http/errors";
 
 import { ambilHalaman, type Halaman, type Transaksi } from "./query";
 
@@ -57,7 +57,7 @@ async function simpanPengingat(
 ) {
   if (!waktuPengingat.length) return;
   if (waktuPengingat.some((remindAt) => detik(remindAt) >= detik(dueAt))) {
-    throw new ConflictError("Waktu pengingat harus sebelum tenggat tugas.");
+    throw new ValidationError("Waktu pengingat harus sebelum tenggat tugas.");
   }
 
   // Kunci unik pasangan tugas dan waktu juga menjaga pengingat yang sudah terkirim.

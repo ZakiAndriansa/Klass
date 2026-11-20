@@ -3,7 +3,7 @@ import { and, asc, desc, eq, inArray, type SQL } from "drizzle-orm";
 
 import { db } from "@/server/db";
 import { materials, subclasses } from "@/server/db/schema/subkelas";
-import { ConflictError } from "@/server/http/errors";
+import { ValidationError } from "@/server/http/errors";
 
 import { ambilHalaman, type Halaman } from "./query";
 
@@ -26,7 +26,7 @@ function pastikanAdaSumber(
   fileUrl: Materi["fileUrl"] | undefined,
   linkUrl: Materi["linkUrl"] | undefined,
 ) {
-  if (!fileUrl && !linkUrl) throw new ConflictError("Materi harus memiliki file atau tautan.");
+  if (!fileUrl && !linkUrl) throw new ValidationError("Materi harus memiliki file atau tautan.");
 }
 
 async function daftarMateri(filter: SQL, halaman: Halaman) {

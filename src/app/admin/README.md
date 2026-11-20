@@ -29,8 +29,10 @@ teks nonaktif, bukan tautan mati.
 Superadmin mengurus website, bukan isi kelas. Karena itu dasbor ini **tidak** memuat folder
 subkelas, agenda, atau jadwal — semuanya milik admin kelas di `/classes/[classId]`.
 
-Pemeriksaan "apakah pengguna ini superadmin" dilakukan di server lewat lapisan izin milik backend,
-bukan dengan menyembunyikan menu. Belum aktif karena middleware dan Better Auth belum dikonfigurasi;
-UI sengaja terbuka. Lihat skill `klass-izin`.
+Pemeriksaan "apakah pengguna ini superadmin" dilakukan di server, bukan dengan menyembunyikan menu.
+Setiap halaman di folder ini memanggil `wajibSuperadmin()` dari `@/server/permissions` sebelum
+membuat isinya (contoh: `page.tsx`). Yang belum login dipindahkan ke `/login`; yang bukan
+superadmin mendapat halaman 404. Controller yang dipanggil halaman memakai `requireSuperadmin()`.
+Lihat `src/server/permissions/README.md`.
 
 Skill: `klass-halaman`.

@@ -85,16 +85,27 @@ describe("jadwalModel", () => {
   });
 
   it("melakukan rollback bila penulisan jadwal gagal", async () => {
-    siapkan(hasilTulis, new Error("weekday tidak valid"), hasilTulis);
+    siapkan(hasilTulis, new Error("subkelas tidak ada"), hasilTulis);
 
     await expect(
       jadwalModel.buat({
         subclassId: "subkelas",
-        weekday: 9,
+        weekday: 2,
         startTime: "08:00",
         endTime: "09:00",
       }),
-    ).rejects.toHaveProperty("cause.message", "weekday tidak valid");
+    ).rejects.toHaveProperty("cause.message", "subkelas tidak ada");
     expect(sqlDijalankan().at(-1)).toBe("rollback");
+  });
+
+  it.each([0, 8, 9, 2.5])("menolak hari %s sebagai salah masukan (400)", async (weekday) => {
+    await expect(
+      jadwalModel.buat({ subclassId: "subkelas", weekday, startTime: "08:00", endTime: "09:00" }),
+    ).rejects.toBeInstanceOf(ValidationError);
+    await expect(jadwalModel.ubah("subkelas", "jadwal", { weekday })).rejects.toBeInstanceOf(
+      ValidationError,
+    );
+    // Ditolak sebelum database disentuh.
+    expect(query).not.toHaveBeenCalled();
   });
 });

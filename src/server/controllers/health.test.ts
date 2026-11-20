@@ -21,8 +21,8 @@ describe("cekKesehatan", () => {
     vi.mocked(healthModel.ping).mockResolvedValue();
 
     await expect(cekKesehatan()).resolves.toEqual({
-      aplikasi: "berjalan",
-      database: "terhubung",
+      app: "running",
+      database: "connected",
     });
   });
 
@@ -30,8 +30,8 @@ describe("cekKesehatan", () => {
     vi.mocked(healthModel.ping).mockRejectedValue(new Error("ECONNREFUSED"));
 
     await expect(cekKesehatan()).resolves.toEqual({
-      aplikasi: "berjalan",
-      database: "terputus",
+      app: "running",
+      database: "disconnected",
     });
   });
 });

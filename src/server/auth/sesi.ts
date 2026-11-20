@@ -1,5 +1,6 @@
 import "server-only";
 import { headers } from "next/headers";
+import { cache } from "react";
 
 import { UnauthorizedError } from "@/server/http/errors";
 
@@ -13,10 +14,19 @@ import { ambilAuth, type Sesi } from "./konfigurasi";
  * karena keduanya menghasilkan sesi Better Auth yang sama.
  */
 
-/** Sesi pengguna yang sedang login, atau `null` bila belum login. */
-export async function ambilSesi(): Promise<Sesi | null> {
-  return ambilAuth().api.getSession({ headers: await headers() });
-}
+/**
+ * Sesi pengguna yang sedang login, atau `null` bila belum login.
+ *
+ * Dibungkus `cache()` supaya dalam satu kali render halaman, layout, halaman, dan
+ * controller yang sama-sama bertanya "siapa yang login" hanya membaca database sekali.
+ */
+export const ambilSesi = cache(async (): Promise<Sesi | null> => {
+  // `headers()` dibaca lebih dulu. Saat `npm run build`, baris ini menghentikan
+  // prerender sebelum Better Auth sempat dinyalakan (lihat `ambilAuth`).
+  const kepala = await headers();
+
+  return ambilAuth().api.getSession({ headers: kepala });
+});
 
 /**
  * Pengguna yang sedang login. Melempar `UnauthorizedError` (401) bila belum login.

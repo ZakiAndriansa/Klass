@@ -65,9 +65,14 @@ Folder berkurung siku seperti `[classId]` berarti bagian alamat itu berubah-ubah
 
 ## Izin
 
-Pemeriksaan login dan peran **belum ada** — middleware dan Better Auth belum dikonfigurasi.
-Papan progress menyembunyikan tombol PJ untuk anggota biasa, tetapi itu hanya tampilan. Saat
-lapisan izin siap, pemeriksaan sesi ditaruh di `layout.tsx` atau di halaman server, dan aturan peran
-diulang di endpoint. Lihat skill `klass-izin`.
+Pengunjung yang belum login dipindahkan ke `/login` oleh `src/proxy.ts`. Itu hanya pengalihan
+cepat. Pengaman sesungguhnya ada di controller: halaman yang mengambil data memanggil controller
+lewat `untukHalaman()` dari `@/server/permissions`, dan bila ditolak pengguna dipindahkan ke
+`/login`, halaman 404, atau `/forbidden`. Halaman di grup ini masih memakai data contoh, jadi
+belum memanggil controller.
+
+Untuk tahu tombol mana yang ditampilkan, pakai `GET /api/v1/classes/{classId}/access`
+(`docs/api.md` bagian "Peran di sebuah kelas"). Menyembunyikan tombol hanya tampilan; server tetap
+memeriksa izin di setiap endpoint. Lihat `src/server/permissions/README.md`.
 
 Peta lengkap rute ada di skill `klass-halaman`.
