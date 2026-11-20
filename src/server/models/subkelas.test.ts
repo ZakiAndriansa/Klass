@@ -12,6 +12,7 @@ import {
   resetMysqlTiruan,
   siapkan,
   sqlDijalankan,
+  tanpaPerubahan,
   waktu,
 } from "./uji/mysql";
 
@@ -84,5 +85,98 @@ describe("subkelasModel", () => {
       subkelasModel.buat({ classId: "kelas", name: "Basis Data" }, ["pengguna-luar"]),
     ).rejects.toThrow("anggota kelas yang sama");
     expect(sqlDijalankan().at(-1)).toBe("rollback");
+  });
+
+  it("berhasil menghapus subkelas dari kelas yang benar", async () => {
+    siapkan(
+      hasilTulis,          // Mulai transaksi
+      hasilBaca(kelas),    // Kelas ditemukan
+      hasilBaca(subkelas), // Subkelas ditemukan
+      hasilTulis,          // DELETE berhasil
+      hasilTulis,          // Commit
+    );
+
+    const hasil = await subkelasModel.hapus("kelas", "subkelas");
+
+    expect(hasil).toBe(true);
+    const queryHapus = query.mock.calls.find(
+      ([perintah]) => perintah.sql.includes("delete from `subclasses`"),
+    );
+
+    expect(queryHapus).toBeDefined();
+    expect(queryHapus?.[1]).toEqual(["kelas", "subkelas"]);
+    expect(sqlDijalankan().at(-1)).toBe("commit");
+  });
+
+  it("tidak menghapus jika kelas tidak ditemukan", async () => {
+    siapkan(
+      hasilTulis,
+      hasilBaca(), // Kelas tidak ditemukan
+      hasilTulis,
+    );
+
+    const hasil = await subkelasModel.hapus("kelas-salah", "subkelas");
+
+    expect(hasil).toBe(false);
+    expect(sqlDijalankan().some((sql) => sql.startsWith("delete"))).toBe(false);
+  });
+
+  it("tidak menghapus jika subkelas tidak ditemukan", async () => {
+    siapkan(
+      hasilTulis,
+      hasilBaca(kelas),
+      hasilBaca(), // Subkelas tidak ditemukan
+      hasilTulis,
+    );
+
+    const hasil = await subkelasModel.hapus("kelas", "subkelas-salah");
+
+    expect(hasil).toBe(false);
+    expect(sqlDijalankan().some((sql) => sql.startsWith("delete"))).toBe(false);
+  });
+
+  it("tidak menghapus subkelas milik kelas lain", async () => {
+    siapkan(
+      hasilTulis,
+      hasilBaca(kelas),
+      hasilBaca(), // Tidak ada subkelas yang cocok dengan kedua ID
+      hasilTulis,
+    );
+
+    const hasil = await subkelasModel.hapus("kelas", "subkelas-kelas-lain");
+
+    expect(hasil).toBe(false);
+    expect(sqlDijalankan().some((sql) => sql.startsWith("delete"))).toBe(false);
+  });
+
+  it("membatalkan transaksi jika DELETE mengalami error", async () => {
+    siapkan(
+      hasilTulis,
+      hasilBaca(kelas),
+      hasilBaca(subkelas),
+      new Error("Database error"),
+      hasilTulis,
+    );
+
+    await expect(
+      subkelasModel.hapus("kelas", "subkelas"),
+    ).rejects.toThrow("Failed query: delete from");
+
+    expect(sqlDijalankan().at(-1)).toBe("rollback");
+  });
+
+  it("mengembalikan false jika DELETE tidak menghapus baris", async () => {
+    siapkan(
+      hasilTulis,
+      hasilBaca(kelas),
+      hasilBaca(subkelas),
+      tanpaPerubahan,
+      hasilTulis,
+    );
+
+    const hasil = await subkelasModel.hapus("kelas", "subkelas");
+
+    expect(hasil).toBe(false);
+    expect(sqlDijalankan().at(-1)).toBe("commit");
   });
 });

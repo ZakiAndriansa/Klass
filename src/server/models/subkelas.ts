@@ -104,6 +104,29 @@ export const subkelasModel = {
     });
   },
 
+  async hapus(classId: string, subclassId: string) {
+    return db.transaction(async (transaksi) => {
+      if (!(await kunciKelas(transaksi, classId))) {
+        return false;
+      }
+
+      if (!(await bacaSubkelas(transaksi, subclassId, classId))) {
+        return false;
+      }
+
+      const [hasil] = await transaksi
+        .delete(subclasses)
+        .where(
+          and(
+            eq(subclasses.classId, classId),
+            eq(subclasses.id, subclassId),
+          ),
+        );
+
+      return hasil.affectedRows > 0;
+    });
+  },
+
   cariPj(subclassId: string, userId: string) {
     return bacaPj(db, subclassId, userId);
   },
