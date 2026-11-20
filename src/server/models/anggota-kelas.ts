@@ -194,6 +194,26 @@ export const anggotaKelasModel = {
     });
   },
 
+  async daftarUndanganPerKelas(classId: string, halaman: Halaman) {
+    const filter = eq(classAdminInvites.classId, classId);
+
+    return ambilHalaman(
+      halaman,
+      db.$count(classAdminInvites, filter),
+      (limit, offset) =>
+        db
+          .select()
+          .from(classAdminInvites)
+          .where(filter)
+          .orderBy(
+            asc(classAdminInvites.createdAt),
+            asc(classAdminInvites.id),
+          )
+          .limit(limit)
+          .offset(offset),
+    );
+  },
+
   async daftarUndanganAdmin(email: string, halaman: Halaman) {
     const filter = and(eq(classAdminInvites.email, email), eq(classAdminInvites.status, "pending"));
     return ambilHalaman(halaman, db.$count(classAdminInvites, filter), (limit, offset) =>
