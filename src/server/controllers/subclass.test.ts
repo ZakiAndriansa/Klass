@@ -134,6 +134,32 @@ describe("subkelas controller - buatSubkelas", () => {
     expect(subkelasModel.buat).not.toHaveBeenCalled();
   });
 
+  it("menerima dua PJ awal", async () => {
+    const sekarang = new Date();
+    vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
+    vi.mocked(subkelasModel.buat).mockResolvedValue({
+      id: "sub-123",
+      classId: "kelas-abc",
+      name: "Basis Data",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+
+    await buatSubkelas("kelas-abc", { name: "Basis Data", pjAwal: ["user-2", "user-3"] });
+
+    expect(subkelasModel.buat).toHaveBeenCalledWith({ classId: "kelas-abc", name: "Basis Data" }, [
+      "user-2",
+      "user-3",
+    ]);
+  });
+
+  it("menolak pembuatan jika PJ awal lebih dari 2 orang (validasi Zod)", async () => {
+    await expect(
+      buatSubkelas("kelas-abc", { name: "Basis Data", pjAwal: ["user-2", "user-3", "user-4"] }),
+    ).rejects.toThrow(ZodError);
+    expect(subkelasModel.buat).not.toHaveBeenCalled();
+  });
+
   it("menolak pembuatan jika nama subkelas melebihi 150 karakter (validasi Zod)", async () => {
     const namaPanjang = "a".repeat(151);
     await expect(buatSubkelas("kelas-abc", { name: namaPanjang })).rejects.toThrow(ZodError);
