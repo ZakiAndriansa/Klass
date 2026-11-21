@@ -37,16 +37,16 @@ describe("ambilProfile", () => {
     vi.mocked(profileModel.cariPerId).mockResolvedValue(pengguna);
 
     await expect(ambilProfile()).resolves.toEqual({
-      idPengguna: "user-1",
-      nama: "Ahmad",
+      id: "user-1",
+      name: "Ahmad",
       email: "ahmad@example.com",
-      avatarUrl: null,
-      peran: "pengguna",
+      image: null,
+      isSuperadmin: false,
     });
     expect(profileModel.cariPerId).toHaveBeenCalledWith("user-1");
   });
 
-  it("menurunkan peran superadmin dari isSuperadmin", async () => {
+  it("meneruskan image dan isSuperadmin dari model", async () => {
     vi.mocked(profileModel.cariPerId).mockResolvedValue({
       ...pengguna,
       image: "https://example.com/avatar.png",
@@ -54,15 +54,15 @@ describe("ambilProfile", () => {
     });
 
     await expect(ambilProfile()).resolves.toMatchObject({
-      avatarUrl: "https://example.com/avatar.png",
-      peran: "superadmin",
+      image: "https://example.com/avatar.png",
+      isSuperadmin: true,
     });
   });
 
   it("mengubah image kosong menjadi null", async () => {
     vi.mocked(profileModel.cariPerId).mockResolvedValue({ ...pengguna, image: "" });
 
-    await expect(ambilProfile()).resolves.toMatchObject({ avatarUrl: null });
+    await expect(ambilProfile()).resolves.toMatchObject({ image: null });
   });
 
   it("melempar NotFoundError bila baris tidak ada", async () => {
@@ -85,21 +85,21 @@ describe("ubahProfile", () => {
   });
 
   it("memakai id dari sesi, bukan dari body", async () => {
-    await ubahProfile({ nama: "Ahmad Baru", id: "penyusup" });
+    await ubahProfile({ name: "Ahmad Baru", id: "penyusup" });
 
     expect(profileModel.ubah).toHaveBeenCalledWith("user-1", { name: "Ahmad Baru" });
   });
 
-  it("memetakan nama menjadi name", async () => {
+  it("mengubah name dan mengembalikan ProfileDto", async () => {
     vi.mocked(profileModel.ubah).mockResolvedValue({ ...pengguna, name: "Ahmad Baru" });
 
-    await expect(ubahProfile({ nama: "Ahmad Baru" })).resolves.toMatchObject({
-      nama: "Ahmad Baru",
+    await expect(ubahProfile({ name: "Ahmad Baru" })).resolves.toMatchObject({
+      name: "Ahmad Baru",
     });
   });
 
-  it("memetakan avatarUrl menjadi image", async () => {
-    await ubahProfile({ nama: "Ahmad Baru", avatarUrl: "https://example.com/a.png" });
+  it("mengirim image ke model bila diisi", async () => {
+    await ubahProfile({ name: "Ahmad Baru", image: "https://example.com/a.png" });
 
     expect(profileModel.ubah).toHaveBeenCalledWith("user-1", {
       name: "Ahmad Baru",
@@ -107,14 +107,14 @@ describe("ubahProfile", () => {
     });
   });
 
-  it("tidak mengirim image bila avatarUrl tidak ada", async () => {
-    await ubahProfile({ nama: "Ahmad Baru" });
+  it("tidak mengirim image bila tidak disertakan", async () => {
+    await ubahProfile({ name: "Ahmad Baru" });
 
     expect(vi.mocked(profileModel.ubah).mock.calls[0][1]).not.toHaveProperty("image");
   });
 
   it("mengirim image null untuk menghapus avatar", async () => {
-    await ubahProfile({ nama: "Ahmad Baru", avatarUrl: null });
+    await ubahProfile({ name: "Ahmad Baru", image: null });
 
     expect(profileModel.ubah).toHaveBeenCalledWith("user-1", {
       name: "Ahmad Baru",
@@ -122,20 +122,27 @@ describe("ubahProfile", () => {
     });
   });
 
-  it("menolak nama kurang dari 3 karakter sebelum memanggil model", async () => {
-    await expect(ubahProfile({ nama: "ab" })).rejects.toBeInstanceOf(ZodError);
+  it("menolak name kurang dari 3 karakter sebelum memanggil model", async () => {
+    await expect(ubahProfile({ name: "ab" })).rejects.toBeInstanceOf(ZodError);
     expect(profileModel.ubah).not.toHaveBeenCalled();
   });
 
-  it("menolak avatarUrl yang bukan http atau https", async () => {
+  it("menolak image yang bukan http atau https", async () => {
     await expect(
-      ubahProfile({ nama: "Ahmad Baru", avatarUrl: "ftp://example.com/a.png" }),
+      ubahProfile({ name: "Ahmad Baru", image: "ftp://example.com/a.png" }),
     ).rejects.toBeInstanceOf(ZodError);
+  });
+
+  it("meneruskan UnauthorizedError tanpa memanggil model", async () => {
+    vi.mocked(requireAuth).mockRejectedValue(new UnauthorizedError());
+
+    await expect(ubahProfile({ name: "Ahmad Baru" })).rejects.toBeInstanceOf(UnauthorizedError);
+    expect(profileModel.ubah).not.toHaveBeenCalled();
   });
 
   it("melempar NotFoundError bila baris tidak ditemukan", async () => {
     vi.mocked(profileModel.ubah).mockResolvedValue(null);
 
-    await expect(ubahProfile({ nama: "Ahmad Baru" })).rejects.toBeInstanceOf(NotFoundError);
+    await expect(ubahProfile({ name: "Ahmad Baru" })).rejects.toBeInstanceOf(NotFoundError);
   });
 });

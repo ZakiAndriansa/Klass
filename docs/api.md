@@ -211,38 +211,38 @@ Mengambil profil pengguna yang sedang login.
 | Siapa yang boleh   | Pengguna yang sudah login                  |
 | Body               | Tidak ada                                  |
 | Respons berhasil   | 200, `{ "data": ProfileDto }`              |
-| Galat yang mungkin | `UNAUTHORIZED`                             |
+| Galat yang mungkin | `UNAUTHORIZED`, `NOT_FOUND`                |
 | Tipe               | `ProfileDto` di `src/types/api/profile.ts` |
 
 ```json
 {
   "data": {
-    "idPengguna": "dev-pj",
-    "nama": "PJ Contoh",
+    "id": "dev-pj",
+    "name": "PJ Contoh",
     "email": "pj@klass.test",
-    "avatarUrl": null,
-    "peran": "pengguna"
+    "image": null,
+    "isSuperadmin": false
   }
 }
 ```
 
-`peran` bernilai `superadmin` atau `pengguna`, diturunkan dari `users.is_superadmin`. Peran per kelas (admin kelas, PJ, anggota) tidak termasuk profil.
+`isSuperadmin` berasal dari `users.is_superadmin`. Peran per kelas (admin kelas, PJ, anggota) tidak termasuk profil.
 
 `PATCH /api/v1/profile`
 
 Mengubah nama dan avatar pengguna yang sedang login.
 
-| Hal                | Isi                                                                                         |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| Siapa yang boleh   | Pengguna yang sudah login, hanya profilnya sendiri                                          |
-| Body               | `nama` wajib, string 3–50 karakter. `avatarUrl` opsional, URL http/https maks 2048 karakter |
-| Respons berhasil   | 200, `{ "data": ProfileDto }`                                                               |
-| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `NOT_FOUND`                                             |
-| Tipe               | `UbahProfileInput` (masukan), `ProfileDto` (keluaran)                                       |
+| Hal                | Isi                                                                                     |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| Siapa yang boleh   | Pengguna yang sudah login, hanya profilnya sendiri                                      |
+| Body               | `name` wajib, string 3–50 karakter. `image` opsional, URL http/https maks 2048 karakter |
+| Respons berhasil   | 200, `{ "data": ProfileDto }`                                                           |
+| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `NOT_FOUND`                                         |
+| Tipe               | `UbahProfileInput` (masukan), `ProfileDto` (keluaran)                                   |
 
-`idPengguna`, `email`, `isSuperadmin`, dan `peran` tidak pernah dibaca dari body; pemilik baris diambil dari sesi.
+`id`, `email`, dan `isSuperadmin` tidak pernah dibaca dari body; pemilik baris diambil dari sesi.
 
-`avatarUrl: null` menghapus avatar. Bila `avatarUrl` tidak dikirim, avatar lama dipertahankan. `nama` selalu wajib karena `PATCH` belum parsial.
+`image: null` menghapus avatar. Bila `image` tidak dikirim, avatar lama dipertahankan. `name` selalu wajib karena `PATCH` belum parsial.
 
 ### Akun contoh (hanya saat pengembangan)
 
