@@ -12,6 +12,7 @@ Indonesia.
 (app)/
   layout.tsx                                pembungkus .ds untuk semua halaman login
   dashboard/page.tsx                        /dashboard — Meja (pengguna) / Loket (superadmin)
+  profile/page.tsx                          /profile — buku profil (identitas + catatan kelas)
   classes/page.tsx                          /classes — daftar kelas yang diikuti
   classes/[classId]/page.tsx                /classes/123 — beranda kelas (ringkasan)
   classes/[classId]/schedule/page.tsx       /classes/123/schedule — jadwal mingguan
@@ -91,17 +92,32 @@ Karena itu navbar **tidak** membaca sesi sendiri: halaman yang membaca sesi lewa
 `getMySession()` (`@/server/controllers/session`) lalu mengirim `pengguna` sebagai prop ke `Navbar`.
 
 Karena membaca cookie, bagian navbar yang butuh sesi harus berada di dalam `<Suspense>`; dengan
-begitu sisa halaman tetap bisa diprerender. Pola ini dipakai di `/classes` dan kelima halaman kelas (lewat `RangkaKelasSesi`).
+begitu sisa halaman tetap bisa diprerender. Pola ini dipakai di `/classes`, `/profile`, dan kelima halaman kelas (lewat `RangkaKelasSesi`).
+
+## Profil
+
+`/profile` berbentuk buku terbuka. Sisi depan berisi identitas (avatar, nama, email, NIM, peran
+kelas), sisi belakang berisi catatan kelas dan shortcut. Satu lembar berporos di punggung buku;
+tombol di samping buku membaliknya. Di bawah 900px lembar tidak diputar secara fisik, melainkan
+kedua sisi ditumpuk dan sticky note mengganti sisi yang terlihat.
+
+- Identitas berasal dari sesi nyata.
+- Daftar kelas, peran per kelas, dan catatan masih data contoh (`features/profil/data-contoh.ts`)
+  sampai `GET /api/v1/classes` tersedia.
+- NIM belum ada di kolom `users`; yang tampil "Belum diisi".
+- **`/profile` adalah satu-satunya tempat keluar.** Tombol "Keluar dari akun" ada di halaman 1
+  buku dan memanggil `DELETE /api/v1/session`. Di halaman lain, tombol kanan atas di navbar
+  adalah tautan ke Meja, bukan tombol keluar.
 
 ## Tombol kanan di navbar
 
 Semua halaman area login memakai pola yang sama:
 
-| Halaman                   | Tombol kanan             |
-| ------------------------- | ------------------------ |
-| `/dashboard`              | `Beranda` → `/`          |
-| `/classes`, halaman kelas | `Meja` → `/dashboard`    |
-| 404 dan `/forbidden`      | `Ke Meja` → `/dashboard` |
+| Halaman                               | Tombol kanan             |
+| ------------------------------------- | ------------------------ |
+| `/dashboard`                          | `Beranda` → `/`          |
+| `/classes`, halaman kelas, `/profile` | `Meja` → `/dashboard`    |
+| 404 dan `/forbidden`                  | `Ke Meja` → `/dashboard` |
 
 Di `/dashboard` tombolnya `Beranda`, bukan `Meja`: tombol yang menunjuk halaman
 yang sedang dibuka tidak ada gunanya.

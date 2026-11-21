@@ -1,0 +1,925 @@
+/* ==========================================================================
+   Component: Profil — buku empat halaman
+   Memakai bahasa visual halaman masuk: meja kertas, lembar berporos, dan
+   punggung buku. Bedanya, isi di sini bukan formulir melainkan identitas dan
+   catatan kelas.
+
+   Empat halaman dalam dua bentangan:
+     halaman 1  dasar kiri   data diri
+     halaman 2  lembar depan peran kelas
+     halaman 3  lembar balik update + jadwal
+     halaman 4  dasar kanan  pintasan kelas
+
+   Navigasi memakai dua sticky note di sisi luar buku, bukan tombol terpisah:
+   Identitas di tepi kiri dan Catatan di tepi kanan. Sisi note tetap; saat
+   lembar dibalik hanya warna aktifnya yang berpindah.
+   ========================================================================== */
+
+.ds .profil-buku {
+  --balik: 760ms;
+  --balik-ease: cubic-bezier(0.32, 0.06, 0.18, 1);
+  --tebal-buku: 10px;
+  /* Lebar note sisi dan berapa banyak tepi note yang masuk ke atas cover. */
+  --profil-postit-lebar: 112px;
+  --profil-postit-singgah: 26px;
+  /* Ruang di kiri-kanan yang disisakan untuk bagian note yang menonjol
+     keluar buku, supaya tidak terpotong tepi jendela. */
+  --profil-postit-ruang: calc(
+    var(--profil-postit-lebar) - var(--profil-postit-singgah) + var(--ds-space-2)
+  );
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: calc(1040px + 2 * var(--profil-postit-ruang));
+  margin-inline: auto;
+  padding-inline: var(--profil-postit-ruang);
+  padding-block: clamp(var(--ds-space-8), 5vw, var(--ds-space-16))
+    clamp(var(--ds-space-10), 6vw, var(--ds-space-20));
+}
+
+.ds .profil-buku__panggung {
+  position: relative;
+  width: 100%;
+  max-width: 1040px;
+  perspective: 2400px;
+  perspective-origin: 50% 38%;
+}
+
+/* --- Tumpukan halaman di bawah cover ---
+   Dua lapis tipis yang lebih lebar dari cover, supaya buku terlihat punya
+   ketebalan, bukan sekadar kotak. */
+.ds .profil-buku__panggung::before,
+.ds .profil-buku__panggung::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  border-radius: calc(var(--ds-auth-page-radius) + 4px);
+  pointer-events: none;
+}
+
+.ds .profil-buku__panggung::before {
+  inset: 10px -5px -8px;
+  background-color: var(--ds-auth-page-edge-1);
+  border: 1px solid var(--ds-auth-page-edge-line);
+  box-shadow:
+    0 2px 0 var(--ds-auth-page-edge-2),
+    0 4px 0 var(--ds-auth-page-edge-3),
+    0 5px 0 var(--ds-auth-page-edge-line);
+}
+
+.ds .profil-buku__panggung::after {
+  inset: 16px -10px -18px;
+  background-color: var(--ds-auth-page-edge-2);
+  border: 1px solid var(--ds-auth-page-edge-line);
+  box-shadow:
+    0 2px 0 var(--ds-auth-page-edge-3),
+    0 6px 0 var(--ds-auth-page-edge-line),
+    0 22px 40px -18px rgba(28, 25, 23, 0.45);
+}
+
+/* --- Cover --- */
+.ds .profil-buku__badan {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: 700px;
+  padding: var(--ds-space-4);
+  background-color: var(--ds-auth-cover);
+  background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.06), transparent 42%);
+  border: var(--ds-border-thin) solid var(--ds-auth-cover-edge);
+  border-radius: var(--ds-auth-page-radius);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28),
+    0 3px 0 rgba(0, 0, 0, 0.22),
+    0 30px 50px -30px rgba(28, 25, 23, 0.6);
+}
+
+/* --- Halaman dasar --- */
+.ds .profil-halaman {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  overflow-y: auto;
+  padding: clamp(var(--ds-space-5), 3.2vw, var(--ds-space-8));
+  background-color: var(--ds-auth-paper);
+  background-image: var(--ds-auth-paper-grain);
+  border: var(--ds-border-thin) solid var(--ds-auth-paper-edge);
+}
+
+.ds .profil-halaman--kiri {
+  border-radius: var(--ds-auth-page-radius) 0 0 var(--ds-auth-page-radius);
+  box-shadow: inset -20px 0 26px -24px rgba(89, 73, 55, 0.45);
+}
+
+.ds .profil-halaman--kanan {
+  border-radius: 0 var(--ds-auth-page-radius) var(--ds-auth-page-radius) 0;
+  box-shadow: inset 20px 0 26px -24px rgba(89, 73, 55, 0.45);
+}
+
+/* --- Lembar berporos ---
+   Lembar hanya menempati halaman KANAN dan berporos di punggung buku.
+   Diputar -180°, ia mendarat di halaman kiri dan menutupi halaman 1. */
+.ds .profil-lembar {
+  position: absolute;
+  top: var(--ds-space-4);
+  right: var(--ds-space-4);
+  bottom: var(--ds-space-4);
+  left: 50%;
+  z-index: 2;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform var(--balik) var(--balik-ease);
+}
+
+.ds .profil-buku__badan.is-catatan .profil-lembar {
+  transform: rotateY(-180deg);
+}
+
+.ds .profil-muka {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  overflow-y: auto;
+  padding: clamp(var(--ds-space-5), 3.2vw, var(--ds-space-8));
+  background-color: var(--ds-auth-paper);
+  background-image: var(--ds-auth-paper-grain);
+  border: var(--ds-border-thin) solid var(--ds-auth-paper-edge);
+  backface-visibility: hidden;
+}
+
+.ds .profil-muka--depan {
+  border-radius: 0 var(--ds-auth-page-radius) var(--ds-auth-page-radius) 0;
+  box-shadow: inset 18px 0 24px -22px rgba(89, 73, 55, 0.4);
+}
+
+.ds .profil-muka--belakang {
+  transform: rotateY(180deg);
+  border-radius: var(--ds-auth-page-radius) 0 0 var(--ds-auth-page-radius);
+  box-shadow: inset -18px 0 24px -22px rgba(89, 73, 55, 0.4);
+}
+
+/* --- Isi halaman --- */
+.ds .profil-halaman__kepala {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  padding-bottom: var(--ds-space-3);
+  border-bottom: var(--ds-border-base) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .profil-eyebrow {
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .profil-halaman__judul {
+  margin: 0;
+  font-size: clamp(var(--ds-text-xl), 2.4vw, var(--ds-text-2xl));
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.ds .profil-subjudul {
+  margin: 0 0 var(--ds-space-2);
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+/* --- Halaman 1: data diri --- */
+.ds .profil-identitas {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-4);
+}
+
+.ds .profil-avatar {
+  font-size: 24px;
+}
+
+.ds .profil-identitas__teks {
+  min-width: 0;
+}
+
+.ds .profil-nama {
+  margin: 0;
+  font-size: clamp(var(--ds-text-lg), 1.8vw, var(--ds-text-xl));
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.ds .profil-email {
+  margin: 2px 0 0;
+  overflow: hidden;
+  font-size: var(--ds-text-sm);
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .profil-lencana {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-1);
+  margin-top: var(--ds-space-2);
+}
+
+.ds .profil-deskripsi {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.65;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .profil-data {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ds-space-3);
+  margin: 0;
+  padding-block: var(--ds-space-3);
+  border-block: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .profil-data div {
+  min-width: 0;
+}
+
+.ds .profil-data dt {
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .profil-data dd {
+  margin: 3px 0 0;
+  overflow: hidden;
+  font-size: var(--ds-text-sm);
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds .profil-data__kosong {
+  font-weight: 500;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .profil-keluar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  margin-top: auto;
+  padding-top: var(--ds-space-4);
+  border-top: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .profil-keluar__catatan {
+  margin: 0;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--ds-color-ink-muted);
+}
+
+/* --- Halaman 2: peran kelas --- */
+.ds .profil-peran__daftar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .profil-peran__baris {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding-block: var(--ds-space-3);
+  border-bottom: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .profil-peran__baris:last-child {
+  border-bottom: 0;
+}
+
+.ds .profil-peran__teks {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ds .profil-peran__nama {
+  overflow: hidden;
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds .profil-peran__sub {
+  overflow: hidden;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .profil-peran__catatan {
+  margin: auto 0 0;
+  padding-top: var(--ds-space-4);
+  border-top: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+  font-size: var(--ds-text-xs);
+  line-height: 1.6;
+  color: var(--ds-color-ink-muted);
+}
+
+/* --- Halaman 3: catatan + jadwal --- */
+.ds .profil-catatan__daftar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .profil-catatan__baris {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: var(--ds-space-3);
+  align-items: start;
+}
+
+.ds .profil-catatan__ikon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+}
+
+.ds .profil-catatan__judul {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ds .profil-catatan__isi {
+  margin: 2px 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.5;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .profil-catatan__waktu {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .profil-jadwal {
+  margin-top: var(--ds-space-4);
+  padding-top: var(--ds-space-4);
+  border-top: var(--ds-border-base) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .profil-jadwal__daftar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .profil-jadwal__baris {
+  display: grid;
+  gap: 1px;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background-color: var(--ds-color-paper-well);
+  border-left: 3px solid var(--ds-color-folder-edge);
+  border-radius: var(--ds-radius-xs);
+}
+
+.ds .profil-jadwal__baris--terdekat {
+  background-color: var(--ds-color-primary);
+  border-left-color: var(--ds-color-border-ink);
+}
+
+.ds .profil-jadwal__waktu {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .profil-jadwal__baris--terdekat .profil-jadwal__waktu {
+  color: var(--ds-color-ink);
+}
+
+.ds .profil-jadwal__kelas {
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.ds .profil-jadwal__ruang {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .profil-catatan__kaki {
+  margin: auto 0 0;
+  padding-top: var(--ds-space-3);
+  border-top: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-lg);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* --- Halaman 4: pintasan kelas --- */
+.ds .profil-shortcut__daftar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .profil-shortcut__tautan {
+  --aksen: var(--ds-color-folder-bg);
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-left: 4px solid var(--aksen);
+  border-radius: var(--ds-radius-sm);
+  box-shadow:
+    0 1px 0 var(--ds-color-rule-dashed),
+    0 4px 10px -8px rgba(28, 25, 23, 0.4);
+  text-decoration: none;
+  transition:
+    transform var(--ds-duration-base) var(--ds-ease-standard),
+    box-shadow var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .profil-shortcut__tautan:hover,
+.ds .profil-shortcut__tautan:focus-visible {
+  transform: translateY(-2px);
+  box-shadow:
+    0 2px 0 var(--ds-color-rule-dashed),
+    0 10px 18px -10px rgba(28, 25, 23, 0.45);
+}
+
+.ds .profil-shortcut__tautan--kuning {
+  --aksen: var(--ds-color-primary);
+}
+
+.ds .profil-shortcut__tautan--lila {
+  --aksen: var(--ds-color-folder-lilac);
+}
+
+.ds .profil-shortcut__tautan--hijau {
+  --aksen: var(--ds-color-folder-green);
+}
+
+.ds .profil-shortcut__tautan--biru {
+  --aksen: var(--ds-color-secondary);
+}
+
+.ds .profil-shortcut__baris {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+}
+
+.ds .profil-shortcut__nama {
+  overflow: hidden;
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds .profil-shortcut__meta {
+  overflow: hidden;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ds-color-ink-muted);
+}
+
+/* --- Punggung buku --- */
+.ds .profil-buku__punggung {
+  position: absolute;
+  top: var(--ds-space-4);
+  bottom: var(--ds-space-4);
+  left: 50%;
+  z-index: 3;
+  width: 22px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(89, 73, 55, 0.2) 42%,
+    rgba(89, 73, 55, 0.26) 50%,
+    rgba(89, 73, 55, 0.2) 58%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* --- Sticky note: navigasi di sisi buku ---
+   Dua catatan persegi panjang menempel di sisi luar buku, sejajar tengah.
+   Bentuknya mengikuti tab indeks landing (nomor mono, label kapital, note
+   aktif kuning) tetapi menempel di tepi kertas, bukan tepi layar.
+   Sisi note tetap: Identitas di kiri, Catatan di kanan. Yang berubah saat
+   lembar dibalik hanya note mana yang aktif (kuning). */
+.ds .profil-postit {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 200ms var(--ds-ease-standard);
+}
+
+.ds .profil-postit__catatan {
+  position: absolute;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  width: var(--profil-postit-lebar);
+  min-height: 40px;
+  padding: 8px 14px;
+  pointer-events: auto;
+  background-color: var(--ds-color-note-blue);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink);
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 var(--ds-color-highlight-specular),
+    0 2px 0 var(--ds-color-rule-dashed),
+    0 10px 16px -10px rgba(28, 25, 23, 0.45);
+  transition:
+    transform var(--ds-duration-slow) var(--ds-ease-standard),
+    background-color var(--ds-duration-base) var(--ds-ease-standard),
+    box-shadow var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+/* Tepi dalam note masuk sampai 22px ke atas kertas, meniru tab yang
+   diselipkan di antara halaman. Sisi luarnya tetap lurus seperti tab indeks
+   landing, hanya sudut luarnya yang membulat. */
+.ds .profil-postit__catatan.is-kanan {
+  left: 100%;
+  border-radius: 0 var(--ds-radius-sm) var(--ds-radius-sm) 0;
+  transform: translate(calc(-1 * var(--profil-postit-singgah)), -50%);
+}
+
+.ds .profil-postit__catatan.is-kiri {
+  right: 100%;
+  border-radius: var(--ds-radius-sm) 0 0 var(--ds-radius-sm);
+  transform: translate(var(--profil-postit-singgah), -50%);
+}
+
+.ds .profil-postit__catatan.is-kanan.is-aktif {
+  transform: translate(calc(-1 * var(--profil-postit-singgah) + 6px), -50%);
+}
+
+.ds .profil-postit__catatan.is-kiri.is-aktif {
+  transform: translate(calc(var(--profil-postit-singgah) - 6px), -50%);
+}
+
+.ds .profil-postit__catatan.is-aktif {
+  background-color: var(--ds-color-primary);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 3px 0 var(--ds-color-rule-dashed),
+    0 14px 22px -10px rgba(28, 25, 23, 0.5);
+}
+
+.ds .profil-postit__catatan.is-kanan:hover,
+.ds .profil-postit__catatan.is-kanan:focus-visible {
+  background-color: var(--ds-color-folder-bg);
+  transform: translate(calc(-1 * var(--profil-postit-singgah) + 10px), -50%);
+}
+
+.ds .profil-postit__catatan.is-kiri:hover,
+.ds .profil-postit__catatan.is-kiri:focus-visible {
+  background-color: var(--ds-color-folder-bg);
+  transform: translate(calc(var(--profil-postit-singgah) - 10px), -50%);
+}
+
+.ds .profil-postit__catatan.is-aktif:hover,
+.ds .profil-postit__catatan.is-aktif:focus-visible {
+  background-color: var(--ds-color-primary-hover);
+}
+
+.ds .profil-postit__nomor {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.5;
+}
+
+.ds .profil-postit__catatan.is-aktif .profil-postit__nomor {
+  opacity: 0.7;
+}
+
+.ds .profil-postit__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sisa note: sepotong kecil bertepi sobek yang menempel di margin kertas,
+   terselip di bawah note dan mengintip keluar. Warnanya mengikuti note yang
+   menempel di sisi itu, jadi saat note berganti aktif, warnanya ikut
+   berubah — persis sisa lembaran yang tertinggal di kertas. */
+.ds .profil-postit__bekas {
+  position: absolute;
+  top: calc(50% + 14px);
+  z-index: -1;
+  width: 26px;
+  height: 18px;
+  pointer-events: none;
+  background-color: var(--profil-bekas);
+  opacity: 0.45;
+}
+
+.ds .profil-postit__bekas--kanan {
+  right: var(--ds-space-4);
+  transform: rotate(-3deg);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 6% 78%, 0 54%, 9% 34%, 2% 14%);
+}
+
+.ds .profil-postit__bekas--kiri {
+  left: var(--ds-space-4);
+  transform: rotate(3deg);
+  clip-path: polygon(0 0, 100% 0, 94% 14%, 100% 34%, 91% 54%, 98% 78%, 94% 100%, 0 100%);
+}
+
+/* Identitas di kiri, Catatan di kanan. Sisa note mengikuti warna note di
+   sisinya: saat identitas (kuning) aktif, sisa di kiri kuning dan di kanan
+   biru. Saat catatan aktif, warnanya bertukar. */
+.ds .profil-postit.is-identitas {
+  --profil-bekas-kiri: var(--ds-color-primary);
+  --profil-bekas-kanan: var(--ds-color-note-blue);
+}
+
+.ds .profil-postit.is-catatan {
+  --profil-bekas-kiri: var(--ds-color-note-blue);
+  --profil-bekas-kanan: var(--ds-color-primary);
+}
+
+.ds .profil-postit__bekas--kanan {
+  --profil-bekas: var(--profil-bekas-kanan);
+}
+
+.ds .profil-postit__bekas--kiri {
+  --profil-bekas: var(--profil-bekas-kiri);
+}
+
+/* --- Penanda halaman --- */
+.ds .profil-buku__penanda {
+  margin: var(--ds-space-6) 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+/* --- Kerangka halaman & keadaan memuat --- */
+.ds .profil-halaman-luar {
+  flex: 1;
+  overflow-x: clip;
+  padding-bottom: var(--ds-space-16);
+}
+
+.ds .profil-buku__badan--memuat {
+  min-height: 700px;
+  border-radius: var(--ds-auth-page-radius);
+  background-color: var(--ds-auth-paper);
+  opacity: 0.6;
+}
+
+/* ==========================================================================
+   Responsif
+   Di bawah 900px lembar tidak diputar secara fisik: hanya bentangan aktif
+   yang ditampilkan, kedua halamannya ditumpuk.
+   ========================================================================== */
+
+@media (max-width: 899px) {
+  .ds .profil-buku__badan {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-3);
+    min-height: 0;
+    padding: var(--ds-space-3);
+  }
+
+  .ds .profil-lembar {
+    position: static;
+    display: contents;
+    transform: none !important;
+    transition: none;
+  }
+
+  .ds .profil-muka {
+    position: static;
+    inset: auto;
+    transform: none;
+    overflow: visible;
+    border-radius: var(--ds-radius-md);
+    box-shadow: none;
+  }
+
+  /* Hanya halaman bentangan aktif yang terlihat. */
+  .ds .profil-buku__badan.is-identitas .profil-halaman--kanan,
+  .ds .profil-buku__badan.is-identitas .profil-muka--belakang,
+  .ds .profil-buku__badan.is-catatan .profil-halaman--kiri,
+  .ds .profil-buku__badan.is-catatan .profil-muka--depan {
+    display: none;
+  }
+
+  /* Urutan DOM mengikuti fisik buku (1, 4, 2, 3). Di layar sempit yang
+     ditumpuk, urutannya harus dibalik menjadi kiri lalu kanan per bentangan:
+     identitas 1→2, catatan 3→4. */
+  .ds .profil-buku__badan.is-identitas .profil-halaman--kiri {
+    order: 1;
+  }
+
+  .ds .profil-buku__badan.is-identitas .profil-muka--depan {
+    order: 2;
+  }
+
+  .ds .profil-buku__badan.is-catatan .profil-muka--belakang {
+    order: 1;
+  }
+
+  .ds .profil-buku__badan.is-catatan .profil-halaman--kanan {
+    order: 2;
+  }
+
+  .ds .profil-halaman,
+  .ds .profil-muka {
+    overflow: visible;
+  }
+
+  .ds .profil-buku__punggung {
+    display: none;
+  }
+
+  .ds .profil-postit {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--ds-space-3);
+    margin-top: var(--ds-space-4);
+    opacity: 1;
+  }
+
+  /* Di layar sempit note kembali menjadi baris di bawah buku, bukan tab sisi.
+     Pemilih dibuat sepadat aturan desktop supaya transform absolutnya kalah. */
+  .ds .profil-postit__catatan,
+  .ds .profil-postit__catatan.is-kanan,
+  .ds .profil-postit__catatan.is-kiri {
+    position: static;
+    width: auto;
+    transform: rotate(-1deg);
+    border-radius: var(--ds-radius-xs);
+  }
+
+  .ds .profil-postit__catatan:nth-child(4) {
+    transform: rotate(1deg);
+  }
+
+  .ds .profil-postit__catatan.is-kanan:hover,
+  .ds .profil-postit__catatan.is-kiri:hover,
+  .ds .profil-postit__catatan.is-kanan:focus-visible,
+  .ds .profil-postit__catatan.is-kiri:focus-visible {
+    transform: translateY(-2px) rotate(0deg);
+  }
+
+  .ds .profil-postit__catatan.is-aktif,
+  .ds .profil-postit__catatan.is-kanan.is-aktif,
+  .ds .profil-postit__catatan.is-kiri.is-aktif,
+  .ds .profil-postit__catatan.is-kanan.is-aktif:hover,
+  .ds .profil-postit__catatan.is-kiri.is-aktif:hover,
+  .ds .profil-postit__catatan.is-kanan.is-aktif:focus-visible,
+  .ds .profil-postit__catatan.is-kiri.is-aktif:focus-visible {
+    transform: translateY(-2px) rotate(0deg);
+    background-color: var(--ds-color-primary);
+  }
+
+  /* Bekas note hanya masuk akal saat note menempel di sisi buku. */
+  .ds .profil-postit__bekas {
+    display: none;
+  }
+
+  .ds .profil-buku {
+    max-width: 1040px;
+    padding-inline: 0;
+  }
+
+  /* Tumpukan halaman disembunyikan; di layar sempit ia hanya menambah noise. */
+  .ds .profil-buku__panggung::before,
+  .ds .profil-buku__panggung::after {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .ds .profil-data {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ds .profil-keluar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds .profil-lembar {
+    transition: none;
+  }
+}
+
+.ds .profil-shortcut__kaki {
+  margin: auto 0 0;
+  padding-top: var(--ds-space-4);
+  border-top: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-lg);
+  font-weight: 700;
+  line-height: 1.35;
+}

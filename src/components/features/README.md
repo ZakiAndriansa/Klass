@@ -9,6 +9,7 @@ features/
   kelas/        daftar kelas, beranda kelas, jadwal, materi, progress, anggota
   landing/      section halaman utama "Buka Mapnya"
   meja/         isi /dashboard: Meja (pengguna) dan Loket (superadmin)
+  profil/       halaman /profile berbentuk buku (identitas + catatan kelas)
   admin/        tabel pengajuan kelas
   dev/          daftar akun contoh untuk /dev/login (khusus pengembangan)
 ```
