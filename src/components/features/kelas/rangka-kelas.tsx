@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 
 import { Navbar } from "@/components/shared/navbar";
+import type { PenggunaNavbar } from "@/components/shared/navbar";
+import { hakKelas, type AksesKelas } from "@/lib/akses-kelas";
 
 import type { KelasDetail } from "./data-contoh";
 import { cn } from "@/lib/utils";
@@ -39,19 +41,30 @@ const tabKelas: {
 export function RangkaKelas({
   kelas,
   aktif,
+  pengguna,
+  akses,
   children,
 }: {
   kelas: KelasDetail;
   aktif: TabKelas;
+  /** Identitas pengguna untuk navbar. Kosong berarti belum terbaca. */
+  pengguna?: PenggunaNavbar | null;
+  /**
+   * Hak pengguna di kelas ini. Bila kosong, semua tombol ubah disembunyikan
+   * dan kode undangan tidak ditampilkan.
+   */
+  akses?: AksesKelas | null;
   children: React.ReactNode;
 }) {
+  const hak = hakKelas(akses ?? null);
   return (
     <div className={`kelas-page kelas-aksen--${kelas.warna}`}>
       <Navbar
         className="navbar--dash"
         merek="Klass"
         merekHref="/dashboard"
-        aksi={{ label: "Keluar", href: "/login", keluar: true }}
+        aksi={{ label: "Meja", href: "/dashboard" }}
+        pengguna={pengguna ?? null}
       />
 
       <header className="kelas-hero">
@@ -87,11 +100,20 @@ export function RangkaKelas({
           </div>
 
           <div className="kelas-hero__sisi">
-            <div className="kelas-kode">
-              <span className="kelas-kode__label">Kode undangan</span>
-              <code className="kelas-kode__nilai">{kelas.kodeUndangan}</code>
-              <span className="kelas-kode__catatan">Bagikan ke teman satu kelas.</span>
-            </div>
+            {hak.sudahAnggota ? (
+              <div className="kelas-kode">
+                <span className="kelas-kode__label">Kode undangan</span>
+                <code className="kelas-kode__nilai">{kelas.kodeUndangan}</code>
+                <span className="kelas-kode__catatan">Bagikan ke teman satu kelas.</span>
+              </div>
+            ) : (
+              <div className="kelas-kode kelas-kode--privat">
+                <span className="kelas-kode__label">Kode undangan</span>
+                <span className="kelas-kode__catatan">
+                  Hanya anggota kelas yang bisa melihat kode ini.
+                </span>
+              </div>
+            )}
 
             <div className="kelas-progres-mini">
               <div className="kelas-progres-mini__atas">

@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { ambilKelas } from "@/components/features/kelas/data-contoh";
 import { PapanProgress } from "@/components/features/kelas/papan-progress";
 import { RangkaKelasMemuat } from "@/components/features/kelas/rangka-kelas-memuat";
-import { RangkaKelas } from "@/components/features/kelas/rangka-kelas";
+import { RangkaKelasSesi } from "../rangka-sesi";
 
 export const metadata: Metadata = {
   title: "Papan progress",
@@ -40,7 +40,7 @@ async function IsiProgress({ params }: { params: Promise<{ classId: string }> })
   const namaSaya = kelas.anggota.find((anggota) => anggota.id === kelas.idSaya)?.nama ?? "Anggota";
 
   return (
-    <RangkaKelas kelas={kelas} aktif="progress">
+    <RangkaKelasSesi kelas={kelas} aktif="progress">
       <header className="kelas-halaman__kepala">
         <p className="kelas-eyebrow">Progress</p>
         <h2 className="kelas-halaman__judul">Papan progress</h2>
@@ -60,6 +60,6 @@ async function IsiProgress({ params }: { params: Promise<{ classId: string }> })
         idSaya={kelas.idSaya}
         namaSaya={namaSaya}
       />
-    </RangkaKelas>
+    </RangkaKelasSesi>
   );
 }

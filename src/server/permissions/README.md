@@ -60,11 +60,13 @@ Hal yang sering keliru:
 
 Halaman tidak punya `handle()`, jadi penolakan diterjemahkan menjadi perpindahan halaman:
 
-| Fungsi                    | Guna                                                                                        |
-| ------------------------- | ------------------------------------------------------------------------------------------- |
-| `forPage(fn)`             | Membungkus pemanggilan controller: 401 ke `/login`, 404 ke halaman 404, 403 ke `/forbidden` |
-| `requirePageLogin()`      | Untuk halaman yang belum mengambil data tetapi wajib login                                  |
-| `requirePageSuperadmin()` | Untuk halaman di bawah `/admin`; yang bukan superadmin mendapat 404                         |
+| Fungsi               | Guna                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| `forPage(fn)`        | Membungkus pemanggilan controller: 401 ke `/login`, 404 ke halaman 404, 403 ke `/forbidden` |
+| `requirePageLogin()` | Untuk halaman yang belum mengambil data tetapi wajib login                                  |
+
+Tidak ada lagi `requirePageSuperadmin()`. `/admin` sudah disatukan ke `/dashboard`, dan halaman
+itu memilih tampilan dari `user.isSuperadmin` tanpa menolak siapa pun.
 
 ```tsx
 export default function Halaman({ params }: { params: Promise<{ classId: string }> }) {
@@ -84,7 +86,7 @@ async function Isi({ params }: { params: Promise<{ classId: string }> }) {
 
 Ketiga fungsi membaca cookie, jadi pemanggilnya harus di dalam `<Suspense>`.
 
-**Penjagaan ditaruh di halaman, bukan di `layout.tsx`.** Next.js merender layout dan halaman secara terpisah, sehingga layout tidak bisa menahan isi halaman di bawahnya. Contohnya ada di `src/app/admin/page.tsx`.
+**Penjagaan ditaruh di halaman, bukan di `layout.tsx`.** Next.js merender layout dan halaman secara terpisah, sehingga layout tidak bisa menahan isi halaman di bawahnya. Contohnya ada di `src/app/(app)/dashboard/page.tsx`.
 
 ## Tiga lapis penjagaan
 

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { alamatLogin, tujuanAman } from "./tujuan";
 
 describe("tujuanAman", () => {
-  it.each(["/dashboard", "/classes/123?tab=materials", "/admin"])("menerima %s", (jalur) => {
+  it.each(["/dashboard", "/classes/123?tab=materials", "/classes/request"])("menerima %s", (jalur) => {
     expect(tujuanAman(jalur)).toBe(jalur);
   });
 

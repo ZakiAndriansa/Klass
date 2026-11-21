@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { ambilKelas } from "@/components/features/kelas/data-contoh";
 import { JadwalKelas } from "@/components/features/kelas/jadwal-kelas";
 import { RangkaKelasMemuat } from "@/components/features/kelas/rangka-kelas-memuat";
-import { RangkaKelas } from "@/components/features/kelas/rangka-kelas";
+import { RangkaKelasSesi } from "../rangka-sesi";
 
 export const metadata: Metadata = {
   title: "Jadwal kelas",
@@ -34,7 +34,7 @@ async function IsiJadwal({ params }: { params: Promise<{ classId: string }> }) {
   if (!kelas) notFound();
 
   return (
-    <RangkaKelas kelas={kelas} aktif="jadwal">
+    <RangkaKelasSesi kelas={kelas} aktif="jadwal">
       <header className="kelas-halaman__kepala">
         <p className="kelas-eyebrow">Jadwal</p>
         <h2 className="kelas-halaman__judul">Jadwal mingguan</h2>
@@ -45,6 +45,6 @@ async function IsiJadwal({ params }: { params: Promise<{ classId: string }> }) {
       </header>
 
       <JadwalKelas jadwal={kelas.jadwal} hariIni={kelas.hariIni} />
-    </RangkaKelas>
+    </RangkaKelasSesi>
   );
 }

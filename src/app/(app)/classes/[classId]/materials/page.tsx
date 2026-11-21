@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { ambilKelas } from "@/components/features/kelas/data-contoh";
 import { DaftarMateri } from "@/components/features/kelas/daftar-materi";
 import { RangkaKelasMemuat } from "@/components/features/kelas/rangka-kelas-memuat";
-import { RangkaKelas } from "@/components/features/kelas/rangka-kelas";
+import { RangkaKelasSesi } from "../rangka-sesi";
 
 export const metadata: Metadata = {
   title: "Materi kelas",
@@ -33,7 +33,7 @@ async function IsiMateri({ params }: { params: Promise<{ classId: string }> }) {
   if (!kelas) notFound();
 
   return (
-    <RangkaKelas kelas={kelas} aktif="materi">
+    <RangkaKelasSesi kelas={kelas} aktif="materi">
       <header className="kelas-halaman__kepala">
         <p className="kelas-eyebrow">Materi</p>
         <h2 className="kelas-halaman__judul">Kumpulan materi</h2>
@@ -44,6 +44,6 @@ async function IsiMateri({ params }: { params: Promise<{ classId: string }> }) {
       </header>
 
       <DaftarMateri kelasId={kelas.id} materi={kelas.materi} />
-    </RangkaKelas>
+    </RangkaKelasSesi>
   );
 }

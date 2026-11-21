@@ -8,7 +8,7 @@ import {
   UnauthorizedError,
 } from "@/server/http/errors";
 
-import { forPage, requirePageLogin, requirePageSuperadmin } from "./page";
+import { forPage, requirePageLogin } from "./page";
 
 /**
  * `redirect()` dan `notFound()` milik Next.js bekerja dengan melempar galat.
@@ -45,23 +45,6 @@ describe("requirePageLogin", () => {
   it("memindahkan ke /login bila belum login", async () => {
     masukSebagai(null);
     await expect(requirePageLogin()).rejects.toThrow("PINDAH:/login");
-  });
-});
-
-describe("requirePageSuperadmin", () => {
-  it("meloloskan superadmin", async () => {
-    masukSebagai(true);
-    await expect(requirePageSuperadmin()).resolves.toMatchObject({ isSuperadmin: true });
-  });
-
-  it("menjawab 404 untuk pengguna biasa", async () => {
-    masukSebagai(false);
-    await expect(requirePageSuperadmin()).rejects.toThrow("TIDAK_DITEMUKAN");
-  });
-
-  it("memindahkan ke /login bila belum login", async () => {
-    masukSebagai(null);
-    await expect(requirePageSuperadmin()).rejects.toThrow("PINDAH:/login");
   });
 });
 

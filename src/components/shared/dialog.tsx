@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,9 @@ type DialogProps = {
 
 export function Dialog({ terbuka, saatTutup, judul, children, footer, className }: DialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  // Satu halaman bisa punya lebih dari satu dialog (mis. antrean + panel tolak).
+  // Tanpa id unik, `aria-labelledby` menunjuk judul dialog yang salah.
+  const idJudul = useId();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -39,7 +42,7 @@ export function Dialog({ terbuka, saatTutup, judul, children, footer, className 
     <dialog
       ref={dialogRef}
       className={cn("modal", className)}
-      aria-labelledby="dialog-judul"
+      aria-labelledby={idJudul}
       onClose={saatTutup}
       onCancel={(e) => {
         e.preventDefault();
@@ -52,7 +55,7 @@ export function Dialog({ terbuka, saatTutup, judul, children, footer, className 
     >
       <div className="modal__sheet">
         <div className="modal__header">
-          <h3 className="modal__title" id="dialog-judul">
+          <h3 className="modal__title" id={idJudul}>
             {judul}
           </h3>
           <button

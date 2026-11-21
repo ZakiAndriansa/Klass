@@ -12,3 +12,10 @@ Fungsi bantu kecil yang **aman dijalankan di peramban**. Folder ini tidak boleh 
 | `tujuan.ts`      | `tujuanAman()` dan `alamatLogin()`: alamat `?next=` setelah login, dibatasi ke halaman Klass sendiri |
 
 Fungsi bantu yang hanya dipakai backend tempatnya di `src/server`, bukan di sini.
+
+## akses-kelas.ts
+
+Menerjemahkan `ClassAccessDto` menjadi keputusan tampilan (`hakKelas`,
+`bolehKelolaSubkelas`, `labelPeran`). Satu-satunya tempat di frontend yang
+boleh membandingkan peran; komponen cukup bertanya "boleh atur kelas?".
+Ini hanya untuk tampilan — server tetap memeriksa izin di setiap endpoint.

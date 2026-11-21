@@ -1,6 +1,6 @@
 # src/app/(app)
 
-**Pemilik:** Aqil · **Reviewer wajib:** Aqil · **Status:** UI siap, backend belum
+**Pemilik:** Aqil · **Reviewer wajib:** Aqil · **Status:** Auth aktif, data kelas masih contoh
 
 Semua halaman yang hanya bisa dibuka setelah login: dasbor, halaman kelas, materi, jadwal, progress,
 dan anggota. Alamatnya bahasa Inggris (`/dashboard`, `/classes`); teks di dalam halaman tetap bahasa
@@ -11,7 +11,7 @@ Indonesia.
 ```
 (app)/
   layout.tsx                                pembungkus .ds untuk semua halaman login
-  dashboard/page.tsx                        /dashboard — dasbor pengguna tanpa peran
+  dashboard/page.tsx                        /dashboard — Meja (pengguna) / Loket (superadmin)
   classes/page.tsx                          /classes — daftar kelas yang diikuti
   classes/[classId]/page.tsx                /classes/123 — beranda kelas (ringkasan)
   classes/[classId]/schedule/page.tsx       /classes/123/schedule — jadwal mingguan
@@ -36,18 +36,26 @@ Progress, dan Anggota. Tab aktif ditentukan halaman masing-masing lewat prop `ak
 Hero memakai warna aksen kelas (`kelas-aksen--kuning|biru|lila|hijau`), jadi pindah kelas terasa
 pindah map, bukan pindah aplikasi.
 
-## Dasbor per peran
+## Meja per peran
 
-| Rute                 | Peran      | Bisa apa saja                                      |
-| -------------------- | ---------- | -------------------------------------------------- |
-| `/dashboard`         | pengguna   | ajukan kelas, masuk kelas, buka kelas yang diikuti |
-| `/classes`           | semua      | cari, filter, dan buka kelas                       |
-| `/classes/[classId]` | semua      | ringkasan, jadwal, materi, progress, anggota       |
-| `/admin`             | superadmin | setujui pengajuan, poster, moderasi                |
+`/dashboard` adalah satu rute dengan dua tampilan, dipilih dari
+`pengguna.isSuperadmin`. Tidak ada rute `/admin` terpisah.
 
-`/dashboard` adalah kondisi "belum punya peran": pengguna baru yang belum jadi PJ maupun admin
-kelas. Formulir pengajuan kelas tinggal di sana, bukan di halaman utama — pengajuan butuh akun
-karena status dan riwayatnya terikat ke pengguna. CTA di landing page mengarah ke `/login`.
+| Rute                 | Peran      | Bisa apa saja                                     |
+| -------------------- | ---------- | ------------------------------------------------- |
+| `/dashboard`         | pengguna   | agenda lintas kelas, tenggat, gabung kelas, kabar |
+| `/dashboard`         | superadmin | antrean pengajuan, undangan admin, kondisi situs  |
+| `/classes`           | semua      | cari, filter, dan buka kelas                      |
+| `/classes/[classId]` | semua      | ringkasan, jadwal, materi, progress, anggota      |
+
+Meja adalah keadaan "hari ini": pengguna baru yang belum punya kelas melihat
+onboarding di halaman yang sama (masuk lewat kode undangan atau ajukan kelas).
+Pengajuan butuh akun karena status dan riwayatnya terikat ke pengguna; CTA di
+landing page mengarah ke `/login`.
+
+Superadmin **tidak** dialihkan keluar dari `/dashboard`. Peran website dan
+peran kelas itu dua hal berbeda, jadi superadmin yang juga anggota kelas tetap
+punya agenda pribadi; yang berubah hanya isi halaman.
 
 Subkelas (mata kuliah) **bukan** rute terpisah. Ia data di dalam kelas dan dipakai sebagai filter
 materi serta label jadwal dan tugas, jadi tidak ada `/classes/123/subclasses/456`.
@@ -56,7 +64,6 @@ materi serta label jadwal dan tugas, jadi tidak ada `/classes/123/subclasses/456
 
 ```
 (app)/
-  profile/page.tsx                    /profile
   classes/request/page.tsx            /classes/request
   classes/join/page.tsx               /classes/join
 ```
@@ -72,7 +79,34 @@ lewat `forPage()` dari `@/server/permissions`, dan bila ditolak pengguna dipinda
 belum memanggil controller.
 
 Untuk tahu tombol mana yang ditampilkan, pakai `GET /api/v1/classes/{classId}/access`
-(`docs/api.md` bagian "Peran di sebuah kelas"). Menyembunyikan tombol hanya tampilan; server tetap
-memeriksa izin di setiap endpoint. Lihat `src/server/permissions/README.md`.
+(`docs/api.md` bagian "Peran di sebuah kelas") lalu terjemahkan dengan `hakKelas()` dari
+`src/lib/akses-kelas.ts`. Jangan menulis `if (role === ...)` di komponen. Menyembunyikan tombol
+hanya tampilan; server tetap memeriksa izin di setiap endpoint. Lihat
+`src/server/permissions/README.md`.
+
+## Sesi di navbar
+
+Komponen di `src/components` tidak boleh menyentuh backend (aturan folder di `eslint.config.mjs`).
+Karena itu navbar **tidak** membaca sesi sendiri: halaman yang membaca sesi lewat
+`getMySession()` (`@/server/controllers/session`) lalu mengirim `pengguna` sebagai prop ke `Navbar`.
+
+Karena membaca cookie, bagian navbar yang butuh sesi harus berada di dalam `<Suspense>`; dengan
+begitu sisa halaman tetap bisa diprerender. Pola ini dipakai di `/classes` dan kelima halaman kelas (lewat `RangkaKelasSesi`).
+
+## Tombol kanan di navbar
+
+Semua halaman area login memakai pola yang sama:
+
+| Halaman                   | Tombol kanan             |
+| ------------------------- | ------------------------ |
+| `/dashboard`              | `Beranda` → `/`          |
+| `/classes`, halaman kelas | `Meja` → `/dashboard`    |
+| 404 dan `/forbidden`      | `Ke Meja` → `/dashboard` |
+
+Di `/dashboard` tombolnya `Beranda`, bukan `Meja`: tombol yang menunjuk halaman
+yang sedang dibuka tidak ada gunanya.
+
+Tombol aksi navbar memakai radius pil (`--ds-radius-pill`), sama dengan chip
+profil di sebelahnya, supaya keduanya terbaca satu kelompok.
 
 Peta lengkap rute ada di skill `klass-halaman`.

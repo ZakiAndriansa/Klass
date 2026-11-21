@@ -17,7 +17,7 @@ export default function HalamanTidakDitemukan() {
         className="navbar--dash"
         merek="Klass"
         merekHref="/dashboard"
-        aksi={{ label: "Ke dasbor", href: "/dashboard" }}
+        aksi={{ label: "Ke Meja", href: "/dashboard" }}
       />
 
       <main className="halaman-404">
@@ -39,7 +39,7 @@ export default function HalamanTidakDitemukan() {
               </Link>
               <Link className="btn btn--secondary btn--md" href="/dashboard">
                 <Compass size={16} aria-hidden="true" />
-                Dasbor
+                Meja
               </Link>
             </div>
           </div>
