@@ -56,8 +56,8 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    // Controller memanggil model, tidak menulis query sendiri.
-    files: ["src/server/controllers/**", "src/server/http/**"],
+    // Controller dan lapisan izin memanggil model, tidak menulis query sendiri.
+    files: ["src/server/controllers/**", "src/server/http/**", "src/server/permissions/**"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -76,6 +76,21 @@ const eslintConfig = defineConfig([
                 "Hanya src/server/models yang boleh menyentuh database. Panggil fungsi model, atau minta Fadlan membuatkannya.",
             },
           ],
+        },
+      ],
+    },
+  },
+  {
+    // Body dibaca lewat `bacaJson(req)`, supaya body yang bukan JSON dijawab 400, bukan 500.
+    files: ["src/app/api/**"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "CallExpression[callee.property.name='json'][callee.object.name=/^(req|request)$/]",
+          message:
+            "Pakai bacaJson(req) dari @/server/http, bukan req.json(). Body yang bukan JSON harus dijawab 400.",
         },
       ],
     },

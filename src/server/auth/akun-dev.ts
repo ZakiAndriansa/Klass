@@ -19,56 +19,56 @@ import { ambilAuth } from "./konfigurasi";
  * Akun baru dimasukkan ke tabel `users` saat pertama kali dipakai masuk, lalu sesinya
  * dibuat Better Auth seperti login biasa. Tidak ada tabel atau kolom tambahan.
  *
- * CATATAN: peran admin kelas, PJ, dan anggota di sini baru berupa label. Tabel
- * `class_members` dan `subclass_pj` belum ada, jadi akun ini belum benar-benar
- * tergabung di kelas mana pun. Setelah tabelnya ada, keanggotaan akun ini diisi
- * lewat data contoh.
+ * CATATAN: peran admin kelas, PJ, dan anggota di sini baru berupa label. Akun ini
+ * belum tergabung di kelas mana pun, karena belum ada data contoh untuk tabel
+ * `class_members` dan `subclass_pj`. Sampai data contohnya dibuat, yang benar-benar
+ * berbeda hanya superadmin (`users.is_superadmin`).
  */
 export const AKUN_DEV: readonly AkunDevDto[] = [
   {
     id: "dev-superadmin",
-    nama: "Superadmin Contoh",
+    name: "Superadmin Contoh",
     email: "superadmin@klass.test",
-    peran: "superadmin",
-    labelPeran: "Superadmin",
-    keterangan: "Mengurus website: menyetujui pengajuan kelas dan mengelola poster.",
-    tujuan: "/admin",
+    role: "superadmin",
+    roleLabel: "Superadmin",
+    description: "Mengurus website: menyetujui pengajuan kelas dan mengelola poster.",
+    redirectTo: "/admin",
   },
   {
     id: "dev-admin-kelas",
-    nama: "Admin Kelas Contoh",
+    name: "Admin Kelas Contoh",
     email: "admin.kelas@klass.test",
-    peran: "admin_kelas",
-    labelPeran: "Admin kelas",
-    keterangan: "Mengatur satu kelas: tema, subkelas, PJ, serta kick dan ban anggota.",
-    tujuan: "/classes",
+    role: "class_admin",
+    roleLabel: "Admin kelas",
+    description: "Mengatur satu kelas: tema, subkelas, PJ, serta kick dan ban anggota.",
+    redirectTo: "/classes",
   },
   {
     id: "dev-pj",
-    nama: "PJ Contoh",
+    name: "PJ Contoh",
     email: "pj@klass.test",
-    peran: "pj",
-    labelPeran: "PJ subkelas",
-    keterangan: "Mengisi materi, jadwal, dan tugas di subkelas yang dipegangnya.",
-    tujuan: "/classes",
+    role: "subclass_pj",
+    roleLabel: "PJ subkelas",
+    description: "Mengisi materi, jadwal, dan tugas di subkelas yang dipegangnya.",
+    redirectTo: "/classes",
   },
   {
     id: "dev-anggota",
-    nama: "Anggota Contoh",
+    name: "Anggota Contoh",
     email: "anggota@klass.test",
-    peran: "anggota",
-    labelPeran: "Anggota",
-    keterangan: "Sudah bergabung di kelas: melihat materi, jadwal, dan tugas.",
-    tujuan: "/classes",
+    role: "member",
+    roleLabel: "Anggota",
+    description: "Sudah bergabung di kelas: melihat materi, jadwal, dan tugas.",
+    redirectTo: "/classes",
   },
   {
     id: "dev-pengguna",
-    nama: "Pengguna Baru Contoh",
+    name: "Pengguna Baru Contoh",
     email: "pengguna@klass.test",
-    peran: "pengguna",
-    labelPeran: "Pengguna baru",
-    keterangan: "Sudah punya akun tetapi belum bergabung di kelas mana pun.",
-    tujuan: "/dashboard",
+    role: "user",
+    roleLabel: "Pengguna baru",
+    description: "Sudah punya akun tetapi belum bergabung di kelas mana pun.",
+    redirectTo: "/dashboard",
   },
 ];
 
@@ -94,10 +94,10 @@ async function siapkanAkunDev(akun: AkunDevDto): Promise<void> {
   await db.transaction(async (tx) => {
     await tx.insert(users).values({
       id: akun.id,
-      name: akun.nama,
+      name: akun.name,
       email: akun.email,
       emailVerified: true,
-      isSuperadmin: akun.peran === "superadmin",
+      isSuperadmin: akun.role === "superadmin",
     });
 
     // Better Auth menyimpan kata sandi di tabel `accounts` dengan penyedia `credential`.

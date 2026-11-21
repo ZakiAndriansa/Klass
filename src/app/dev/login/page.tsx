@@ -6,7 +6,8 @@ import { PilihAkunDev } from "@/components/features/dev/pilih-akun-dev";
 import { Alert } from "@/components/shared/alert";
 import { Section, SectionInner } from "@/components/shared/section";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { daftarAkunDev, loginDevAktif, sesiDev } from "@/server/controllers/dev-auth";
+import { daftarAkunDev, loginDevAktif } from "@/server/controllers/dev-auth";
+import { sesiSaya } from "@/server/controllers/session";
 
 export const metadata: Metadata = {
   title: "Login pengembangan",
@@ -48,7 +49,7 @@ export default function HalamanLoginDev() {
 }
 
 async function IsiLoginDev() {
-  const [akun, sesi] = await Promise.all([daftarAkunDev(), sesiDev()]);
+  const [akun, sesi] = await Promise.all([daftarAkunDev(), sesiSaya()]);
 
   return <PilihAkunDev akun={akun} sesi={sesi} />;
 }

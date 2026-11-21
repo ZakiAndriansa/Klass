@@ -4,7 +4,7 @@ import { and, asc, eq, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
 import { db } from "@/server/db";
 import { classes } from "@/server/db/schema/kelas";
 import { assignmentReminders, assignments, subclasses } from "@/server/db/schema/subkelas";
-import { ConflictError } from "@/server/http/errors";
+import { ConflictError, ValidationError } from "@/server/http/errors";
 
 import { ambilHalaman, type Halaman, type Transaksi } from "./query";
 
@@ -57,7 +57,7 @@ async function simpanPengingat(
 ) {
   if (!waktuPengingat.length) return;
   if (waktuPengingat.some((remindAt) => detik(remindAt) >= detik(dueAt))) {
-    throw new ConflictError("Waktu pengingat harus sebelum tenggat tugas.");
+    throw new ValidationError("Waktu pengingat harus sebelum tenggat tugas.");
   }
 
   // Kunci unik pasangan tugas dan waktu juga menjaga pengingat yang sudah terkirim.
@@ -138,6 +138,15 @@ export const tugasModel = {
       .delete(assignments)
       .where(and(eq(assignments.id, id), filterKelas(classId)));
     return hasil.affectedRows > 0;
+  },
+
+  // Menampilkan semua pengingat yang terhubung dengan satu tugas
+  async daftarPengingat(assignmentId: string) {
+    return db
+      .select()
+      .from(assignmentReminders)
+      .where(eq(assignmentReminders.assignmentId, assignmentId))
+      .orderBy(asc(assignmentReminders.remindAt), asc(assignmentReminders.id));
   },
 
   // Daftar ini tidak mengklaim pekerjaan. Worker harus mencegah pemrosesan paralel

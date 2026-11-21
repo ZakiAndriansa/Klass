@@ -6,7 +6,7 @@ import { z } from "zod";
  */
 
 /** Peran yang punya akun contoh. Satu peran, satu akun. */
-export const PERAN_DEV = ["superadmin", "admin_kelas", "pj", "anggota", "pengguna"] as const;
+export const PERAN_DEV = ["superadmin", "class_admin", "subclass_pj", "member", "user"] as const;
 
 export type PeranDev = (typeof PERAN_DEV)[number];
 
@@ -14,30 +14,20 @@ export type PeranDev = (typeof PERAN_DEV)[number];
 export type AkunDevDto = {
   /** Sama dengan `users.id` akun ini di database. */
   id: string;
-  nama: string;
+  name: string;
   email: string;
-  peran: PeranDev;
+  role: PeranDev;
   /** Nama peran yang enak dibaca, misalnya "Admin kelas". */
-  labelPeran: string;
+  roleLabel: string;
   /** Penjelasan singkat apa yang bisa dilakukan peran ini. */
-  keterangan: string;
+  description: string;
   /** Halaman yang dibuka setelah masuk dengan akun ini. */
-  tujuan: string;
-};
-
-/** Pengguna yang sedang login. */
-export type SesiDevDto = {
-  idPengguna: string;
-  nama: string;
-  email: string;
-  isSuperadmin: boolean;
-  /** `null` bila yang login bukan salah satu akun contoh. */
-  peran: PeranDev | null;
+  redirectTo: string;
 };
 
 /** Body `POST /api/v1/dev/session`. */
 export const masukDevSchema = z.object({
-  idAkun: z.string({ error: "idAkun wajib diisi." }).trim().min(1, "idAkun wajib diisi."),
+  accountId: z.string({ error: "accountId wajib diisi." }).trim().min(1, "accountId wajib diisi."),
 });
 
 export type MasukDevInput = z.infer<typeof masukDevSchema>;

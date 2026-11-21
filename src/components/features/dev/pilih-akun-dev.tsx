@@ -8,26 +8,27 @@ import { GridKartu, KartuKertas } from "@/components/shared/kartu";
 import { ToastRegion, useToast } from "@/components/shared/toast";
 import { TombolKertas } from "@/components/shared/tombol-kertas";
 import { api, ApiError } from "@/lib/api-client";
-import type { AkunDevDto, PeranDev, SesiDevDto } from "@/types/api/dev-auth";
+import type { AkunDevDto, PeranDev } from "@/types/api/dev-auth";
+import type { SesiDto } from "@/types/api/session";
 
 /**
  * Daftar akun contoh untuk `/dev/login`: satu kartu per peran, tinggal diklik.
  *
- * Data akun dan sesi datang dari halaman lewat props. Komponen ini hanya
- * memanggil `/api/v1/dev/session` saat tombol ditekan.
+ * Data akun dan sesi datang dari halaman lewat props. Komponen ini memanggil
+ * `POST /api/v1/dev/session` untuk masuk dan `DELETE /api/v1/session` untuk keluar.
  */
 type PilihAkunDevProps = {
   akun: AkunDevDto[];
   /** Akun yang sedang dipakai, atau `null` bila belum masuk. */
-  sesi: SesiDevDto | null;
+  sesi: SesiDto | null;
 };
 
 const varianLencana: Record<PeranDev, "primary" | "info" | "success" | "warning" | "error"> = {
   superadmin: "error",
-  admin_kelas: "warning",
-  pj: "info",
-  anggota: "success",
-  pengguna: "primary",
+  class_admin: "warning",
+  subclass_pj: "info",
+  member: "success",
+  user: "primary",
 };
 
 function pesanGalat(galat: unknown): string {
@@ -44,11 +45,11 @@ export function PilihAkunDev({ akun, sesi }: PilihAkunDevProps) {
     setSedang(pilihan.id);
 
     try {
-      await api<SesiDevDto>("/dev/session", {
+      await api<SesiDto>("/dev/session", {
         method: "POST",
-        body: JSON.stringify({ idAkun: pilihan.id }),
+        body: JSON.stringify({ accountId: pilihan.id }),
       });
-      router.push(pilihan.tujuan);
+      router.push(pilihan.redirectTo);
       router.refresh();
     } catch (galat) {
       tampilkan(pesanGalat(galat), "error");
@@ -60,7 +61,7 @@ export function PilihAkunDev({ akun, sesi }: PilihAkunDevProps) {
     setSedang("keluar");
 
     try {
-      await api<null>("/dev/session", { method: "DELETE" });
+      await api<null>("/session", { method: "DELETE" });
       router.refresh();
       tampilkan("Kamu sudah keluar.", "sukses");
     } catch (galat) {
@@ -75,7 +76,7 @@ export function PilihAkunDev({ akun, sesi }: PilihAkunDevProps) {
       {sesi ? (
         <Alert
           varian="sukses"
-          judul={`Sedang masuk sebagai ${sesi.nama}`}
+          judul={`Sedang masuk sebagai ${sesi.name}`}
           pesan={`${sesi.email}. Pilih akun lain di bawah untuk berganti peran.`}
         />
       ) : (
@@ -88,14 +89,14 @@ export function PilihAkunDev({ akun, sesi }: PilihAkunDevProps) {
 
       <GridKartu>
         {akun.map((satu) => {
-          const dipakai = sesi?.idPengguna === satu.id;
+          const dipakai = sesi?.id === satu.id;
 
           return (
             <KartuKertas
               key={satu.id}
-              judul={satu.nama}
-              deskripsi={satu.keterangan}
-              lencana={{ label: satu.labelPeran, varian: varianLencana[satu.peran] }}
+              judul={satu.name}
+              deskripsi={satu.description}
+              lencana={{ label: satu.roleLabel, varian: varianLencana[satu.role] }}
               kode={satu.email}
               aksi={
                 <TombolKertas
@@ -105,7 +106,7 @@ export function PilihAkunDev({ akun, sesi }: PilihAkunDevProps) {
                   disabled={sedang !== null}
                   onClick={() => masuk(satu)}
                 >
-                  {dipakai ? "Buka halamannya" : `Masuk sebagai ${satu.labelPeran}`}
+                  {dipakai ? "Buka halamannya" : `Masuk sebagai ${satu.roleLabel}`}
                 </TombolKertas>
               }
             />
