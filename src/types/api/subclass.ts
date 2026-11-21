@@ -11,7 +11,7 @@ export const buatSubkelasSchema = z.object({
     .max(150, "Nama subkelas maksimal 150 karakter"),
   pjAwal: z
     .array(z.string().trim().min(1, "ID pengguna tidak boleh kosong."))
-    .max(2, "Pj awal maksimal 1 orang")
+    .max(1, "Pj awal maksimal 1 orang")
     .optional()
     .default([]),
 });
