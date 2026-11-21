@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const ubahProfilSchema = z.object({
+export const ubahProfileSchema = z.object({
   nama: z.string().trim().min(3, "Nama minimal 3 karakter.").max(50, "Nama maksimal 50 karakter."),
   avatarUrl: z
     .url({ protocol: /^https?$/ })
@@ -9,12 +9,14 @@ export const ubahProfilSchema = z.object({
     .optional(),
 });
 
-export type UbahProfilInput = z.infer<typeof ubahProfilSchema>;
+export type UbahProfileInput = z.infer<typeof ubahProfileSchema>;
 
-export type ProfilDto = {
-  id: string;
+export type PeranProfile = "superadmin" | "pengguna";
+
+export type ProfileDto = {
+  idPengguna: string;
   nama: string;
   email: string;
   avatarUrl: string | null;
-  role: "superadmin" | "user";
+  peran: PeranProfile;
 };
