@@ -7,10 +7,10 @@ Model adalah kumpulan fungsi yang membaca dan mengubah database. **Hanya folder 
 Satu berkas per modul, mengekspor satu objek:
 
 ```ts
-export const materiModel = {
+export const materialModel = {
   async buat(data) { ... },
-  async cariPerId(id) { ... },
-  async daftarPerSubkelas(subclassId, { page, limit }) { ... },
+  async findById(id) { ... },
+  async listBySubclass(subclassId, { page, limit }) { ... },
 };
 ```
 

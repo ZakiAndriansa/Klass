@@ -1,12 +1,12 @@
 import "server-only";
 import { eq } from "drizzle-orm";
 
-import { classes } from "@/server/db/schema/kelas";
+import { classes } from "@/server/db/schema/class";
 
-import type { Transaksi } from "./query";
+import type { Transaction } from "./query";
 
 // Operasi yang mengubah anggota atau PJ mengunci kelas terlebih dahulu.
-export async function kunciKelas(transaksi: Transaksi, classId: string) {
+export async function lockClass(transaksi: Transaction, classId: string) {
   const [kelas] = await transaksi
     .select()
     .from(classes)

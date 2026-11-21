@@ -3,35 +3,46 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ValidationError } from "@/server/http/errors";
 
-import { kelasModel } from "./kelas";
+import { classModel } from "./class";
 import {
   getConnection,
-  hasilHitung,
-  hasilTulis,
+  countResult,
+  writeResult,
   query,
   release,
-  resetMysqlTiruan,
-  waktu,
-} from "./uji/mysql";
+  resetMysqlMock,
+  sampleTime,
+} from "./testing/mysql";
 
 // Drizzle tetap membangun SQL dan memetakan hasil. Hanya driver MySQL yang ditiru.
-vi.mock("mysql2/promise", async () => (await import("./uji/mysql")).driver);
+vi.mock("mysql2/promise", async () => (await import("./testing/mysql")).driver);
 vi.mock("@/env", () => ({ env: { DATABASE_URL: "mysql://localhost/klass_test" } }));
 
 const idKelas = "db7c8c93-3b38-4ab2-9997-f13d98a80580";
 const dataKelas = { name: "Informatika A", createdBy: "pengguna-pengaju" };
 
 function barisDariMySQL(id: string) {
-  return [id, dataKelas.name, dataKelas.createdBy, "pending", 1, null, null, null, waktu, waktu];
+  return [
+    id,
+    dataKelas.name,
+    dataKelas.createdBy,
+    "pending",
+    1,
+    null,
+    null,
+    null,
+    sampleTime,
+    sampleTime,
+  ];
 }
 
-describe("kelasModel", () => {
-  beforeEach(resetMysqlTiruan);
+describe("classModel", () => {
+  beforeEach(resetMysqlMock);
 
   it("mencari kelas berdasarkan ID dan mengembalikan data kelas", async () => {
     query.mockResolvedValueOnce([[barisDariMySQL(idKelas)], []]);
 
-    await expect(kelasModel.cariPerId(idKelas)).resolves.toMatchObject({
+    await expect(classModel.findById(idKelas)).resolves.toMatchObject({
       id: idKelas,
       ...dataKelas,
     });
@@ -44,17 +55,17 @@ describe("kelasModel", () => {
   it("mengembalikan null bila ID kelas tidak ditemukan", async () => {
     query.mockResolvedValueOnce([[], []]);
 
-    await expect(kelasModel.cariPerId(idKelas)).resolves.toBeNull();
+    await expect(classModel.findById(idKelas)).resolves.toBeNull();
   });
 
   it("menyimpan kelas, membaca ID yang dibuat Drizzle, lalu mengembalikan baris lengkap", async () => {
     query
-      .mockResolvedValueOnce(hasilTulis) // BEGIN
-      .mockResolvedValueOnce(hasilTulis) // INSERT
+      .mockResolvedValueOnce(writeResult) // BEGIN
+      .mockResolvedValueOnce(writeResult) // INSERT
       .mockImplementationOnce(async (_, [id]) => [[barisDariMySQL(String(id))], []])
-      .mockResolvedValueOnce(hasilTulis); // COMMIT
+      .mockResolvedValueOnce(writeResult); // COMMIT
 
-    const kelas = await kelasModel.buat(dataKelas);
+    const kelas = await classModel.create(dataKelas);
 
     expect(kelas).toEqual({
       id: expect.stringMatching(/^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/),
@@ -85,12 +96,12 @@ describe("kelasModel", () => {
 
   it("membatalkan penyimpanan bila kelas yang baru dibuat tidak bisa ditemukan", async () => {
     query
-      .mockResolvedValueOnce(hasilTulis)
-      .mockResolvedValueOnce(hasilTulis)
+      .mockResolvedValueOnce(writeResult)
+      .mockResolvedValueOnce(writeResult)
       .mockResolvedValueOnce([[], []])
-      .mockResolvedValueOnce(hasilTulis);
+      .mockResolvedValueOnce(writeResult);
 
-    await expect(kelasModel.buat(dataKelas)).rejects.toThrow(
+    await expect(classModel.create(dataKelas)).rejects.toThrow(
       "Kelas yang baru dibuat tidak ditemukan.",
     );
     expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ sql: "rollback" }), []);
@@ -98,11 +109,11 @@ describe("kelasModel", () => {
   });
 
   it("membatasi daftar publik pada kelas aktif yang terdaftar", async () => {
-    query.mockResolvedValueOnce(hasilHitung(1));
+    query.mockResolvedValueOnce(countResult(1));
     query.mockResolvedValueOnce([[["kelas", "Dasar 100%", null]], []]);
 
-    await expect(kelasModel.daftarPublik({ page: 1, limit: 10 }, "100%")).resolves.toEqual({
-      baris: [{ id: "kelas", name: "Dasar 100%", style: null }],
+    await expect(classModel.listPublic({ page: 1, limit: 10 }, "100%")).resolves.toEqual({
+      rows: [{ id: "kelas", name: "Dasar 100%", style: null }],
       total: 1,
     });
     expect(query.mock.calls[1][1]).toEqual(["active", true, "%100!%%", 10]);
@@ -118,16 +129,16 @@ describe("kelasModel", () => {
     { page: 1, limit: 101 },
     { page: Number.MAX_SAFE_INTEGER, limit: 100 },
   ])("menolak pagination $page/$limit sebelum menjalankan SQL", async (halaman) => {
-    await expect(kelasModel.daftarPublik(halaman)).rejects.toThrow(ValidationError);
+    await expect(classModel.listPublic(halaman)).rejects.toThrow(ValidationError);
     expect(query).not.toHaveBeenCalled();
   });
 
   it("mengembalikan halaman kosong tanpa SELECT baris saat offset melebihi total", async () => {
-    query.mockResolvedValueOnce(hasilHitung(3));
+    query.mockResolvedValueOnce(countResult(3));
 
     await expect(
-      kelasModel.daftarPublik({ page: Number.MAX_SAFE_INTEGER, limit: 1 }),
-    ).resolves.toEqual({ baris: [], total: 3 });
+      classModel.listPublic({ page: Number.MAX_SAFE_INTEGER, limit: 1 }),
+    ).resolves.toEqual({ rows: [], total: 3 });
     expect(query).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({ sql: expect.stringContaining("count(") }),
       ["active", true],
@@ -135,10 +146,10 @@ describe("kelasModel", () => {
   });
 
   it("menerima batas 100 baris sesuai kontrak API", async () => {
-    query.mockResolvedValueOnce(hasilHitung(1));
+    query.mockResolvedValueOnce(countResult(1));
     query.mockResolvedValueOnce([[["kelas", "Kelas A", null]], []]);
 
-    await expect(kelasModel.daftarPublik({ page: 1, limit: 100 })).resolves.toMatchObject({
+    await expect(classModel.listPublic({ page: 1, limit: 100 })).resolves.toMatchObject({
       total: 1,
     });
     expect(query.mock.calls[1][1]).toEqual(["active", true, 100]);
@@ -149,25 +160,25 @@ describe("kelasModel", () => {
     const aktif = [...pending];
     aktif[3] = "active";
     query
-      .mockResolvedValueOnce(hasilTulis)
+      .mockResolvedValueOnce(writeResult)
       .mockResolvedValueOnce([[pending], []])
-      .mockResolvedValueOnce(hasilTulis)
-      .mockResolvedValueOnce(hasilTulis)
+      .mockResolvedValueOnce(writeResult)
+      .mockResolvedValueOnce(writeResult)
       .mockResolvedValueOnce([[aktif], []])
-      .mockResolvedValueOnce(hasilTulis);
+      .mockResolvedValueOnce(writeResult);
 
-    await expect(kelasModel.setujuiPengajuan(idKelas)).resolves.toMatchObject({ status: "active" });
+    await expect(classModel.approveRequest(idKelas)).resolves.toMatchObject({ status: "active" });
     expect(query.mock.calls[2][1]).toEqual([idKelas, dataKelas.createdBy, "admin", "admin"]);
     expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ sql: "commit" }), []);
   });
 
   it("mengembalikan null jika pengajuan yang hendak ditolak tidak ada", async () => {
     query
-      .mockResolvedValueOnce(hasilTulis)
+      .mockResolvedValueOnce(writeResult)
       .mockResolvedValueOnce([[], []])
-      .mockResolvedValueOnce(hasilTulis);
+      .mockResolvedValueOnce(writeResult);
 
-    await expect(kelasModel.tolakPengajuan(idKelas)).resolves.toBeNull();
+    await expect(classModel.rejectRequest(idKelas)).resolves.toBeNull();
     expect(query).toHaveBeenCalledTimes(3);
   });
 
@@ -175,24 +186,24 @@ describe("kelasModel", () => {
     const aktif = barisDariMySQL(idKelas);
     aktif[3] = "active";
     query
-      .mockResolvedValueOnce(hasilTulis)
+      .mockResolvedValueOnce(writeResult)
       .mockResolvedValueOnce([[aktif], []])
-      .mockResolvedValueOnce(hasilTulis);
+      .mockResolvedValueOnce(writeResult);
 
-    await expect(kelasModel.setujuiPengajuan(idKelas)).rejects.toThrow("sudah diputuskan");
+    await expect(classModel.approveRequest(idKelas)).rejects.toThrow("sudah diputuskan");
     expect(query).toHaveBeenCalledTimes(3);
     expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ sql: "rollback" }), []);
   });
 
   it("membatalkan penetapan pengaju sebagai admin jika aktivasi gagal", async () => {
     query
-      .mockResolvedValueOnce(hasilTulis)
+      .mockResolvedValueOnce(writeResult)
       .mockResolvedValueOnce([[barisDariMySQL(idKelas)], []])
-      .mockResolvedValueOnce(hasilTulis)
+      .mockResolvedValueOnce(writeResult)
       .mockRejectedValueOnce(new Error("aktivasi gagal"))
-      .mockResolvedValueOnce(hasilTulis);
+      .mockResolvedValueOnce(writeResult);
 
-    await expect(kelasModel.setujuiPengajuan(idKelas)).rejects.toHaveProperty(
+    await expect(classModel.approveRequest(idKelas)).rejects.toHaveProperty(
       "cause.message",
       "aktivasi gagal",
     );
@@ -201,11 +212,11 @@ describe("kelasModel", () => {
 
   it("mencegah kelas privat disimpan tanpa kode undangan", async () => {
     query
-      .mockResolvedValueOnce(hasilTulis)
+      .mockResolvedValueOnce(writeResult)
       .mockResolvedValueOnce([[barisDariMySQL(idKelas)], []])
-      .mockResolvedValueOnce(hasilTulis);
+      .mockResolvedValueOnce(writeResult);
 
-    await expect(kelasModel.ubahPengaturan(idKelas, { isListed: false })).rejects.toMatchObject({
+    await expect(classModel.updateSettings(idKelas, { isListed: false })).rejects.toMatchObject({
       status: 400,
       message: "Kelas yang tidak terdaftar harus memiliki kode undangan.",
     });
@@ -218,13 +229,13 @@ describe("kelasModel", () => {
     privat[5] = "KODE";
     privat[6] = 20;
     query
-      .mockResolvedValueOnce(hasilTulis)
-      .mockResolvedValueOnce(hasilTulis)
+      .mockResolvedValueOnce(writeResult)
+      .mockResolvedValueOnce(writeResult)
       .mockResolvedValueOnce([[privat], []])
-      .mockResolvedValueOnce(hasilTulis);
+      .mockResolvedValueOnce(writeResult);
 
     const opsi = { isListed: false, inviteCode: "KODE", memberLimit: 20 };
-    await expect(kelasModel.buat({ ...dataKelas, ...opsi })).resolves.toMatchObject(opsi);
+    await expect(classModel.create({ ...dataKelas, ...opsi })).resolves.toMatchObject(opsi);
     expect(query.mock.calls[1][1]).toEqual([
       expect.any(String),
       dataKelas.name,
@@ -238,12 +249,12 @@ describe("kelasModel", () => {
   it("mengubah kode undangan duplikat menjadi galat konflik", async () => {
     const duplikat = Object.assign(new Error("duplicate"), { code: "ER_DUP_ENTRY" });
     query
-      .mockResolvedValueOnce(hasilTulis)
+      .mockResolvedValueOnce(writeResult)
       .mockResolvedValueOnce([[barisDariMySQL(idKelas)], []])
       .mockRejectedValueOnce(duplikat)
-      .mockResolvedValueOnce(hasilTulis);
+      .mockResolvedValueOnce(writeResult);
 
-    await expect(kelasModel.ubahPengaturan(idKelas, { inviteCode: "KODE" })).rejects.toThrow(
+    await expect(classModel.updateSettings(idKelas, { inviteCode: "KODE" })).rejects.toThrow(
       "kelas lain",
     );
   });

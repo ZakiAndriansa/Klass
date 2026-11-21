@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ambilSesi, keluar } from "@/server/auth";
+import { getSession, signOut } from "@/server/auth";
 
-import { keluarSesi, sesiSaya } from "./session";
+import { endSession, getMySession } from "./session";
 
 /** Uji controller sesi. Folder auth diganti tiruan, jadi tidak butuh database. */
-vi.mock("@/server/auth", () => ({ ambilSesi: vi.fn(), keluar: vi.fn() }));
+vi.mock("@/server/auth", () => ({ getSession: vi.fn(), signOut: vi.fn() }));
 
 function masukSebagai(user: Record<string, unknown> | null) {
-  vi.mocked(ambilSesi).mockResolvedValue(
-    user === null ? null : ({ user } as Awaited<ReturnType<typeof ambilSesi>>),
+  vi.mocked(getSession).mockResolvedValue(
+    user === null ? null : ({ user } as Awaited<ReturnType<typeof getSession>>),
   );
 }
 
@@ -19,7 +19,7 @@ describe("controller sesi", () => {
   it("mengembalikan null bila belum login", async () => {
     masukSebagai(null);
 
-    await expect(sesiSaya()).resolves.toBeNull();
+    await expect(getMySession()).resolves.toBeNull();
   });
 
   it("mengembalikan identitas pengguna tanpa kolom lain dari tabel users", async () => {
@@ -33,7 +33,7 @@ describe("controller sesi", () => {
       createdAt: new Date(),
     });
 
-    await expect(sesiSaya()).resolves.toEqual({
+    await expect(getMySession()).resolves.toEqual({
       id: "u-1",
       name: "Budi",
       email: "budi@contoh.id",
@@ -45,14 +45,14 @@ describe("controller sesi", () => {
   it("keluar mengakhiri sesi yang sedang berjalan", async () => {
     masukSebagai({ id: "u-1" });
 
-    await expect(keluarSesi()).resolves.toBeNull();
-    expect(keluar).toHaveBeenCalledTimes(1);
+    await expect(endSession()).resolves.toBeNull();
+    expect(signOut).toHaveBeenCalledTimes(1);
   });
 
   it("keluar tanpa sesi tidak dianggap galat", async () => {
     masukSebagai(null);
 
-    await expect(keluarSesi()).resolves.toBeNull();
-    expect(keluar).not.toHaveBeenCalled();
+    await expect(endSession()).resolves.toBeNull();
+    expect(signOut).not.toHaveBeenCalled();
   });
 });

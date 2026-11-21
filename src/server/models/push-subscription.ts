@@ -2,19 +2,19 @@ import "server-only";
 import { and, asc, eq, inArray, sql, type SQL } from "drizzle-orm";
 
 import { db } from "@/server/db";
-import { classMembers } from "@/server/db/schema/kelas";
+import { classMembers } from "@/server/db/schema/class";
 import { pushSubscriptions } from "@/server/db/schema/website";
 import { ConflictError } from "@/server/http/errors";
 
-import { ambilHalaman, type Halaman } from "./query";
+import { paginate, type Pagination } from "./query";
 
-type LanggananBaru = Pick<
+type NewSubscription = Pick<
   typeof pushSubscriptions.$inferInsert,
   "userId" | "endpoint" | "p256dh" | "auth"
 >;
 
-async function daftarLangganan(filter: SQL, halaman: Halaman) {
-  return ambilHalaman(halaman, db.$count(pushSubscriptions, filter), (limit, offset) =>
+async function listSubscriptions(filter: SQL, halaman: Pagination) {
+  return paginate(halaman, db.$count(pushSubscriptions, filter), (limit, offset) =>
     db
       .select()
       .from(pushSubscriptions)
@@ -26,7 +26,7 @@ async function daftarLangganan(filter: SQL, halaman: Halaman) {
 }
 
 export const pushSubscriptionModel = {
-  async simpan({ userId, endpoint, p256dh, auth }: LanggananBaru) {
+  async save({ userId, endpoint, p256dh, auth }: NewSubscription) {
     return db.transaction(async (transaksi) => {
       // Saat endpoint sudah ada, kunci baris tanpa mengubah pemilik atau kunci push.
       await transaksi
@@ -54,19 +54,19 @@ export const pushSubscriptionModel = {
   },
 
   // Hasil berisi kunci push untuk pemrosesan internal dan perlu dipetakan sebelum ke API.
-  daftarPerPengguna(userId: string, halaman: Halaman) {
-    return daftarLangganan(eq(pushSubscriptions.userId, userId), halaman);
+  listByUser(userId: string, halaman: Pagination) {
+    return listSubscriptions(eq(pushSubscriptions.userId, userId), halaman);
   },
 
-  daftarPerKelas(classId: string, halaman: Halaman) {
+  listByClass(classId: string, halaman: Pagination) {
     const anggotaKelas = db
       .select({ userId: classMembers.userId })
       .from(classMembers)
       .where(eq(classMembers.classId, classId));
-    return daftarLangganan(inArray(pushSubscriptions.userId, anggotaKelas), halaman);
+    return listSubscriptions(inArray(pushSubscriptions.userId, anggotaKelas), halaman);
   },
 
-  async hapus(userId: string, endpoint: string) {
+  async remove(userId: string, endpoint: string) {
     const [hasil] = await db
       .delete(pushSubscriptions)
       .where(

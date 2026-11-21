@@ -2,35 +2,39 @@ import "server-only";
 import { and, asc, desc, eq, inArray, type SQL } from "drizzle-orm";
 
 import { db } from "@/server/db";
-import { materials, subclasses } from "@/server/db/schema/subkelas";
+import { materials, subclasses } from "@/server/db/schema/subclass";
 import { ValidationError } from "@/server/http/errors";
 
-import { ambilHalaman, type Halaman } from "./query";
+import { paginate, type Pagination } from "./query";
 
-type Materi = typeof materials.$inferSelect;
-type MateriBaru = Pick<
+type Material = typeof materials.$inferSelect;
+type NewMaterial = Pick<
   typeof materials.$inferInsert,
   "subclassId" | "uploadedBy" | "title" | "fileUrl" | "linkUrl" | "fileName" | "fileSize"
 >;
-type PerubahanMateri = Partial<Omit<MateriBaru, "subclassId" | "uploadedBy">>;
+type MaterialChanges = Partial<Omit<NewMaterial, "subclassId" | "uploadedBy">>;
 
-const idMateri = (subclassId: string, id: string) =>
+const materialFilter = (subclassId: string, id: string) =>
   and(eq(materials.subclassId, subclassId), eq(materials.id, id));
 
-async function bacaMateri(koneksi: Pick<typeof db, "select">, subclassId: string, id: string) {
-  const [materi] = await koneksi.select().from(materials).where(idMateri(subclassId, id)).limit(1);
+async function readMaterial(koneksi: Pick<typeof db, "select">, subclassId: string, id: string) {
+  const [materi] = await koneksi
+    .select()
+    .from(materials)
+    .where(materialFilter(subclassId, id))
+    .limit(1);
   return materi ?? null;
 }
 
-function pastikanAdaSumber(
-  fileUrl: Materi["fileUrl"] | undefined,
-  linkUrl: Materi["linkUrl"] | undefined,
+function ensureHasSource(
+  fileUrl: Material["fileUrl"] | undefined,
+  linkUrl: Material["linkUrl"] | undefined,
 ) {
   if (!fileUrl && !linkUrl) throw new ValidationError("Materi harus memiliki file atau tautan.");
 }
 
-async function daftarMateri(filter: SQL, halaman: Halaman) {
-  return ambilHalaman(halaman, db.$count(materials, filter), (limit, offset) =>
+async function listMaterials(filter: SQL, halaman: Pagination) {
+  return paginate(halaman, db.$count(materials, filter), (limit, offset) =>
     db
       .select()
       .from(materials)
@@ -41,63 +45,71 @@ async function daftarMateri(filter: SQL, halaman: Halaman) {
   );
 }
 
-export const materiModel = {
-  cariPerId(subclassId: string, id: string) {
-    return bacaMateri(db, subclassId, id);
+export const materialModel = {
+  findById(subclassId: string, id: string) {
+    return readMaterial(db, subclassId, id);
   },
 
-  daftarPerSubkelas(subclassId: string, halaman: Halaman) {
-    return daftarMateri(eq(materials.subclassId, subclassId), halaman);
+  listBySubclass(subclassId: string, halaman: Pagination) {
+    return listMaterials(eq(materials.subclassId, subclassId), halaman);
   },
 
-  daftarPerKelas(classId: string, halaman: Halaman) {
+  listByClass(classId: string, halaman: Pagination) {
     const subkelasDiKelas = db
       .select({ id: subclasses.id })
       .from(subclasses)
       .where(eq(subclasses.classId, classId));
-    return daftarMateri(inArray(materials.subclassId, subkelasDiKelas), halaman);
+    return listMaterials(inArray(materials.subclassId, subkelasDiKelas), halaman);
   },
 
-  async buat({ subclassId, uploadedBy, title, fileUrl, linkUrl, fileName, fileSize }: MateriBaru) {
-    pastikanAdaSumber(fileUrl, linkUrl);
+  async create({
+    subclassId,
+    uploadedBy,
+    title,
+    fileUrl,
+    linkUrl,
+    fileName,
+    fileSize,
+  }: NewMaterial) {
+    ensureHasSource(fileUrl, linkUrl);
     return db.transaction(async (transaksi) => {
       const [hasil] = await transaksi
         .insert(materials)
         .values({ subclassId, uploadedBy, title, fileUrl, linkUrl, fileName, fileSize })
         .$returningId();
       if (!hasil) throw new Error("ID materi yang baru dibuat tidak tersedia.");
-      const materi = await bacaMateri(transaksi, subclassId, hasil.id);
+      const materi = await readMaterial(transaksi, subclassId, hasil.id);
       if (!materi) throw new Error("Materi yang baru dibuat tidak ditemukan.");
       return materi;
     });
   },
 
-  async ubah(
+  async update(
     subclassId: string,
     id: string,
-    { title, fileUrl, linkUrl, fileName, fileSize }: PerubahanMateri,
+    { title, fileUrl, linkUrl, fileName, fileSize }: MaterialChanges,
   ) {
     return db.transaction(async (transaksi) => {
-      const filter = idMateri(subclassId, id);
+      const filter = materialFilter(subclassId, id);
       const [materi] = await transaksi.select().from(materials).where(filter).for("update");
       if (!materi) return null;
 
       const perubahan = { title, fileUrl, linkUrl, fileName, fileSize };
       if (Object.values(perubahan).every((nilai) => nilai === undefined)) return materi;
       if (fileUrl !== undefined || linkUrl !== undefined) {
-        pastikanAdaSumber(
+        ensureHasSource(
           fileUrl === undefined ? materi.fileUrl : fileUrl,
           linkUrl === undefined ? materi.linkUrl : linkUrl,
         );
       }
 
       await transaksi.update(materials).set(perubahan).where(filter);
-      return bacaMateri(transaksi, subclassId, id);
+      return readMaterial(transaksi, subclassId, id);
     });
   },
 
-  async hapus(subclassId: string, id: string) {
-    const [hasil] = await db.delete(materials).where(idMateri(subclassId, id));
+  async remove(subclassId: string, id: string) {
+    const [hasil] = await db.delete(materials).where(materialFilter(subclassId, id));
     return hasil.affectedRows > 0;
   },
 };

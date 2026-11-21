@@ -2,21 +2,21 @@ import "server-only";
 import { and, asc, eq, inArray, type SQL } from "drizzle-orm";
 
 import { db } from "@/server/db";
-import { schedules, subclasses } from "@/server/db/schema/subkelas";
+import { schedules, subclasses } from "@/server/db/schema/subclass";
 import { ValidationError } from "@/server/http/errors";
 
-import { ambilHalaman, type Halaman } from "./query";
+import { paginate, type Pagination } from "./query";
 
-type JadwalBaru = Pick<
+type NewSchedule = Pick<
   typeof schedules.$inferInsert,
   "subclassId" | "weekday" | "startTime" | "endTime"
 >;
-type PerubahanJadwal = Partial<Omit<JadwalBaru, "subclassId">>;
+type ScheduleChanges = Partial<Omit<NewSchedule, "subclassId">>;
 
-const idJadwal = (subclassId: string, id: string) =>
+const scheduleFilter = (subclassId: string, id: string) =>
   and(eq(schedules.subclassId, subclassId), eq(schedules.id, id));
 
-function detikDalamHari(waktu: string) {
+function secondsInDay(waktu: string) {
   if (!/^(?:[01]?\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(waktu)) {
     throw new ValidationError("Jam jadwal harus berupa waktu dalam satu hari.");
   }
@@ -25,25 +25,29 @@ function detikDalamHari(waktu: string) {
 }
 
 // 1 = Senin sampai 7 = Minggu, sama dengan CHECK `schedules_weekday_check` di database.
-function pastikanHari(weekday: number) {
+function ensureWeekday(weekday: number) {
   if (!Number.isInteger(weekday) || weekday < 1 || weekday > 7) {
     throw new ValidationError("Hari jadwal harus antara 1 (Senin) dan 7 (Minggu).");
   }
 }
 
-function pastikanUrutanJam(startTime: string, endTime: string) {
-  if (detikDalamHari(endTime) <= detikDalamHari(startTime)) {
+function ensureTimeOrder(startTime: string, endTime: string) {
+  if (secondsInDay(endTime) <= secondsInDay(startTime)) {
     throw new ValidationError("Jam selesai harus setelah jam mulai pada hari yang sama.");
   }
 }
 
-async function bacaJadwal(koneksi: Pick<typeof db, "select">, subclassId: string, id: string) {
-  const [jadwal] = await koneksi.select().from(schedules).where(idJadwal(subclassId, id)).limit(1);
+async function readSchedule(koneksi: Pick<typeof db, "select">, subclassId: string, id: string) {
+  const [jadwal] = await koneksi
+    .select()
+    .from(schedules)
+    .where(scheduleFilter(subclassId, id))
+    .limit(1);
   return jadwal ?? null;
 }
 
-async function daftarJadwal(filter: SQL, halaman: Halaman) {
-  return ambilHalaman(halaman, db.$count(schedules, filter), (limit, offset) =>
+async function listSchedules(filter: SQL, halaman: Pagination) {
+  return paginate(halaman, db.$count(schedules, filter), (limit, offset) =>
     db
       .select()
       .from(schedules)
@@ -54,59 +58,59 @@ async function daftarJadwal(filter: SQL, halaman: Halaman) {
   );
 }
 
-export const jadwalModel = {
-  cariPerId(subclassId: string, id: string) {
-    return bacaJadwal(db, subclassId, id);
+export const scheduleModel = {
+  findById(subclassId: string, id: string) {
+    return readSchedule(db, subclassId, id);
   },
 
-  daftarPerSubkelas(subclassId: string, halaman: Halaman) {
-    return daftarJadwal(eq(schedules.subclassId, subclassId), halaman);
+  listBySubclass(subclassId: string, halaman: Pagination) {
+    return listSchedules(eq(schedules.subclassId, subclassId), halaman);
   },
 
-  daftarPerKelas(classId: string, halaman: Halaman) {
+  listByClass(classId: string, halaman: Pagination) {
     const subkelasDiKelas = db
       .select({ id: subclasses.id })
       .from(subclasses)
       .where(eq(subclasses.classId, classId));
-    return daftarJadwal(inArray(schedules.subclassId, subkelasDiKelas), halaman);
+    return listSchedules(inArray(schedules.subclassId, subkelasDiKelas), halaman);
   },
 
-  async buat({ subclassId, weekday, startTime, endTime }: JadwalBaru) {
-    pastikanHari(weekday);
-    pastikanUrutanJam(startTime, endTime);
+  async create({ subclassId, weekday, startTime, endTime }: NewSchedule) {
+    ensureWeekday(weekday);
+    ensureTimeOrder(startTime, endTime);
     return db.transaction(async (transaksi) => {
       const [hasil] = await transaksi
         .insert(schedules)
         .values({ subclassId, weekday, startTime, endTime })
         .$returningId();
       if (!hasil) throw new Error("ID jadwal yang baru dibuat tidak tersedia.");
-      const jadwal = await bacaJadwal(transaksi, subclassId, hasil.id);
+      const jadwal = await readSchedule(transaksi, subclassId, hasil.id);
       if (!jadwal) throw new Error("Jadwal yang baru dibuat tidak ditemukan.");
       return jadwal;
     });
   },
 
-  async ubah(subclassId: string, id: string, { weekday, startTime, endTime }: PerubahanJadwal) {
+  async update(subclassId: string, id: string, { weekday, startTime, endTime }: ScheduleChanges) {
     const perubahan = { weekday, startTime, endTime };
     if (Object.values(perubahan).every((nilai) => nilai === undefined))
-      return bacaJadwal(db, subclassId, id);
-    if (weekday !== undefined) pastikanHari(weekday);
+      return readSchedule(db, subclassId, id);
+    if (weekday !== undefined) ensureWeekday(weekday);
 
     return db.transaction(async (transaksi) => {
-      const filter = idJadwal(subclassId, id);
+      const filter = scheduleFilter(subclassId, id);
       if (startTime !== undefined || endTime !== undefined) {
         const [jadwal] = await transaksi.select().from(schedules).where(filter).for("update");
         if (!jadwal) return null;
-        pastikanUrutanJam(startTime ?? jadwal.startTime, endTime ?? jadwal.endTime);
+        ensureTimeOrder(startTime ?? jadwal.startTime, endTime ?? jadwal.endTime);
       }
 
       await transaksi.update(schedules).set(perubahan).where(filter);
-      return bacaJadwal(transaksi, subclassId, id);
+      return readSchedule(transaksi, subclassId, id);
     });
   },
 
-  async hapus(subclassId: string, id: string) {
-    const [hasil] = await db.delete(schedules).where(idJadwal(subclassId, id));
+  async remove(subclassId: string, id: string) {
+    const [hasil] = await db.delete(schedules).where(scheduleFilter(subclassId, id));
     return hasil.affectedRows > 0;
   },
 };

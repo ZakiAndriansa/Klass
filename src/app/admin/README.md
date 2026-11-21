@@ -30,7 +30,7 @@ Superadmin mengurus website, bukan isi kelas. Karena itu dasbor ini **tidak** me
 subkelas, agenda, atau jadwal — semuanya milik admin kelas di `/classes/[classId]`.
 
 Pemeriksaan "apakah pengguna ini superadmin" dilakukan di server, bukan dengan menyembunyikan menu.
-Setiap halaman di folder ini memanggil `wajibSuperadmin()` dari `@/server/permissions` sebelum
+Setiap halaman di folder ini memanggil `requirePageSuperadmin()` dari `@/server/permissions` sebelum
 membuat isinya (contoh: `page.tsx`). Yang belum login dipindahkan ke `/login`; yang bukan
 superadmin mendapat halaman 404. Controller yang dipanggil halaman memakai `requireSuperadmin()`.
 Lihat `src/server/permissions/README.md`.

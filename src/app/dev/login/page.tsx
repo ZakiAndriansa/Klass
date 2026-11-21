@@ -6,8 +6,8 @@ import { PilihAkunDev } from "@/components/features/dev/pilih-akun-dev";
 import { Alert } from "@/components/shared/alert";
 import { Section, SectionInner } from "@/components/shared/section";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { daftarAkunDev, loginDevAktif } from "@/server/controllers/dev-auth";
-import { sesiSaya } from "@/server/controllers/session";
+import { listDevAccounts, isDevLoginEnabled } from "@/server/controllers/dev-auth";
+import { getMySession } from "@/server/controllers/session";
 
 export const metadata: Metadata = {
   title: "Login pengembangan",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
  * tanpa Google dan tanpa kata sandi. Di produksi halaman ini menjawab 404.
  */
 export default function HalamanLoginDev() {
-  if (!loginDevAktif()) {
+  if (!isDevLoginEnabled()) {
     notFound();
   }
 
@@ -49,7 +49,7 @@ export default function HalamanLoginDev() {
 }
 
 async function IsiLoginDev() {
-  const [akun, sesi] = await Promise.all([daftarAkunDev(), sesiSaya()]);
+  const [akun, sesi] = await Promise.all([listDevAccounts(), getMySession()]);
 
   return <PilihAkunDev akun={akun} sesi={sesi} />;
 }

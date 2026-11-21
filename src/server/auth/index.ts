@@ -6,6 +6,6 @@ import "server-only";
  * Kode lain mengimpor dari `@/server/auth`, bukan dari berkas di dalamnya:
  *   import { requireAuth } from "@/server/auth";
  */
-export { ambilAuth, penanganAuth, type Sesi } from "./konfigurasi";
-export { ambilSesi, keluar, requireAuth } from "./sesi";
-export { AKUN_DEV, cariAkunDev, masukAkunDev } from "./akun-dev";
+export { getAuth, authHandler, type Session } from "./config";
+export { getSession, signOut, requireAuth } from "./session";
+export { DEV_ACCOUNTS, findDevAccount, signInDevAccount } from "./dev-accounts";

@@ -6,7 +6,7 @@ import { z, ZodError } from "zod";
 import { AppError } from "./errors";
 import { fail } from "./response";
 
-type Penangan<Konteks> = (req: Request, ctx: Konteks) => Promise<Response>;
+type Handler<Konteks> = (req: Request, ctx: Konteks) => Promise<Response>;
 
 /**
  * Pembungkus semua fungsi di `route.ts`. Pemilik: Zaki.
@@ -17,9 +17,9 @@ type Penangan<Konteks> = (req: Request, ctx: Konteks) => Promise<Response>;
  *    sehingga `route.ts` tidak perlu menulis `try` dan `catch`.
  *
  * Pemakaian:
- *   export const GET = handle(async () => ok(await cekKesehatan()));
+ *   export const GET = handle(async () => ok(await checkHealth()));
  */
-export function handle<Konteks = unknown>(penangan: Penangan<Konteks>): Penangan<Konteks> {
+export function handle<Konteks = unknown>(penangan: Handler<Konteks>): Handler<Konteks> {
   return async (req, ctx) => {
     await connection();
 

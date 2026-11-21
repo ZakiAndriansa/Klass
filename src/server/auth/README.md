@@ -4,14 +4,14 @@
 
 Login dengan Better Auth (F1): konfigurasi, pembaca sesi, dan akun contoh untuk pengembangan.
 
-| Berkas           | Isi                                                                      |
-| ---------------- | ------------------------------------------------------------------------ |
-| `index.ts`       | Pintu masuk folder. Kode lain mengimpor dari `@/server/auth`             |
-| `konfigurasi.ts` | Konfigurasi Better Auth: sambungan ke database, kolom tambahan, penyedia |
-| `sesi.ts`        | `ambilSesi()`, `requireAuth()`, dan `keluar()`                           |
+| Berkas       | Isi                                                                      |
+| ------------ | ------------------------------------------------------------------------ |
+| `index.ts`   | Pintu masuk folder. Kode lain mengimpor dari `@/server/auth`             |
+| `config.ts`  | Konfigurasi Better Auth: sambungan ke database, kolom tambahan, penyedia |
+| `session.ts` | `getSession()`, `requireAuth()`, dan `signOut()`                         |
 
 Yang di sini hanya menjawab "siapa yang login". "Boleh melakukan apa" ada di `src/server/permissions`.
-| `akun-dev.ts` | Daftar akun contoh (satu per peran) dan cara masuk dengan akun itu |
+| `dev-accounts.ts` | Daftar akun contoh (satu per peran) dan cara masuk dengan akun itu |
 
 ## Membaca siapa yang login
 
@@ -26,7 +26,7 @@ export async function ambilProfil() {
 }
 ```
 
-Pakai `ambilSesi()` bila belum login bukan sebuah galat (hasilnya `null`).
+Pakai `getSession()` bila belum login bukan sebuah galat (hasilnya `null`).
 
 Frontend membaca sesi lewat `GET /api/v1/session` dan keluar lewat `DELETE /api/v1/session` (`src/server/controllers/session.ts`).
 
@@ -65,18 +65,18 @@ Tabel lain yang butuh pengguna merujuk ke `users.id` (varchar 36). Tidak ada tab
 
 ## Yang sudah dan belum ada
 
-| Hal                                              | Status                                                  |
-| ------------------------------------------------ | ------------------------------------------------------- |
-| Konfigurasi dasar dan skema tabel                | Ada                                                     |
-| Migrasi `drizzle/0000_tabel_auth.sql`            | Ada, sudah dicoba di MySQL 8.4 lokal                    |
-| Akun contoh, `/dev/login`, dan `/api/v1/dev/...` | Ada, hanya saat pengembangan                            |
-| Fungsi pembaca sesi (`requireAuth`, `ambilSesi`) | Ada                                                     |
-| URL `/api/auth/...`                              | Ada (`src/app/api/auth/[...all]/route.ts`)              |
-| Tombol Google di `/login` tersambung             | Ada. Tanpa kredensial, tombolnya menampilkan pesan      |
-| Sesi dan keluar yang berlaku di produksi         | Ada (`/api/v1/session`)                                 |
-| Kredensial Google Cloud di `.env`                | Belum (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`)      |
-| `BETTER_AUTH_SECRET` di `.env`                   | Belum. Tidak perlu saat pengembangan, wajib di produksi |
-| Dicoba dengan akun Google sungguhan              | Belum, menunggu kredensial                              |
+| Hal                                               | Status                                                  |
+| ------------------------------------------------- | ------------------------------------------------------- |
+| Konfigurasi dasar dan skema tabel                 | Ada                                                     |
+| Migrasi `drizzle/0000_tabel_auth.sql`             | Ada, sudah dicoba di MySQL 8.4 lokal                    |
+| Akun contoh, `/dev/login`, dan `/api/v1/dev/...`  | Ada, hanya saat pengembangan                            |
+| Fungsi pembaca sesi (`requireAuth`, `getSession`) | Ada                                                     |
+| URL `/api/auth/...`                               | Ada (`src/app/api/auth/[...all]/route.ts`)              |
+| Tombol Google di `/login` tersambung              | Ada. Tanpa kredensial, tombolnya menampilkan pesan      |
+| Sesi dan keluar yang berlaku di produksi          | Ada (`/api/v1/session`)                                 |
+| Kredensial Google Cloud di `.env`                 | Belum (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`)      |
+| `BETTER_AUTH_SECRET` di `.env`                    | Belum. Tidak perlu saat pengembangan, wajib di produksi |
+| Dicoba dengan akun Google sungguhan               | Belum, menunggu kredensial                              |
 
 ## Mengaktifkan login Google
 
@@ -94,6 +94,6 @@ Akun baru dibuat otomatis saat seseorang pertama kali masuk dengan Google, jadi 
 ## Aturan
 
 1. Folder ini satu-satunya di luar `src/server/models` yang boleh mengimpor `db`, karena Better Auth membaca dan menulis tabelnya sendiri.
-2. Controller dan halaman tidak memanggil Better Auth (`ambilAuth()`) langsung, tetapi lewat `requireAuth()` atau `ambilSesi()`. Pemeriksaan peran (siapa boleh apa) ada di `src/server/permissions`.
+2. Controller dan halaman tidak memanggil Better Auth (`getAuth()`) langsung, tetapi lewat `requireAuth()` atau `getSession()`. Pemeriksaan peran (siapa boleh apa) ada di `src/server/permissions`.
 3. `is_superadmin` hanya diubah langsung di database oleh pengelola. Pengecualiannya akun contoh `dev-superadmin`.
-4. Akun contoh hanya ditambah atau diubah di `akun-dev.ts`, bersamaan dengan `PERAN_DEV` di `src/types/api/dev-auth.ts`.
+4. Akun contoh hanya ditambah atau diubah di `dev-accounts.ts`, bersamaan dengan `DEV_ROLES` di `src/types/api/dev-auth.ts`.

@@ -8,8 +8,8 @@ import { GridKartu, KartuKertas } from "@/components/shared/kartu";
 import { ToastRegion, useToast } from "@/components/shared/toast";
 import { TombolKertas } from "@/components/shared/tombol-kertas";
 import { api, ApiError } from "@/lib/api-client";
-import type { AkunDevDto, PeranDev } from "@/types/api/dev-auth";
-import type { SesiDto } from "@/types/api/session";
+import type { DevAccountDto, DevRole } from "@/types/api/dev-auth";
+import type { SessionDto } from "@/types/api/session";
 
 /**
  * Daftar akun contoh untuk `/dev/login`: satu kartu per peran, tinggal diklik.
@@ -18,12 +18,12 @@ import type { SesiDto } from "@/types/api/session";
  * `POST /api/v1/dev/session` untuk masuk dan `DELETE /api/v1/session` untuk keluar.
  */
 type PilihAkunDevProps = {
-  akun: AkunDevDto[];
+  akun: DevAccountDto[];
   /** Akun yang sedang dipakai, atau `null` bila belum masuk. */
-  sesi: SesiDto | null;
+  sesi: SessionDto | null;
 };
 
-const varianLencana: Record<PeranDev, "primary" | "info" | "success" | "warning" | "error"> = {
+const varianLencana: Record<DevRole, "primary" | "info" | "success" | "warning" | "error"> = {
   superadmin: "error",
   class_admin: "warning",
   subclass_pj: "info",
@@ -41,11 +41,11 @@ export function PilihAkunDev({ akun, sesi }: PilihAkunDevProps) {
   /** `id` akun yang sedang diproses, atau `"keluar"` saat keluar. */
   const [sedang, setSedang] = useState<string | null>(null);
 
-  async function masuk(pilihan: AkunDevDto) {
+  async function masuk(pilihan: DevAccountDto) {
     setSedang(pilihan.id);
 
     try {
-      await api<SesiDto>("/dev/session", {
+      await api<SessionDto>("/dev/session", {
         method: "POST",
         body: JSON.stringify({ accountId: pilihan.id }),
       });

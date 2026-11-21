@@ -3,11 +3,11 @@ import "server-only";
 import type { db } from "@/server/db";
 import { ValidationError } from "@/server/http/errors";
 
-export type Halaman = { page: number; limit: number };
-export type Transaksi = Parameters<Parameters<typeof db.transaction>[0]>[0];
+export type Pagination = { page: number; limit: number };
+export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
-export async function ambilHalaman<T>(
-  { page, limit }: Halaman,
+export async function paginate<T>(
+  { page, limit }: Pagination,
   hitungTotal: PromiseLike<number>,
   ambilBaris: (limit: number, offset: number) => PromiseLike<T[]>,
 ) {
@@ -24,13 +24,13 @@ export async function ambilHalaman<T>(
 
   const total = await hitungTotal;
   // Hindari SELECT dengan OFFSET besar ketika halamannya di luar jumlah baris.
-  const baris = offset < total ? await ambilBaris(limit, offset) : [];
-  return { baris, total };
+  const rows = offset < total ? await ambilBaris(limit, offset) : [];
+  return { rows, total };
 }
 
-export function entriDuplikat(galat: unknown): boolean {
+export function isDuplicateEntry(galat: unknown): boolean {
   return (
     (galat instanceof Error && "code" in galat && galat.code === "ER_DUP_ENTRY") ||
-    (galat instanceof Error && galat.cause instanceof Error && entriDuplikat(galat.cause))
+    (galat instanceof Error && galat.cause instanceof Error && isDuplicateEntry(galat.cause))
   );
 }

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ambilSesi } from "@/server/auth";
+import { getSession } from "@/server/auth";
 import {
   ConflictError,
   ForbiddenError,
@@ -8,7 +8,7 @@ import {
   UnauthorizedError,
 } from "@/server/http/errors";
 
-import { untukHalaman, wajibLogin, wajibSuperadmin } from "./halaman";
+import { forPage, requirePageLogin, requirePageSuperadmin } from "./page";
 
 /**
  * `redirect()` dan `notFound()` milik Next.js bekerja dengan melempar galat.
@@ -22,52 +22,52 @@ vi.mock("next/navigation", () => ({
     throw new Error("TIDAK_DITEMUKAN");
   },
 }));
-vi.mock("@/server/auth", () => ({ ambilSesi: vi.fn() }));
+vi.mock("@/server/auth", () => ({ getSession: vi.fn() }));
 
 function masukSebagai(isSuperadmin: boolean | null) {
-  vi.mocked(ambilSesi).mockResolvedValue(
+  vi.mocked(getSession).mockResolvedValue(
     isSuperadmin === null
       ? null
       : ({ user: { id: "u-1", name: "Pengguna", isSuperadmin } } as Awaited<
-          ReturnType<typeof ambilSesi>
+          ReturnType<typeof getSession>
         >),
   );
 }
 
 beforeEach(() => vi.resetAllMocks());
 
-describe("wajibLogin", () => {
+describe("requirePageLogin", () => {
   it("mengembalikan pengguna bila sudah login", async () => {
     masukSebagai(false);
-    await expect(wajibLogin()).resolves.toMatchObject({ id: "u-1" });
+    await expect(requirePageLogin()).resolves.toMatchObject({ id: "u-1" });
   });
 
   it("memindahkan ke /login bila belum login", async () => {
     masukSebagai(null);
-    await expect(wajibLogin()).rejects.toThrow("PINDAH:/login");
+    await expect(requirePageLogin()).rejects.toThrow("PINDAH:/login");
   });
 });
 
-describe("wajibSuperadmin", () => {
+describe("requirePageSuperadmin", () => {
   it("meloloskan superadmin", async () => {
     masukSebagai(true);
-    await expect(wajibSuperadmin()).resolves.toMatchObject({ isSuperadmin: true });
+    await expect(requirePageSuperadmin()).resolves.toMatchObject({ isSuperadmin: true });
   });
 
   it("menjawab 404 untuk pengguna biasa", async () => {
     masukSebagai(false);
-    await expect(wajibSuperadmin()).rejects.toThrow("TIDAK_DITEMUKAN");
+    await expect(requirePageSuperadmin()).rejects.toThrow("TIDAK_DITEMUKAN");
   });
 
   it("memindahkan ke /login bila belum login", async () => {
     masukSebagai(null);
-    await expect(wajibSuperadmin()).rejects.toThrow("PINDAH:/login");
+    await expect(requirePageSuperadmin()).rejects.toThrow("PINDAH:/login");
   });
 });
 
-describe("untukHalaman", () => {
+describe("forPage", () => {
   it("meneruskan hasil controller bila berhasil", async () => {
-    await expect(untukHalaman(async () => ({ id: "kelas-a" }))).resolves.toEqual({ id: "kelas-a" });
+    await expect(forPage(async () => ({ id: "kelas-a" }))).resolves.toEqual({ id: "kelas-a" });
   });
 
   it.each([
@@ -76,7 +76,7 @@ describe("untukHalaman", () => {
     ["tidak punya izin (403)", new ForbiddenError(), "PINDAH:/forbidden"],
   ])("%s", async (_nama, galat, harapan) => {
     await expect(
-      untukHalaman(async () => {
+      forPage(async () => {
         throw galat;
       }),
     ).rejects.toThrow(harapan);
@@ -85,7 +85,7 @@ describe("untukHalaman", () => {
   it("meneruskan galat lain apa adanya supaya ditangani error.tsx", async () => {
     const galat = new ConflictError("Kelas sudah penuh.");
     await expect(
-      untukHalaman(async () => {
+      forPage(async () => {
         throw galat;
       }),
     ).rejects.toBe(galat);

@@ -15,7 +15,7 @@ import {
 } from "drizzle-orm/mysql-core";
 
 import { users } from "./auth";
-import { classes } from "./kelas";
+import { classes } from "./class";
 
 export const subclasses = mysqlTable(
   "subclasses",
@@ -40,18 +40,18 @@ export const subclasses = mysqlTable(
 );
 
 export const subclassesRelations = relations(subclasses, ({ one, many }) => ({
-  kelas: one(classes, {
+  class: one(classes, {
     fields: [subclasses.classId],
     references: [classes.id],
   }),
 
-  penanggungJawab: many(subclassPj),
+  pj: many(subclassPj),
 
-  materi: many(materials),
+  materials: many(materials),
 
-  jadwal: many(schedules),
+  schedules: many(schedules),
 
-  tugas: many(assignments),
+  assignments: many(assignments),
 }));
 
 export const subclassPj = mysqlTable(
@@ -81,12 +81,12 @@ export const subclassPj = mysqlTable(
 );
 
 export const subclassPjRelations = relations(subclassPj, ({ one }) => ({
-  subkelas: one(subclasses, {
+  subclass: one(subclasses, {
     fields: [subclassPj.subclassId],
     references: [subclasses.id],
   }),
 
-  pengguna: one(users, {
+  user: one(users, {
     fields: [subclassPj.userId],
     references: [users.id],
   }),
@@ -131,12 +131,12 @@ export const materials = mysqlTable(
 );
 
 export const materialsRelations = relations(materials, ({ one }) => ({
-  subkelas: one(subclasses, {
+  subclass: one(subclasses, {
     fields: [materials.subclassId],
     references: [subclasses.id],
   }),
 
-  pengunggah: one(users, {
+  uploader: one(users, {
     fields: [materials.uploadedBy],
     references: [users.id],
   }),
@@ -173,7 +173,7 @@ export const schedules = mysqlTable(
 );
 
 export const schedulesRelations = relations(schedules, ({ one }) => ({
-  subkelas: one(subclasses, {
+  subclass: one(subclasses, {
     fields: [schedules.subclassId],
     references: [subclasses.id],
   }),
@@ -216,17 +216,17 @@ export const assignments = mysqlTable(
 );
 
 export const assignmentsRelations = relations(assignments, ({ one, many }) => ({
-  subkelas: one(subclasses, {
+  subclass: one(subclasses, {
     fields: [assignments.subclassId],
     references: [subclasses.id],
   }),
 
-  pembuat: one(users, {
+  creator: one(users, {
     fields: [assignments.createdBy],
     references: [users.id],
   }),
 
-  pengingat: many(assignmentReminders),
+  reminders: many(assignmentReminders),
 }));
 
 export const assignmentReminders = mysqlTable(
@@ -261,7 +261,7 @@ export const assignmentReminders = mysqlTable(
 );
 
 export const assignmentRemindersRelations = relations(assignmentReminders, ({ one }) => ({
-  tugas: one(assignments, {
+  assignment: one(assignments, {
     fields: [assignmentReminders.assignmentId],
     references: [assignments.id],
   }),

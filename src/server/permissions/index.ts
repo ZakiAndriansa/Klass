@@ -7,13 +7,13 @@ import "server-only";
  *   import { requireClassAdmin } from "@/server/permissions";
  */
 export {
-  bacaAksesKelas,
+  readClassAccess,
   requireClassAdmin,
   requireClassMember,
   requireSubclassManager,
   requireSubclassMember,
-  type AksesKelas,
-  type OpsiIzin,
-} from "./kelas";
-export { untukHalaman, wajibLogin, wajibSuperadmin } from "./halaman";
+  type ClassAccess,
+  type PermissionOptions,
+} from "./class";
+export { forPage, requirePageLogin, requirePageSuperadmin } from "./page";
 export { requireSuperadmin } from "./superadmin";

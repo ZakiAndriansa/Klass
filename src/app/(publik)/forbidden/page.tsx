@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 /**
  * Halaman "tidak punya izin", beralamat `/forbidden`.
  *
- * Dibuka otomatis oleh `untukHalaman()` (`src/server/permissions`) saat controller
+ * Dibuka otomatis oleh `forPage()` (`src/server/permissions`) saat controller
  * menolak dengan 403: pengguna sudah login, tetapi perannya tidak cukup.
  *
  * Tampilannya sengaja memakai kelas yang sama dengan halaman 404 (`not-found.tsx`).

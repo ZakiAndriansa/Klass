@@ -5,7 +5,7 @@
  *
  * Pemeriksaan superadmin TIDAK ditaruh di sini. Next.js merender layout dan halaman
  * secara terpisah, jadi layout tidak bisa menahan isi halaman. Setiap halaman di
- * bawah `/admin` memeriksanya sendiri dengan `wajibSuperadmin()` (lihat `page.tsx`),
+ * bawah `/admin` memeriksanya sendiri dengan `requirePageSuperadmin()` (lihat `page.tsx`),
  * dan controller yang dipanggilnya memakai `requireSuperadmin()`.
  * Menyembunyikan menu bukan pengamanan.
  */

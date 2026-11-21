@@ -1,18 +1,18 @@
 import "server-only";
 
-import { requireAuth, type Sesi } from "@/server/auth";
+import { requireAuth, type Session } from "@/server/auth";
 import { ConflictError, ForbiddenError, NotFoundError } from "@/server/http/errors";
-import { anggotaKelasModel } from "@/server/models/anggota-kelas";
-import { kelasModel } from "@/server/models/kelas";
-import { subkelasModel } from "@/server/models/subkelas";
-import type { PeranKelas } from "@/types/api/class-access";
+import { classMemberModel } from "@/server/models/class-member";
+import { classModel } from "@/server/models/class";
+import { subclassModel } from "@/server/models/subclass";
+import type { ClassRole } from "@/types/api/class-access";
 
 /**
  * Izin tingkat kelas. Pemilik: Zaki.
  *
  * Controller memanggil salah satu fungsi `require...` SEBELUM memanggil model:
  *
- *   const { user, kelas } = await requireClassAdmin(classId);
+ *   const { user, classData } = await requireClassAdmin(classId);
  *
  * Bila lolos, fungsi mengembalikan siapa penggunanya dan kelasnya. Bila tidak,
  * fungsi melempar galat yang diubah `handle()` menjadi respons:
@@ -28,50 +28,50 @@ import type { PeranKelas } from "@/types/api/class-access";
  * biasa di kelas lain, jadi yang diperiksa selalu `classId` yang diminta.
  */
 
-type Pengguna = Sesi["user"];
-type Kelas = NonNullable<Awaited<ReturnType<typeof kelasModel.cariPerId>>>;
+type User = Session["user"];
+type ClassRow = NonNullable<Awaited<ReturnType<typeof classModel.findById>>>;
 
-export type AksesKelas = {
-  user: Pengguna;
-  kelas: Kelas;
+export type ClassAccess = {
+  user: User;
+  classData: ClassRow;
   /** `null` berarti bukan anggota kelas ini. */
-  role: PeranKelas | null;
+  role: ClassRole | null;
 };
 
 /** Untuk endpoint yang hanya membaca: kelas yang diarsipkan tetap boleh dibuka. */
-export type OpsiIzin = { bolehArsip?: boolean };
+export type PermissionOptions = { allowArchived?: boolean };
 
-const PESAN_TIDAK_ADA = "Kelas tidak ditemukan.";
-const PESAN_BUKAN_ADMIN = "Hanya admin kelas yang boleh melakukan ini.";
-const PESAN_BUKAN_PENGELOLA = "Hanya admin kelas atau PJ subkelas ini yang boleh melakukan ini.";
+const MESSAGE_NOT_FOUND = "Kelas tidak ditemukan.";
+const MESSAGE_NOT_ADMIN = "Hanya admin kelas yang boleh melakukan ini.";
+const MESSAGE_NOT_MANAGER = "Hanya admin kelas atau PJ subkelas ini yang boleh melakukan ini.";
 
 /**
  * Siapa pengguna ini di kelas tersebut. Tidak menolak yang bukan anggota;
  * penolakan dilakukan fungsi `require...` di bawah.
  */
-async function muatAkses(classId: string, pengguna?: Pengguna): Promise<AksesKelas> {
+async function loadAccess(classId: string, pengguna?: User): Promise<ClassAccess> {
   // Login diperiksa paling dulu, supaya yang belum login selalu mendapat 401.
   const user = pengguna ?? (await requireAuth());
 
-  const kelas = await kelasModel.cariPerId(classId);
+  const kelas = await classModel.findById(classId);
   // Pengajuan yang belum disetujui atau ditolak belum menjadi kelas.
   if (!kelas || kelas.status === "pending" || kelas.status === "rejected") {
-    throw new NotFoundError(PESAN_TIDAK_ADA);
+    throw new NotFoundError(MESSAGE_NOT_FOUND);
   }
 
-  const anggota = await anggotaKelasModel.cariAnggota(classId, user.id);
+  const anggota = await classMemberModel.findMember(classId, user.id);
 
-  return { user, kelas, role: anggota?.role ?? null };
+  return { user, classData: kelas, role: anggota?.role ?? null };
 }
 
 /** Kelas yang tidak terdaftar dianggap tidak ada bagi orang luar. */
-function tolakOrangLuar(kelas: Kelas): never {
-  if (!kelas.isListed) throw new NotFoundError(PESAN_TIDAK_ADA);
+function rejectOutsider(kelas: ClassRow): never {
+  if (!kelas.isListed) throw new NotFoundError(MESSAGE_NOT_FOUND);
   throw new ForbiddenError("Kamu belum menjadi anggota kelas ini.");
 }
 
-function pastikanBolehDiubah(kelas: Kelas, { bolehArsip = false }: OpsiIzin) {
-  if (kelas.status === "archived" && !bolehArsip) {
+function ensureEditable(kelas: ClassRow, { allowArchived = false }: PermissionOptions) {
+  if (kelas.status === "archived" && !allowArchived) {
     throw new ConflictError("Kelas ini sudah diarsipkan, jadi isinya tidak bisa diubah.");
   }
 }
@@ -80,12 +80,12 @@ function pastikanBolehDiubah(kelas: Kelas, { bolehArsip = false }: OpsiIzin) {
  * Boleh MELIHAT isi kelas: anggota kelas itu, atau superadmin (untuk moderasi).
  * Superadmin yang bukan anggota mendapat `role: null`.
  */
-export async function requireClassMember(classId: string): Promise<AksesKelas> {
-  return pastikanBolehMelihat(await muatAkses(classId));
+export async function requireClassMember(classId: string): Promise<ClassAccess> {
+  return ensureCanView(await loadAccess(classId));
 }
 
-function pastikanBolehMelihat(akses: AksesKelas): AksesKelas {
-  if (akses.role === null && !akses.user.isSuperadmin) tolakOrangLuar(akses.kelas);
+function ensureCanView(akses: ClassAccess): ClassAccess {
+  if (akses.role === null && !akses.user.isSuperadmin) rejectOutsider(akses.classData);
   return akses;
 }
 
@@ -93,21 +93,21 @@ function pastikanBolehMelihat(akses: AksesKelas): AksesKelas {
  * Boleh MENGATUR kelas: hanya admin kelas itu. Superadmin tidak termasuk,
  * karena superadmin mengurus website, bukan isi kelas.
  *
- * Kelas yang diarsipkan ditolak, kecuali `bolehArsip: true` (endpoint baca saja).
+ * Kelas yang diarsipkan ditolak, kecuali `allowArchived: true` (endpoint baca saja).
  */
 export async function requireClassAdmin(
   classId: string,
-  opsi: OpsiIzin = {},
-): Promise<AksesKelas & { role: "admin" }> {
-  const akses = await muatAkses(classId);
+  opsi: PermissionOptions = {},
+): Promise<ClassAccess & { role: "admin" }> {
+  const akses = await loadAccess(classId);
 
   if (akses.role === null) {
     // Superadmin boleh tahu kelasnya ada, jadi jawabannya 403, bukan 404.
-    if (akses.user.isSuperadmin) throw new ForbiddenError(PESAN_BUKAN_ADMIN);
-    tolakOrangLuar(akses.kelas);
+    if (akses.user.isSuperadmin) throw new ForbiddenError(MESSAGE_NOT_ADMIN);
+    rejectOutsider(akses.classData);
   }
-  if (akses.role !== "admin") throw new ForbiddenError(PESAN_BUKAN_ADMIN);
-  pastikanBolehDiubah(akses.kelas, opsi);
+  if (akses.role !== "admin") throw new ForbiddenError(MESSAGE_NOT_ADMIN);
+  ensureEditable(akses.classData, opsi);
 
   return { ...akses, role: "admin" };
 }
@@ -116,33 +116,33 @@ export async function requireClassAdmin(
  * Boleh MENGELOLA satu subkelas (materi, jadwal, tugas): admin kelasnya, atau
  * PJ subkelas ITU. PJ subkelas lain di kelas yang sama tidak boleh.
  */
-export async function requireSubclassManager(subclassId: string, opsi: OpsiIzin = {}) {
-  const { akses, subkelas } = await muatAksesSubkelas(subclassId);
+export async function requireSubclassManager(subclassId: string, opsi: PermissionOptions = {}) {
+  const { akses, subkelas } = await loadSubclassAccess(subclassId);
 
   if (akses.role !== "admin") {
-    const pj = await subkelasModel.cariPj(subclassId, akses.user.id);
-    if (!pj) throw new ForbiddenError(PESAN_BUKAN_PENGELOLA);
+    const pj = await subclassModel.findPj(subclassId, akses.user.id);
+    if (!pj) throw new ForbiddenError(MESSAGE_NOT_MANAGER);
   }
-  pastikanBolehDiubah(akses.kelas, opsi);
+  ensureEditable(akses.classData, opsi);
 
-  return { ...akses, subkelas };
+  return { ...akses, subclass: subkelas };
 }
 
 /** Boleh MELIHAT isi satu subkelas: anggota kelasnya, atau superadmin. */
 export async function requireSubclassMember(subclassId: string) {
-  const { akses, subkelas } = await muatAksesSubkelas(subclassId);
-  return { ...akses, subkelas };
+  const { akses, subkelas } = await loadSubclassAccess(subclassId);
+  return { ...akses, subclass: subkelas };
 }
 
-async function muatAksesSubkelas(subclassId: string) {
+async function loadSubclassAccess(subclassId: string) {
   const user = await requireAuth();
 
-  const subkelas = await subkelasModel.cariPerId(subclassId);
+  const subkelas = await subclassModel.findById(subclassId);
   if (!subkelas) throw new NotFoundError("Subkelas tidak ditemukan.");
 
-  let akses: AksesKelas;
+  let akses: ClassAccess;
   try {
-    akses = pastikanBolehMelihat(await muatAkses(subkelas.classId, user));
+    akses = ensureCanView(await loadAccess(subkelas.classId, user));
   } catch (galat) {
     // Kelasnya tidak boleh diketahui, maka subkelasnya juga tidak.
     if (galat instanceof NotFoundError) throw new NotFoundError("Subkelas tidak ditemukan.");
@@ -158,15 +158,15 @@ async function muatAksesSubkelas(subclassId: string) {
  * orang luar di kelas TERDAFTAR tidak ditolak: ia mendapat `role: null`,
  * supaya halaman bisa menampilkan tombol gabung.
  */
-export async function bacaAksesKelas(classId: string) {
-  const akses = await muatAkses(classId);
+export async function readClassAccess(classId: string) {
+  const akses = await loadAccess(classId);
 
-  if (akses.role === null && !akses.kelas.isListed && !akses.user.isSuperadmin) {
-    throw new NotFoundError(PESAN_TIDAK_ADA);
+  if (akses.role === null && !akses.classData.isListed && !akses.user.isSuperadmin) {
+    throw new NotFoundError(MESSAGE_NOT_FOUND);
   }
 
   const pjSubclassIds =
-    akses.role === null ? [] : await subkelasModel.daftarIdPerPj(classId, akses.user.id);
+    akses.role === null ? [] : await subclassModel.listIdsByPj(classId, akses.user.id);
 
   return { ...akses, pjSubclassIds };
 }

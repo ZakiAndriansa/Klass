@@ -61,7 +61,7 @@ export const pushSubscriptions = mysqlTable(
 );
 
 export const pushSubscriptionsRelations = relations(pushSubscriptions, ({ one }) => ({
-  pengguna: one(users, {
+  user: one(users, {
     fields: [pushSubscriptions.userId],
     references: [users.id],
   }),
