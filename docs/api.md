@@ -254,6 +254,21 @@ await api<SesiDto>("/dev/session", {
 const { data: sesi } = await api<SesiDto | null>("/session");
 ```
 
+### Subkelas (F7)
+
+`POST /api/v1/classes/{classId}/subclasses`
+
+Membuat subkelas baru di dalam kelas. `pjAwal` boleh tidak dikirim; isinya paling banyak 2 ID
+pengguna, dan semuanya harus sudah menjadi anggota kelas itu.
+
+| Hal                | Isi                                                                      |
+| ------------------ | ------------------------------------------------------------------------ |
+| Siapa yang boleh   | Admin kelas                                                              |
+| Body               | `{ "name": "Nama Subkelas", "pjAwal"?: ["user-id-1"] }`                  |
+| Respons berhasil   | 201 dengan `data: SubkelasDto`                                           |
+| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND` |
+| Tipe               | `SubkelasDto`, `BuatSubkelasInput` di `src/types/api/subclass.ts`        |
+
 ### Templat untuk endpoint baru
 
 Salin bagian ini lalu isi. Endpoint baru ditulis **di atas** bagian ini.
