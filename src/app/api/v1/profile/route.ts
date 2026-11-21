@@ -1,5 +1,5 @@
 import { ambilProfile, ubahProfile } from "@/server/controllers/profile";
-import { handle, ok } from "@/server/http";
+import { bacaJson, handle, ok } from "@/server/http";
 
 export const GET = handle(async () => {
   const profile = await ambilProfile();
@@ -7,7 +7,7 @@ export const GET = handle(async () => {
 });
 
 export const PATCH = handle(async (req) => {
-  const body = await req.json();
+  const body = await bacaJson(req);
   const profileBaru = await ubahProfile(body);
   return ok(profileBaru);
 });
