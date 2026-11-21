@@ -66,6 +66,14 @@
   --ds-color-well-shape: #c9bd9f;
   --ds-color-well-shape-alt: #b5aa8f;
 
+  /* --- Colors: Landing "Buka Mapnya" ---
+     Meja kerja untuk pita jelajah dan malam untuk undangan. `stamp-red`
+     dipakai bersama dengan Loket. */
+  --ds-color-desk: #e9dfc8;
+  --ds-color-desk-line: rgba(28, 25, 23, 0.07);
+  --ds-color-night: #171412;
+  --ds-color-stamp-red: #b83a32;
+
   /* --- Highlighter / Stabilo Marker ---
      Sengaja semi-transparan agar garis kertas tetap tembus, seperti sorotan
      stabilo asli. Dipakai badge, alert, toast, tooltip, dan header modal. */
@@ -301,22 +309,21 @@
     transparent 94%
   );
 
-  /* --- Dasbor (Figma "02 Dashboard Kelas" 60:775 & "03 Dashboard Admin" 60:776) ---
-     Kerangka dua kolom: sidebar 216px + konten 1122px di dalam frame 1440px.
-     Header 80px, jarak antar-blok 40px, kartu ringkasan 170px. */
-  --ds-dash-sidebar: 216px;
-  --ds-dash-head-height: 64px;
-  --ds-dash-pad: var(--ds-space-10);
-  --ds-dash-content-max: 1200px;
-  --ds-dash-paper: #faf7f0;
-  --ds-dash-folder-line: #e6dfd1;
-  --ds-dash-summary-height: 170px;
-  --ds-dash-folder-tab-width: 147.719px;
-  --ds-dash-folder-tab-height: 36.688px;
-  --ds-shadow-dash-card: 0 3px 0 var(--ds-color-border-ink), 0 5px 5px rgba(28, 25, 23, 0.14);
-  --ds-shadow-dash-sheet: 0 2px 0 var(--ds-color-rule-dashed), 0 6px 14px rgba(28, 25, 23, 0.08);
-  --ds-shadow-dash-panel: 0 4px 0 rgba(28, 25, 23, 0.16);
-  --ds-shadow-dash-nav: 0 4px 0 rgba(28, 25, 23, 0.18);
+  /* --- Bayangan panel kertas ---
+     Satu-satunya token yang tersisa dari dasbor lama. Dipakai panel Meja,
+     kartu kelas, dan panel progress, jadi namanya tidak lagi menyebut "dash". */
+  --ds-shadow-kertas-panel: 0 2px 0 var(--ds-color-rule-dashed), 0 6px 14px rgba(28, 25, 23, 0.08);
+
+  /* --- Landing "Buka Mapnya" ---
+     Artefak fitur, slip kertas, dan surat undangan di atas meja malam. */
+  --ds-peta-tab-height: 36px;
+  --ds-peta-gutter: calc(
+    max(0px, (100vw - var(--ds-container-wide-max)) / 2) + var(--ds-content-gutter)
+  );
+  --ds-shadow-artefak: 0 2px 0 var(--ds-color-folder-edge), 0 18px 32px -14px rgba(28, 25, 23, 0.3);
+  --ds-shadow-slip: 0 1px 0 var(--ds-color-rule-dashed), 0 10px 18px -10px rgba(28, 25, 23, 0.28);
+  --ds-shadow-surat:
+    0 30px 60px -24px rgba(0, 0, 0, 0.65), inset 0 1px 0 var(--ds-color-highlight-specular);
 
   /* --- Folder Card (Figma "file card") --- */
   --ds-folder-card-gap: 41px;
@@ -439,6 +446,11 @@
   --ds-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ds-ease-press: cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* --- Butir kertas ---
+     Sudah dipakai halaman auth; landing memakai ulang agar kertasnya sama. */
+  --ds-paper-grain: var(--ds-auth-paper-grain);
+  /* Sedikit memantul di ujung: dipakai kertas yang naik keluar dari map. */
+  --ds-ease-kertas: cubic-bezier(0.18, 0.92, 0.24, 1.04);
   /* --- Z-index --- */
   --ds-z-base: 1;
   --ds-z-tape: 5;

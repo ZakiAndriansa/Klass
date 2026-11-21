@@ -10,7 +10,7 @@ import {
 } from "@/components/features/kelas/data-contoh";
 import { IsiMateri } from "@/components/features/kelas/isi-materi";
 import { RangkaKelasMemuat } from "@/components/features/kelas/rangka-kelas-memuat";
-import { RangkaKelas } from "@/components/features/kelas/rangka-kelas";
+import { RangkaKelasSesi } from "../../rangka-sesi";
 
 export async function generateMetadata({
   params,
@@ -63,7 +63,7 @@ async function Isi({ params }: { params: Promise<{ classId: string; materialId: 
     : undefined;
 
   return (
-    <RangkaKelas kelas={kelas} aktif="materi">
+    <RangkaKelasSesi kelas={kelas} aktif="materi">
       <IsiMateri
         kelas={kelas}
         materi={materi}
@@ -72,6 +72,6 @@ async function Isi({ params }: { params: Promise<{ classId: string; materialId: 
         terkait={terkait}
         tugas={tugas}
       />
-    </RangkaKelas>
+    </RangkaKelasSesi>
   );
 }

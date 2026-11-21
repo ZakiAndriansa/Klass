@@ -7,13 +7,33 @@ Komponen milik satu fitur. Satu fitur satu subfolder:
 ```
 features/
   kelas/        daftar kelas, beranda kelas, jadwal, materi, progress, anggota
-  dasbor/       kerangka + isi dasbor pengguna dan superadmin
+  landing/      section halaman utama "Buka Mapnya"
+  meja/         isi /dashboard: Meja (pengguna) dan Loket (superadmin)
+  profil/       halaman /profile berbentuk buku (identitas + catatan kelas)
   admin/        tabel pengajuan kelas
   dev/          daftar akun contoh untuk /dev/login (khusus pengembangan)
 ```
 
 Satu subfolder dikerjakan satu orang supaya Rehan dan Darrel tidak mengubah berkas yang sama.
 Pembagiannya ditentukan Aqil. Subfolder dibuat saat fiturnya mulai dikerjakan.
+
+## features/landing
+
+Section halaman utama (`/`) setelah hero, dengan arah "Buka Mapnya". Rinciannya
+ada di `landing/README.md`.
+
+| Berkas             | Isi                                                  |
+| ------------------ | ---------------------------------------------------- |
+| `bab.tsx`          | penanda bab + kepala bab dua kolom                   |
+| `indeks-map.tsx`   | Client Component: indeks bab di tepi kanan           |
+| `manifesto.tsx`    | pernyataan + tiga prinsip kelas                      |
+| `isi-map.tsx`      | tiga fitur sebagai artefak meja                      |
+| `alur-arsip.tsx`   | tiga langkah bertab                                  |
+| `folder-kelas.tsx` | Client Component: map kelas buka/tutup + tiga berkas |
+| `peta-kelas.tsx`   | pita "Jelajahi semua kelas"                          |
+| `papan-kabar.tsx`  | siaran satu arah + poster acara                      |
+| `tanya-jawab.tsx`  | FAQ landing memakai `shared/accordion.tsx`           |
+| `surat-ajakan.tsx` | penutup undangan di meja malam                       |
 
 ## features/kelas
 
@@ -50,33 +70,33 @@ Rincian papan tugas, arti progres, dan endpoint yang direncanakan ada di `docs/p
 
 Gaya ada di `src/app/styles/klass/kelas.css`; token `--ds-*` di `tokens.css`.
 
-## features/dasbor
+## features/meja
 
-| Berkas                       | Peran      | Isi                                                 |
-| ---------------------------- | ---------- | --------------------------------------------------- |
-| `kerangka-dasbor.tsx`        | dua        | `KepalaDasbor` + sidebar + kolom konten             |
-| `sisi-dasbor.tsx`            | dua        | navigasi peran; item tanpa rute ditandai `nonaktif` |
-| `kerangka-dasbor-memuat.tsx` | dua        | fallback `<Suspense>` saat `params`/data dimuat     |
-| `dasbor-pengguna.tsx`        | pengguna   | kelas diikuti, masuk kelas, ajukan kelas, riwayat   |
-| `form-pengajuan-kelas.tsx`   | pengguna   | Client Component: formulir pengajuan + validasi     |
-| `form-masuk-kelas.tsx`       | pengguna   | Client Component: masuk kelas pakai kode undangan   |
-| `dasbor-superadmin.tsx`      | superadmin | ringkasan, antrean pengajuan, poster, moderasi      |
-| `tabel-pengajuan.tsx`        | superadmin | Client Component: setujui/tolak + toast             |
-| `kartu-ringkasan.tsx`        | dua        | kotak angka ringkasan di puncak dasbor              |
-| `data-contoh.ts`             | dua        | data contoh sampai controller siap                  |
+Isi `/dashboard`: satu rute dengan dua tampilan menurut peran global. Rincian
+ada di `meja/README.md`.
+
+| Berkas                     | Peran      | Isi                                               |
+| -------------------------- | ---------- | ------------------------------------------------- |
+| `meja.tsx`                 | pengguna   | agenda hari ini + keadaan onboarding              |
+| `agenda.tsx`               | pengguna   | agenda hari ini dan pita minggu                   |
+| `kolom-kanan.tsx`          | pengguna   | perhatian, tab map kelas, kabar, strip pengajuan  |
+| `loket.tsx`                | superadmin | antrean pengajuan, undangan admin, kondisi situs  |
+| `antrean-pengajuan.tsx`    | superadmin | Client Component: setujui, tolak beralasan, undo  |
+| `form-masuk-kelas.tsx`     | pengguna   | Client Component: masuk kelas pakai kode undangan |
+| `form-pengajuan-kelas.tsx` | pengguna   | Client Component: formulir pengajuan + validasi   |
+| `data-contoh.ts`           | dua        | data dummy per akun sampai controller siap        |
 
 Aturannya:
 
-1. Kerangka satu, isi terpisah. Jangan menyalin `kerangka-dasbor.tsx` per peran.
-2. Header dasbor hanya logo dan tombol keluar — `KepalaDasbor` di `kerangka-dasbor.tsx`, dipakai juga
-   oleh `kerangka-dasbor-memuat.tsx` supaya tidak ada lompatan tinggi header saat data dimuat.
-   Navigasi peran ada di sidebar, jadi `Navbar` dipanggil tanpa `item`.
-3. Jangan mencampur isi: superadmin tidak mengurus isi kelas, anggota biasa tidak mendapat alat
-   pengelolaan apa pun.
-4. Data masih contoh dan ditandai `TODO(api)` di komponennya. Saat backend siap, ganti impor
-   `data-contoh` dengan data dari controller.
+1. Satu rute, dua tampilan. Tidak ada lagi `/admin`; halaman memilih isi dari
+   `pengguna.isSuperadmin`, dan superadmin tetap punya agenda pribadinya.
+2. Meja hanya memuat yang tidak bisa dijawab halaman lain. Katalog kelas tetap
+   di `/classes`; riwayat pengajuan menyusul di halaman profil.
+3. Jangan mencampur isi: superadmin tidak mengurus isi kelas, anggota biasa
+   tidak mendapat alat pengelolaan apa pun.
+4. Data masih dummy dan ditandai `TODO(api)` di `data-contoh.ts`.
 5. Interaksi yang butuh state jadi Client Component kecil; sisanya Server Component.
 
-Gaya ada di `src/app/styles/klass/dashboard.css`; token `--ds-dash-*` di `tokens.css`.
+Gaya ada di `src/app/styles/klass/meja.css`; tidak ada token `--ds-dash-*` baru.
 
 Skill: `klass-komponen`.

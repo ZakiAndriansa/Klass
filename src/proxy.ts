@@ -13,7 +13,7 @@ import { alamatLogin } from "@/lib/tujuan";
  * INI BUKAN PENGAMANAN. Proxy hanya melihat "ada cookie atau tidak"; cookie palsu
  * akan lolos dari sini. Pemeriksaan sungguhan (sesi masih berlaku, perannya apa)
  * dilakukan di tempat lain:
- *   halaman   `requirePageLogin()` dan `requirePageSuperadmin()` di layout
+ *   halaman   `requirePageLogin()` dan `forPage()` di halaman
  *   data      `requireAuth()` dan `require...` di controller (`src/server/permissions`)
  *
  * Peran (admin kelas, PJ) sengaja tidak diperiksa di sini, karena peran berlaku per
@@ -32,5 +32,5 @@ export function proxy(request: NextRequest) {
 
 /** Halaman yang wajib login. `/api` tidak termasuk: API menjawab 401 dalam bentuk JSON. */
 export const config = {
-  matcher: ["/dashboard/:path*", "/classes/:path*", "/admin/:path*"],
+  matcher: ["/dashboard/:path*", "/classes/:path*", "/profile/:path*"],
 };

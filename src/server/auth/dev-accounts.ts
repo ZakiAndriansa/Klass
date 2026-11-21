@@ -32,7 +32,7 @@ export const DEV_ACCOUNTS: readonly DevAccountDto[] = [
     role: "superadmin",
     roleLabel: "Superadmin",
     description: "Mengurus website: menyetujui pengajuan kelas dan mengelola poster.",
-    redirectTo: "/admin",
+    redirectTo: "/dashboard",
   },
   {
     id: "dev-admin-kelas",

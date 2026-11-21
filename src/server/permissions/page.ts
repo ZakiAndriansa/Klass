@@ -14,8 +14,12 @@ import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/server/http/
  *   tidak ada           halaman 404
  *   tidak punya izin    pindah ke /forbidden
  *
- * Ketiga fungsi di bawah membaca cookie, jadi pemanggilnya harus berada di dalam
+ * Kedua fungsi di bawah membaca cookie, jadi pemanggilnya harus berada di dalam
  * `<Suspense>` (aturan Cache Components, lihat skill `klass-halaman`).
+ *
+ * Tidak ada lagi penjaga superadmin khusus halaman: `/admin` sudah disatukan ke
+ * `/dashboard`, dan halaman itu memilih tampilan dari `user.isSuperadmin` tanpa
+ * perlu menolak siapa pun.
  */
 
 const LOGIN_PAGE = "/login";
@@ -27,17 +31,6 @@ export async function requirePageLogin(): Promise<Session["user"]> {
   if (!sesi) redirect(LOGIN_PAGE);
 
   return sesi.user;
-}
-
-/**
- * Dipasang di layout `/admin`. Yang bukan superadmin mendapat 404, bukan
- * "tidak punya izin", supaya area admin tidak terlihat ada.
- */
-export async function requirePageSuperadmin(): Promise<Session["user"]> {
-  const user = await requirePageLogin();
-  if (!user.isSuperadmin) notFound();
-
-  return user;
 }
 
 /**

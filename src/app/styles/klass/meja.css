@@ -1,0 +1,1262 @@
+/* ==========================================================================
+   Component: Meja & Loket — `/dashboard`
+   Satu halaman, dua tampilan per peran:
+
+     Meja    agenda lintas kelas untuk pengguna biasa
+     Loket   antrean pengajuan untuk superadmin
+
+   Keduanya memakai bahasa visual kertas yang sama dengan halaman lain:
+   panel kertas, tab map, dan sticky note. Semua aturan dibatasi `.ds`.
+
+   Navigasi memakai satu navbar dengan tiga tab. Tidak ada sidebar: dulu
+   `/dashboard` dan `/admin` memakai sidebar yang menyalin tautan navbar,
+   sehingga ada dua sumber navigasi untuk tujuan yang sama.
+   ========================================================================== */
+
+.ds .meja-halaman {
+  flex: 1;
+  padding-block: clamp(var(--ds-space-10), 5vw, var(--ds-space-16))
+    clamp(var(--ds-space-12), 7vw, var(--ds-space-20));
+}
+
+.ds .meja {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+}
+
+/* --- Kepala halaman --- */
+.ds .meja-kepala {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  padding-bottom: var(--ds-space-5);
+  border-bottom: var(--ds-border-base) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .meja-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .meja-judul {
+  margin: 0;
+  font-size: clamp(var(--ds-text-2xl), 3.4vw, var(--ds-text-4xl));
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.ds .meja-rekap {
+  margin: 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: 1.6;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .meja-rekap--panjang {
+  max-width: 62ch;
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-lg);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ds-color-ink);
+}
+
+.ds .meja-kepala__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-3);
+}
+
+/* Panel agenda adalah isi utama Meja, jadi ia mendapat penekanan tipis:
+   garis atas lebih tebal, bukan kotak berbeda warna. */
+.ds .meja-panel--agenda {
+  padding-top: calc(var(--ds-space-5) - 2px);
+  border-top: 3px solid var(--ds-color-border-ink);
+}
+
+/* --- Susunan dua kolom: agenda di kiri, note + tab di kanan --- */
+.ds .meja-kolom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-space-5);
+  margin-top: var(--ds-space-5);
+}
+
+.ds .meja-kolom__utama,
+.ds .meja-kolom__sisi {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--ds-space-5);
+}
+
+@media (min-width: 940px) {
+  .ds .meja-kolom {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: var(--ds-space-6);
+    align-items: start;
+  }
+
+  /* Kolom kanan ikut menempel saat agenda panjang, seperti papan note di
+     samping meja kerja. */
+  .ds .meja-kolom__sisi {
+    position: sticky;
+    top: var(--ds-space-6);
+  }
+}
+
+/* --- Panel kertas --- */
+.ds .meja-panel {
+  padding: var(--ds-space-5);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-kertas-panel);
+}
+
+.ds .meja-panel__kepala {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  margin-bottom: var(--ds-space-4);
+  padding-bottom: var(--ds-space-3);
+  border-bottom: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .meja-panel__judul {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin: 0;
+  font-size: var(--ds-text-base);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.ds .meja-panel__meta {
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .meja-panel__tautan {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .meja-panel__tautan:hover {
+  color: var(--ds-color-ink);
+}
+
+/* --- Warna kelas --- */
+.ds .meja-warna--kuning {
+  --meja-aksen: var(--ds-color-primary);
+}
+
+.ds .meja-warna--biru {
+  --meja-aksen: var(--ds-color-secondary);
+}
+
+.ds .meja-warna--lila {
+  --meja-aksen: var(--ds-color-folder-lilac);
+}
+
+.ds .meja-warna--hijau {
+  --meja-aksen: var(--ds-color-folder-green);
+}
+
+/* --- Agenda hari ini --- */
+.ds .meja-agenda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .meja-agenda__baris {
+  --meja-aksen: var(--ds-color-folder-edge);
+
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 16px;
+  gap: var(--ds-space-3);
+  align-items: center;
+  padding: var(--ds-space-3);
+  background-color: var(--ds-color-paper-well);
+  border-left: 3px solid var(--meja-aksen);
+  border-radius: var(--ds-radius-xs);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform var(--ds-duration-base) var(--ds-ease-standard),
+    background-color var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .meja-agenda__baris:hover,
+.ds .meja-agenda__baris:focus-visible {
+  background-color: var(--ds-color-folder-bg);
+  transform: translateX(2px);
+}
+
+.ds .meja-agenda__baris.is-mendesak {
+  background-color: var(--ds-color-primary);
+  border-left-color: var(--ds-color-border-ink);
+}
+
+.ds .meja-agenda__baris.is-mendesak:hover,
+.ds .meja-agenda__baris.is-mendesak:focus-visible {
+  background-color: var(--ds-color-primary-hover);
+}
+
+.ds .meja-agenda__jam {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.ds .meja-agenda__isi {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ds .meja-agenda__judul {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds .meja-agenda__ikon {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.ds .meja-agenda__ket {
+  overflow: hidden;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .meja-agenda__baris.is-mendesak .meja-agenda__ket {
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .meja-agenda__panah {
+  flex-shrink: 0;
+  opacity: 0.35;
+}
+
+/* --- Pita minggu --- */
+.ds .meja-minggu {
+  /* Wadah geser sekaligus containing block. Tanpa `relative`, teks `sr-only`
+     di dalam hari berposisi `absolute` terhadap halaman, lolos dari kliping
+     `overflow-x`, dan membuat dokumen bisa digeser mendatar di ponsel. */
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--ds-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .meja-minggu__hari {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: var(--ds-space-2) 4px;
+  border: var(--ds-border-thin) solid var(--ds-color-rule-dashed);
+  border-radius: var(--ds-radius-xs);
+  text-align: center;
+}
+
+.ds .meja-minggu__hari.is-ini {
+  background-color: var(--ds-color-primary);
+  border-color: var(--ds-color-border-ink);
+}
+
+.ds .meja-minggu__label {
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .meja-minggu__hari.is-ini .meja-minggu__label {
+  color: var(--ds-color-ink);
+}
+
+.ds .meja-minggu__titik {
+  display: flex;
+  gap: 2px;
+  min-height: 6px;
+}
+
+.ds .meja-titik {
+  display: block;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: var(--ds-radius-pill);
+  background-color: var(--meja-aksen, var(--ds-color-folder-edge));
+}
+
+.ds .meja-minggu__jumlah {
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* --- Sticky note "Perlu perhatian" --- */
+.ds .meja-note {
+  position: relative;
+  padding: var(--ds-space-5);
+  background-color: var(--ds-color-note-blue);
+  border: var(--ds-border-thin) solid var(--ds-color-border-subtle);
+  border-radius: var(--ds-radius-xs);
+  box-shadow:
+    inset 0 1px 0 var(--ds-color-highlight-specular),
+    0 10px 20px rgba(28, 25, 23, 0.12);
+  transform: rotate(-0.6deg);
+}
+
+/* Selotip di atas note, memakai aset warna yang sudah ada. */
+.ds .meja-note__selotip {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 52px;
+  height: 18px;
+  transform: translateX(-50%) rotate(-2deg);
+  background-color: var(--ds-color-tape);
+  box-shadow: var(--ds-shadow-tape);
+}
+
+.ds .meja-note__judul {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .meja-note__rekap {
+  margin: var(--ds-space-2) 0 var(--ds-space-3);
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-lg);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.ds .meja-note__daftar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .meja-note__baris {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  padding-top: var(--ds-space-2);
+  border-top: var(--ds-border-thin) dashed rgba(28, 25, 23, 0.18);
+  text-decoration: none;
+  color: inherit;
+}
+
+.ds .meja-note__baris:hover .meja-note__nama,
+.ds .meja-note__baris:focus-visible .meja-note__nama {
+  text-decoration: underline;
+}
+
+.ds .meja-note__teks {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ds .meja-note__nama {
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.ds .meja-note__meta {
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--ds-color-ink-muted);
+}
+
+/* --- Tab map kelas --- */
+.ds .meja-map {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .meja-map__tab {
+  --meja-aksen: var(--ds-color-folder-bg);
+
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-left: 4px solid var(--meja-aksen);
+  border-radius: var(--ds-radius-sm) var(--ds-radius-sm) var(--ds-radius-sm) 0;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform var(--ds-duration-base) var(--ds-ease-standard),
+    background-color var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .meja-map__tab:hover,
+.ds .meja-map__tab:focus-visible {
+  background-color: var(--ds-color-folder-tab);
+  transform: translateX(3px);
+}
+
+.ds .meja-map__nama {
+  overflow: hidden;
+  flex: 1;
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds .meja-map__peran {
+  flex-shrink: 0;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .meja-map__baru {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  padding-inline: 4px;
+  background-color: var(--ds-color-primary);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-pill);
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* --- Kabar kelas --- */
+.ds .meja-kabar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .meja-kabar__baris {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  padding-top: var(--ds-space-2);
+  border-top: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+  text-decoration: none;
+  color: inherit;
+}
+
+.ds .meja-kabar li:first-child .meja-kabar__baris {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.ds .meja-kabar__ikon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--meja-aksen, var(--ds-color-ink-muted));
+}
+
+.ds .meja-kabar__teks {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ds .meja-kabar__judul {
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ds .meja-kabar__baris:hover .meja-kabar__judul,
+.ds .meja-kabar__baris:focus-visible .meja-kabar__judul {
+  text-decoration: underline;
+}
+
+.ds .meja-kabar__meta {
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--ds-color-ink-muted);
+}
+
+/* --- Strip pengajuan --- */
+.ds .meja-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-3);
+  margin-top: var(--ds-space-4);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background-color: var(--ds-color-warning-soft);
+  border-left: 3px solid var(--ds-color-warning);
+  border-radius: var(--ds-radius-xs);
+}
+
+.ds .meja-strip__label {
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .meja-strip__daftar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .meja-strip__baris {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.ds .meja-strip__nama {
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+}
+
+.ds .meja-strip__tautan {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .meja-strip__tautan:hover {
+  color: var(--ds-color-ink);
+}
+
+/* --- Blok gabung kelas di Meja yang sudah berisi --- */
+.ds .meja-gabung {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-5);
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-thin) dashed var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+}
+
+.ds .meja-gabung__judul {
+  margin: 0;
+  font-size: var(--ds-text-base);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.ds .meja-gabung__ket {
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.55;
+  color: var(--ds-color-ink-secondary);
+}
+
+/* --- Formulir --- */
+.ds .meja-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  width: 100%;
+  max-width: none;
+}
+
+.ds .meja-form__baris {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+}
+
+.ds .meja-form__baris .field__input,
+.ds .meja-form__baris input {
+  flex: 1;
+  min-width: 180px;
+}
+
+.ds .meja-form__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-3);
+}
+
+/* --- Onboarding --- */
+.ds .meja-kolom--onboarding {
+  align-items: start;
+}
+
+@media (min-width: 940px) {
+  .ds .meja-kolom--onboarding {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  /* Formulir panjang di kanan tidak boleh membuat kartu kiri ikut melar. */
+  .ds .meja-kolom--onboarding .meja-langkah {
+    align-self: start;
+  }
+}
+
+.ds .meja-langkah {
+  padding: var(--ds-space-5);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-kertas-panel);
+}
+
+.ds .meja-langkah--utama {
+  background-color: var(--ds-color-primary);
+}
+
+.ds .meja-langkah__nomor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding-inline: 5px;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.ds .meja-langkah__judul {
+  margin: var(--ds-space-3) 0 0;
+  font-size: var(--ds-text-lg);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.ds .meja-langkah__ket {
+  margin: var(--ds-space-2) 0 var(--ds-space-4);
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  color: var(--ds-color-ink-secondary);
+}
+
+/* --- Penjelasan isi kelas di onboarding --- */
+.ds .meja-isi-kelas {
+  margin-top: var(--ds-space-6);
+  padding-top: var(--ds-space-5);
+  border-top: var(--ds-border-base) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .meja-isi-kelas__judul {
+  margin: 0 0 var(--ds-space-4);
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .meja-isi-kelas__daftar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--ds-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .meja-isi-kelas__daftar li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: var(--ds-text-sm);
+  line-height: 1.55;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .meja-isi-kelas__daftar strong {
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-lg);
+  line-height: 1.2;
+  color: var(--ds-color-ink);
+}
+
+.ds .meja-isi-kelas__kaki {
+  margin: var(--ds-space-5) 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .meja-isi-kelas__kaki a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* --- Keadaan kosong kecil --- */
+.ds .meja-kosong-mini {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  color: var(--ds-color-ink-muted);
+}
+
+/* ==========================================================================
+   Loket superadmin
+   ========================================================================== */
+
+.ds .loket-kepala {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+}
+
+.ds .loket-rekap {
+  margin: 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  line-height: 1.6;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .loket-rekap__telat {
+  color: var(--ds-color-error);
+}
+
+.ds .loket-antrean {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  margin: var(--ds-space-5) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .loket-kartu {
+  padding: var(--ds-space-5);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-kertas-panel);
+}
+
+.ds .loket-kartu__kepala {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+}
+
+.ds .loket-kartu__judul {
+  margin: 0;
+  font-size: var(--ds-text-lg);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.ds .loket-kartu__sub {
+  margin: 2px 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .loket-umur {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  background-color: var(--ds-color-paper-well);
+  border-radius: var(--ds-radius-xs);
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.ds .loket-umur--telat {
+  background-color: var(--ds-color-error-soft);
+  color: var(--ds-color-error);
+}
+
+.ds .loket-kartu__deskripsi {
+  margin: var(--ds-space-3) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .loket-kartu__fakta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--ds-space-3);
+  margin: var(--ds-space-4) 0 0;
+  padding-block: var(--ds-space-3);
+  border-block: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .loket-kartu__fakta dt {
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .loket-kartu__fakta dd {
+  margin: 2px 0 0;
+  overflow: hidden;
+  font-size: var(--ds-text-sm);
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds .loket-kartu__email {
+  font-weight: 500;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .loket-sinyal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  margin: var(--ds-space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .loket-sinyal__item {
+  position: relative;
+  padding-left: var(--ds-space-4);
+  font-size: var(--ds-text-xs);
+  line-height: 1.5;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .loket-sinyal__item::before {
+  content: "·";
+  position: absolute;
+  left: 6px;
+  font-weight: 700;
+}
+
+.ds .loket-sinyal__item--waspada {
+  color: var(--ds-color-warning);
+}
+
+.ds .loket-sinyal__item--waspada::before {
+  content: "!";
+  color: var(--ds-color-warning);
+}
+
+.ds .loket-kartu__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-4);
+}
+
+.ds .loket-kartu__tanggal {
+  margin-left: auto;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  color: var(--ds-color-ink-muted);
+}
+
+/* --- Keadaan kosong: cap "Bersih" --- */
+.ds .loket-bersih {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-6);
+  padding: var(--ds-space-10) var(--ds-space-5);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) dashed var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-md);
+  text-align: center;
+}
+
+.ds .loket-bersih__cap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  margin-bottom: var(--ds-space-2);
+  border: var(--ds-border-thick) solid var(--ds-color-stamp-red);
+  border-radius: 50%;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ds-color-stamp-red);
+  transform: rotate(-7deg);
+}
+
+.ds .loket-bersih__pesan {
+  margin: 0;
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.ds .loket-bersih__meta {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  color: var(--ds-color-ink-muted);
+}
+
+/* --- Undo persetujuan --- */
+.ds .loket-undo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-4);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background-color: var(--ds-color-success-soft);
+  border-left: 3px solid var(--ds-color-success);
+  border-radius: var(--ds-radius-xs);
+  font-size: var(--ds-text-sm);
+}
+
+.ds .loket-undo span {
+  flex: 1;
+  min-width: 160px;
+}
+
+/* --- Dialog tolak --- */
+.ds .loket-dialog__ket {
+  margin: 0 0 var(--ds-space-4);
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .loket-dialog__cepat {
+  margin-top: var(--ds-space-4);
+}
+
+.ds .loket-dialog__cepat-label {
+  display: block;
+  margin-bottom: var(--ds-space-2);
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .loket-dialog__cepat-daftar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+}
+
+.ds .loket-dialog__chip {
+  padding: 5px 10px;
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-text-xs);
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.ds .loket-dialog__chip:hover,
+.ds .loket-dialog__chip:focus-visible {
+  background-color: var(--ds-color-folder-tab);
+}
+
+/* --- Panel bawah Loket --- */
+.ds .loket-bawah {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-space-4);
+  margin-top: var(--ds-space-6);
+}
+
+@media (min-width: 760px) {
+  .ds .loket-bawah {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ds .loket-panel {
+  padding: var(--ds-space-4);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-sm);
+}
+
+.ds .loket-undangan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .loket-undangan__baris {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  padding-bottom: var(--ds-space-2);
+  border-bottom: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .loket-undangan__baris:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.ds .loket-undangan__nama {
+  overflow: hidden;
+  font-size: var(--ds-text-sm);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds .loket-undangan__kelas {
+  overflow: hidden;
+  flex: 1;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .loket-undangan__umur {
+  flex-shrink: 0;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--ds-color-warning);
+}
+
+.ds .loket-kondisi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds .loket-kondisi__baris {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  line-height: 1.4;
+}
+
+.ds .loket-kondisi__baris.is-gagal {
+  color: var(--ds-color-error);
+}
+
+.ds .loket-kondisi__teks {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-weight: 600;
+}
+
+.ds .loket-kondisi__sub {
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .loket-pintu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2) var(--ds-space-4);
+  margin-top: var(--ds-space-5);
+}
+
+.ds .loket-pintu__tautan {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .loket-pintu__tautan:hover {
+  color: var(--ds-color-ink);
+}
+
+/* --- Kerangka muat --- */
+.ds .meja--memuat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+}
+
+.ds .meja-memuat__bar {
+  height: 16px;
+  background-color: var(--ds-color-paper-well);
+  border-radius: var(--ds-radius-xs);
+}
+
+.ds .meja-memuat__bar--eyebrow {
+  width: 32%;
+  height: 11px;
+}
+
+.ds .meja-memuat__bar--judul {
+  width: 46%;
+  height: 38px;
+}
+
+@media (max-width: 560px) {
+  /* Enam hari tidak muat di ponsel. Alih-alih memecah jadi dua baris yang
+     memutus urutan minggu, pita digeser mendatar. */
+  .ds .meja-minggu {
+    grid-template-columns: repeat(6, minmax(64px, 1fr));
+    gap: var(--ds-space-2);
+    overflow-x: auto;
+    padding-bottom: var(--ds-space-2);
+    scrollbar-width: thin;
+  }
+
+  .ds .meja-agenda__baris {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: var(--ds-space-2);
+  }
+
+  .ds .meja-agenda__panah {
+    display: none;
+  }
+
+  .ds .meja-strip__tautan {
+    margin-left: 0;
+  }
+}

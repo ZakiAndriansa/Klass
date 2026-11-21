@@ -9,6 +9,11 @@ import { cn } from "@/lib/utils";
  *
  * Perilaku dari galeri: satu item terbuka pada satu waktu; tombol +/− ikut
  * berganti glyph dan berputar 45° lewat CSS saat terbuka.
+ *
+ * Panel tidak memakai atribut `hidden` karena `hidden` tidak bisa
+ * dianimasikan. Sebagai gantinya panel selalu ada di DOM, tingginya
+ * dianimasikan lewat `grid-template-rows: 0fr → 1fr`, dan saat tertutup
+ * diberi `inert` supaya isinya keluar dari urutan Tab dan pohon aksesibilitas.
  */
 type ItemFaq = {
   tanya: string;
@@ -45,14 +50,17 @@ export function Accordion({ item, terbukaAwal = 0, className }: AccordionProps) 
                 {sedangTerbuka ? "\u2212" : "+"}
               </span>
             </button>
+
             <div
               className="accordion__panel"
               id={`${dasarId}-panel-${indeks}`}
               role="region"
               aria-labelledby={`${dasarId}-tombol-${indeks}`}
-              hidden={!sedangTerbuka}
+              inert={!sedangTerbuka}
             >
-              <div className="accordion__body">{faq.jawab}</div>
+              <div className="accordion__panel-inner">
+                <div className="accordion__body">{faq.jawab}</div>
+              </div>
             </div>
           </div>
         );

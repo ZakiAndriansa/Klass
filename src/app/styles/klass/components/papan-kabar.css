@@ -1,0 +1,265 @@
+/* ==========================================================================
+   Component: Papan Kabar (siaran + poster)
+   Tiga siaran yang ditusuk pin di kiri, satu poster acara di kanan. Semua
+   kertas sedikit miring; tidak ada tombol komentar atau aksi sosial.
+   ========================================================================== */
+
+.ds .papan-kabar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-space-12);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .ds .papan-kabar {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: clamp(var(--ds-space-8), 5vw, var(--ds-space-16));
+  }
+}
+
+.ds .papan-kabar__siaran {
+  min-width: 0;
+}
+
+.ds .papan-kabar__kepala {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  padding-bottom: var(--ds-space-2);
+  margin-bottom: var(--ds-space-6);
+  border-bottom: var(--ds-border-base) solid var(--ds-color-border-ink);
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+}
+
+.ds .papan-kabar__kepala span:last-child {
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .siaran-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-6);
+  list-style: none;
+}
+
+.ds .siaran {
+  --siaran-aksen: var(--ds-color-info);
+
+  position: relative;
+  padding: var(--ds-space-5) var(--ds-space-5) var(--ds-space-4);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-left: 5px solid var(--siaran-aksen);
+  border-radius: var(--ds-radius-xs);
+  box-shadow: var(--ds-shadow-slip);
+  transform: rotate(var(--siaran-rot, 0deg));
+}
+
+.ds .siaran-list li:nth-child(1) .siaran {
+  --siaran-rot: -0.6deg;
+}
+
+.ds .siaran-list li:nth-child(2) .siaran {
+  --siaran-rot: 0.4deg;
+}
+
+.ds .siaran-list li:nth-child(3) .siaran {
+  --siaran-rot: -0.3deg;
+}
+
+.ds .siaran--warning {
+  --siaran-aksen: var(--ds-color-warning);
+}
+
+.ds .siaran--info {
+  --siaran-aksen: var(--ds-color-info);
+}
+
+.ds .siaran--success {
+  --siaran-aksen: var(--ds-color-success);
+}
+
+.ds .siaran__pin {
+  position: absolute;
+  top: calc(-1 * var(--ds-space-3));
+  left: var(--ds-space-5);
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-pill);
+  box-shadow: 0 2px 0 rgba(28, 25, 23, 0.18);
+}
+
+.ds .siaran__kepala {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin-bottom: var(--ds-space-3);
+}
+
+.ds .siaran__sumber {
+  margin-left: auto;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .siaran h3 {
+  margin: 0 0 var(--ds-space-1);
+  font-size: var(--ds-text-lg);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.ds .siaran p {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.6;
+  color: var(--ds-color-ink-secondary);
+}
+
+/* --- Poster acara --- */
+.ds .poster-agenda {
+  position: relative;
+  justify-self: end;
+  width: 100%;
+  max-width: 390px;
+  padding: var(--ds-space-8) var(--ds-space-6) 0;
+  background-color: var(--ds-color-secondary);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  box-shadow: var(--ds-shadow-poster);
+  transform: rotate(1.2deg);
+}
+
+@media (max-width: 899px) {
+  .ds .poster-agenda {
+    justify-self: center;
+    max-width: 420px;
+    transform: rotate(0.7deg);
+  }
+}
+
+.ds .poster-agenda__tape {
+  position: absolute;
+  top: calc(-1 * var(--ds-space-3));
+  left: 50%;
+  width: 110px;
+  height: 24px;
+  transform: translateX(-50%) rotate(-2deg);
+  background-color: var(--ds-color-tape);
+  box-shadow: var(--ds-shadow-tape);
+}
+
+.ds .poster-agenda__label {
+  display: block;
+  margin-bottom: var(--ds-space-4);
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+}
+
+.ds .poster-agenda__kicker {
+  margin: 0 0 var(--ds-space-2);
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.ds .poster-agenda__judul {
+  margin: 0 0 var(--ds-space-6);
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.ds .poster-agenda__detail {
+  margin: 0;
+  border-top: var(--ds-border-base) dashed var(--ds-color-border-ink);
+}
+
+.ds .poster-agenda__detail div {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: var(--ds-space-2);
+  padding-block: var(--ds-space-2);
+  border-bottom: var(--ds-border-thin) dashed var(--ds-color-border-subtle);
+}
+
+.ds .poster-agenda__detail dt {
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .poster-agenda__detail dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ds .poster-agenda__kaki {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding-block: var(--ds-space-4);
+}
+
+.ds .poster-agenda__kaki > span:first-child {
+  max-width: 18ch;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ds .poster-agenda__cap {
+  flex-shrink: 0;
+  padding: 5px 8px;
+  border: var(--ds-border-thick) solid var(--ds-color-stamp-red);
+  border-radius: 2px;
+  color: var(--ds-color-stamp-red);
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: rotate(-6deg);
+}
+
+.ds .poster-agenda__robek {
+  padding: var(--ds-space-3) 0 var(--ds-space-4);
+  border-top: var(--ds-border-base) dashed var(--ds-color-border-ink);
+  overflow: hidden;
+  font-family: var(--ds-font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.7;
+}

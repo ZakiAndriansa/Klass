@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { AvatarPengguna } from "@/components/shared/avatar-pengguna";
 import { LambangKlass } from "@/components/shared/lambang-klass";
-import { TombolKeluar } from "@/components/shared/tombol-keluar";
 import { TautanTombolKertas } from "@/components/shared/tombol-kertas";
 
 /**
@@ -16,9 +16,18 @@ import { TautanTombolKertas } from "@/components/shared/tombol-kertas";
  * - menekan Escape menutup drawer;
  * - menu otomatis tertutup bila layar dilebarkan ke >= 768px.
  *
- * `item` boleh kosong. Di dasbor navigasi peran sudah ada di sidebar, jadi
- * header cukup menampilkan logo dan tombol keluar — tanpa tab tengah, tanpa
- * tombol drawer.
+ * `item` boleh kosong. Halaman kelas dan dedikasi memakai navbar tanpa tab
+ * tengah karena navigasinya ada di hero halaman, jadi header cukup menampilkan
+ * logo, tombol Meja, dan identitas pengguna.
+ *
+ * `aksi` sengaja hanya tautan biasa. Mengakhiri sesi bukan urusan navbar:
+ * keluar hanya bisa dilakukan dari buku profil, supaya tidak ada tombol
+ * berbahaya yang menempel di setiap halaman.
+ *
+ * `pengguna` diisi Server Component dari `getMySession()`. Bila ada, navbar
+ * menampilkan avatar dan tautan ke `/profile`; bila tidak, hanya tombol masuk.
+ * Komponen ini tidak mengambil sesi sendiri karena Client Component tidak
+ * boleh membaca database.
  *
  * `Client Component` karena butuh state. Jangan taruh pengambilan data di sini.
  */
@@ -29,17 +38,24 @@ type ItemNavigasi = {
   aktif?: boolean;
 };
 
+/** Identitas ringkas untuk sudut kanan navbar. */
+export type PenggunaNavbar = {
+  name: string;
+  image: string | null;
+};
+
 type NavbarProps = {
   merek?: string;
-  /** Tujuan logo. Di halaman publik cukup `#top`; di dasbor arahkan ke `/`. */
+  /** Tujuan logo. Di halaman publik cukup `#top`; di area login arahkan ke `/dashboard`. */
   merekHref?: string;
   /** Tautan tengah. Kosongkan bila navigasi sudah ada di tempat lain. */
   item?: ItemNavigasi[];
-  /**
-   * Tombol di kanan, misalnya "Ajukan kelas".
-   * Dengan `keluar: true` tombol ini mengakhiri sesi dulu, baru pindah ke `href`.
-   */
-  aksi?: { label: string; href: string; keluar?: boolean };
+  /** Tombol di kanan, misalnya "Ajukan kelas" atau "Meja". Selalu tautan biasa. */
+  aksi?: { label: string; href: string };
+  /** Identitas pengguna yang sedang login. Kosong berarti belum masuk. */
+  pengguna?: PenggunaNavbar | null;
+  /** Tandai halaman profil sedang dibuka. */
+  profilAktif?: boolean;
   className?: string;
 };
 
@@ -48,6 +64,8 @@ export function Navbar({
   merekHref = "#top",
   item = [],
   aksi,
+  pengguna,
+  profilAktif = false,
   className,
 }: NavbarProps) {
   const adaMenu = item.length > 0;
@@ -98,10 +116,24 @@ export function Navbar({
         ) : null}
 
         <div className="navbar__actions">
-          {aksi?.keluar ? (
-            <TombolKeluar label={aksi.label} tujuan={aksi.href} />
-          ) : aksi ? (
-            <TautanTombolKertas href={aksi.href} variant="primary" size="sm">
+          {pengguna ? (
+            <a
+              href="/profile"
+              className={cn("navbar__profil", profilAktif && "is-active")}
+              aria-current={profilAktif ? "page" : undefined}
+            >
+              <AvatarPengguna nama={pengguna.name} image={pengguna.image} ukuran={30} />
+              <span className="navbar__profil-nama">{pengguna.name}</span>
+            </a>
+          ) : null}
+
+          {aksi ? (
+            <TautanTombolKertas
+              className="navbar__aksi"
+              href={aksi.href}
+              variant="primary"
+              size="sm"
+            >
               {aksi.label}
             </TautanTombolKertas>
           ) : null}

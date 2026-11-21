@@ -12,6 +12,7 @@
 @import "./klass/components/heading.css";
 @import "./klass/components/button.css";
 @import "./klass/components/navbar.css";
+@import "./klass/components/avatar.css";
 @import "./klass/components/footer.css";
 @import "./klass/components/hero.css";
 @import "./klass/components/card.css";
@@ -28,10 +29,22 @@
 @import "./klass/components/tooltip.css";
 @import "./klass/components/pagination.css";
 
+/* Landing "Buka Mapnya" */
+@import "./klass/components/bab.css";
+@import "./klass/components/indeks-map.css";
+@import "./klass/components/manifesto.css";
+@import "./klass/components/isi-map.css";
+@import "./klass/components/alur-arsip.css";
+@import "./klass/components/peta-kelas.css";
+@import "./klass/components/papan-kabar.css";
+@import "./klass/components/tanya-jawab.css";
+@import "./klass/components/surat-ajakan.css";
+
 /* Aturan susunan khusus halaman utama; diimpor terakhir. */
 @import "./klass/landing.css";
 @import "./klass/auth.css";
-@import "./klass/dashboard.css";
+@import "./klass/meja.css";
+@import "./klass/profil.css";
 @import "./klass/shell.css";
 
 @import "./klass/kelas.css";

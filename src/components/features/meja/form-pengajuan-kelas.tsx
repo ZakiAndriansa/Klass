@@ -23,9 +23,9 @@ import { jenisKelompok } from "./data-contoh";
 /**
  * Formulir pengajuan kelas baru.
  *
- * Dipindahkan dari galeri komponen ke dasbor pengguna, karena pengajuan hanya
- * masuk akal setelah pengguna punya akun. Isian dan urutannya sama seperti
- * formulir di galeri; bedanya di sini ada validasi dan pengiriman.
+ * Hanya tampil di keadaan onboarding, karena pengajuan kelas adalah langkah
+ * sekali pakai: setelah kelas disetujui, formulir ini tidak lagi jadi isi
+ * utama Meja.
  *
  * Slug diturunkan dari nama kelas, jadi pengguna tidak perlu memikirkan URL.
  *
@@ -41,13 +41,14 @@ function jadikanSlug(nama: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-export function FormPengajuanKelas() {
+export function FormPengajuanKelas({ idAwal = "ajuan" }: { idAwal?: string }) {
   const [nama, setNama] = useState("");
   const [deskripsi, setDeskripsi] = useState("");
   const [salah, setSalah] = useState(false);
   const { daftar: toast, tampilkan, tutup } = useToast();
 
   const slug = jadikanSlug(nama);
+  const idNama = `${idAwal}-nama`;
 
   function kirim(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -65,11 +66,11 @@ export function FormPengajuanKelas() {
 
   return (
     <>
-      <FormStack className="dash-form" onSubmit={kirim} noValidate>
+      <FormStack className="meja-form" onSubmit={kirim} noValidate>
         <Field salah={salah}>
-          <FieldLabel htmlFor="request-name">Nama kelas</FieldLabel>
+          <FieldLabel htmlFor={idNama}>Nama kelas</FieldLabel>
           <FieldInput
-            id="request-name"
+            id={idNama}
             name="nama"
             type="text"
             value={nama}
@@ -79,37 +80,37 @@ export function FormPengajuanKelas() {
             }}
             placeholder="Contoh: Informatika 2024 A"
             aria-invalid={salah || undefined}
-            aria-describedby={salah ? "request-name-err" : "request-name-hint"}
+            aria-describedby={salah ? `${idNama}-err` : `${idNama}-hint`}
           />
           {salah ? (
-            <FieldError id="request-name-err">
+            <FieldError id={`${idNama}-err`}>
               Nama kelas wajib diisi dan harus mengandung huruf atau angka.
             </FieldError>
           ) : (
-            <FieldHint id="request-name-hint">
+            <FieldHint id={`${idNama}-hint`}>
               Nama ini akan tampil di halaman jelajah kelas.
             </FieldHint>
           )}
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="request-slug">Alamat kelas</FieldLabel>
+          <FieldLabel htmlFor={`${idAwal}-slug`}>Alamat kelas</FieldLabel>
           <FieldInput
-            id="request-slug"
+            id={`${idAwal}-slug`}
             type="text"
             value={slug ? `/classes/${slug}` : ""}
             placeholder="/classes/…"
             readOnly
-            aria-describedby="request-slug-hint"
+            aria-describedby={`${idAwal}-slug-hint`}
           />
-          <FieldHint id="request-slug-hint">
+          <FieldHint id={`${idAwal}-slug-hint`}>
             Dibuat otomatis dari nama kelas. Bisa diubah setelah kelas jadi.
           </FieldHint>
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="request-type">Jenis kelompok</FieldLabel>
-          <FieldSelect id="request-type" name="jenis" defaultValue="kuliah">
+          <FieldLabel htmlFor={`${idAwal}-jenis`}>Jenis kelompok</FieldLabel>
+          <FieldSelect id={`${idAwal}-jenis`} name="jenis" defaultValue="kuliah">
             {jenisKelompok.map((jenis) => (
               <option key={jenis.value} value={jenis.value}>
                 {jenis.label}
@@ -119,9 +120,9 @@ export function FormPengajuanKelas() {
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="request-description">Deskripsi singkat</FieldLabel>
+          <FieldLabel htmlFor={`${idAwal}-deskripsi`}>Deskripsi singkat</FieldLabel>
           <FieldTextarea
-            id="request-description"
+            id={`${idAwal}-deskripsi`}
             name="deskripsi"
             rows={3}
             value={deskripsi}
@@ -151,7 +152,7 @@ export function FormPengajuanKelas() {
           <Radio name="pengingat" value="1d" label="Hanya 1 hari sebelum deadline" />
         </FieldGroup>
 
-        <div className="dash-form__actions">
+        <div className="meja-form__aksi">
           <TombolKertas type="submit" variant="primary" size="md">
             Kirim pengajuan
           </TombolKertas>

@@ -1,0 +1,180 @@
+/* ==========================================================================
+   Component: Alur Arsip (three steps)
+   Tiga lembar bertab yang turun bertingkat. Tab membawa nomor dan label,
+   lembar membawa judul serta penjelasan.
+   ========================================================================== */
+
+.ds .alur {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-8);
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  .ds .alur {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ds-space-6);
+    align-items: start;
+  }
+
+  .ds .alur__langkah:nth-child(2) {
+    margin-top: var(--ds-space-6);
+  }
+
+  .ds .alur__langkah:nth-child(3) {
+    margin-top: var(--ds-space-12);
+  }
+}
+
+.ds .alur__langkah {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.ds .alur__tab {
+  --alur-tab: var(--ds-color-folder-bg);
+
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: 32px;
+  margin-left: var(--ds-space-4);
+  padding-inline: var(--ds-space-4);
+  background-color: var(--alur-tab);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-bottom: 0;
+  border-radius: var(--ds-radius-sm) var(--ds-radius-sm) 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+}
+
+.ds .alur__langkah:nth-child(2) .alur__tab {
+  --alur-tab: var(--ds-color-folder-lilac);
+}
+
+.ds .alur__langkah:nth-child(3) .alur__tab {
+  --alur-tab: var(--ds-color-primary);
+}
+
+.ds .alur__tab-nomor {
+  opacity: 0.55;
+}
+
+.ds .alur__lembar {
+  position: relative;
+  width: 100%;
+  min-height: 224px;
+  padding: var(--ds-space-6);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: 0 var(--ds-radius-sm) var(--ds-radius-sm) var(--ds-radius-sm);
+  box-shadow: var(--ds-shadow-paper);
+}
+
+.ds .alur__nomor {
+  position: absolute;
+  top: var(--ds-space-3);
+  right: var(--ds-space-5);
+  font-family: var(--ds-font-mono);
+  font-size: 58px;
+  font-weight: 700;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--ds-color-rule-dashed);
+  pointer-events: none;
+}
+
+.ds .alur__lembar h3 {
+  margin: var(--ds-space-3) 0 var(--ds-space-2);
+  max-width: 12ch;
+  font-size: var(--ds-text-xl);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.ds .alur__lembar p {
+  margin: 0;
+  max-width: 34ch;
+  font-size: var(--ds-text-sm);
+  line-height: 1.65;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .alur__catatan {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-space-4);
+  max-width: 760px;
+  margin-top: var(--ds-space-12);
+  padding-top: var(--ds-space-6);
+  border-top: var(--ds-border-base) dashed var(--ds-color-rule-dashed);
+}
+
+@media (min-width: 640px) {
+  .ds .alur__catatan {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--ds-space-5);
+  }
+}
+
+.ds .alur__cap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 74px;
+  flex-shrink: 0;
+  border: var(--ds-border-thick) solid var(--ds-color-stamp-red);
+  border-radius: 50%;
+  color: var(--ds-color-stamp-red);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  transform: rotate(-8deg);
+}
+
+.ds .alur__catatan p {
+  margin: 0;
+  font-size: var(--ds-text-base);
+  line-height: 1.65;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .alur__catatan strong {
+  color: var(--ds-color-ink);
+}
+
+@media (max-width: 899px) {
+  /* Di layar sempit tidak ada komposisi bertingkat, jadi lembar tidak perlu
+     tinggi minimum yang menyisakan ruang kosong. */
+  .ds .alur__lembar {
+    min-height: 0;
+    padding-bottom: var(--ds-space-8);
+  }
+}
+
+@media (max-width: 479px) {
+  /* Nomor outline dikecilkan dan judul diturunkan supaya keduanya tidak
+     bertumpuk di lembar selebar ponsel. */
+  .ds .alur__nomor {
+    top: var(--ds-space-2);
+    right: var(--ds-space-4);
+    font-size: 38px;
+  }
+
+  .ds .alur__lembar h3 {
+    margin-top: var(--ds-space-8);
+  }
+}

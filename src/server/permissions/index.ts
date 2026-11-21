@@ -15,5 +15,5 @@ export {
   type ClassAccess,
   type PermissionOptions,
 } from "./class";
-export { forPage, requirePageLogin, requirePageSuperadmin } from "./page";
+export { forPage, requirePageLogin } from "./page";
 export { requireSuperadmin } from "./superadmin";

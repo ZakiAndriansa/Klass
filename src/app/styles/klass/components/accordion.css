@@ -82,10 +82,39 @@
   transform: rotate(45deg);
 }
 
+/* Panel dianimasikan lewat grid 0fr → 1fr: tinggi aslinya tidak perlu
+   diketahui, jadi jawaban boleh sepanjang apa pun. Saat tertutup isinya
+   dipotong dan diberi `inert` dari komponen supaya tidak bisa di-Tab. */
+.ds .accordion__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--ds-duration-slow) var(--ds-ease-standard),
+    opacity var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .accordion__item.is-open .accordion__panel {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.ds .accordion__panel-inner {
+  overflow: hidden;
+}
+
+/* Jawaban masuk sedikit lebih lambat daripada panelnya membuka, supaya
+   terasa seperti kertas yang ditarik keluar, bukan teks yang di-unhide. */
 .ds .accordion__body {
   padding: var(--ds-space-4) var(--ds-space-5);
   font-size: var(--ds-text-sm);
   line-height: 1.6;
   letter-spacing: -0.01em;
   color: var(--ds-color-ink-secondary);
+  transform: translateY(-4px);
+  transition: transform var(--ds-duration-slow) var(--ds-ease-standard);
+}
+
+.ds .accordion__item.is-open .accordion__body {
+  transform: translateY(0);
 }
