@@ -199,6 +199,50 @@ Alamat di bawah `/api/auth/` dijalankan Better Auth sendiri. Bentuk jawabannya *
 
 Login Google baru aktif setelah kredensialnya diisi di `.env` (caranya di `src/server/auth/README.md`). Sebelum itu tombol Google menampilkan pesan, dan masuknya lewat akun contoh.
 
+### Profil
+
+`GET /api/v1/profile`
+
+Mengambil profil pengguna yang sedang login.
+
+| Hal                | Isi                                        |
+| ------------------ | ------------------------------------------ |
+| Siapa yang boleh   | Pengguna yang sudah login                  |
+| Body               | Tidak ada                                  |
+| Respons berhasil   | 200, `{ "data": ProfileDto }`              |
+| Galat yang mungkin | `UNAUTHORIZED`, `NOT_FOUND`                |
+| Tipe               | `ProfileDto` di `src/types/api/profile.ts` |
+
+```json
+{
+  "data": {
+    "id": "dev-pj",
+    "name": "PJ Contoh",
+    "email": "pj@klass.test",
+    "image": null,
+    "isSuperadmin": false
+  }
+}
+```
+
+`isSuperadmin` berasal dari `users.is_superadmin`. Peran per kelas (admin kelas, PJ, anggota) tidak termasuk profil.
+
+`PATCH /api/v1/profile`
+
+Mengubah nama dan avatar pengguna yang sedang login.
+
+| Hal                | Isi                                                                                     |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| Siapa yang boleh   | Pengguna yang sudah login, hanya profilnya sendiri                                      |
+| Body               | `name` wajib, string 3–50 karakter. `image` opsional, URL http/https maks 2048 karakter |
+| Respons berhasil   | 200, `{ "data": ProfileDto }`                                                           |
+| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `NOT_FOUND`                                         |
+| Tipe               | `UpdateProfileInput` (masukan), `ProfileDto` (keluaran)                                 |
+
+`id`, `email`, dan `isSuperadmin` tidak pernah dibaca dari body; pemilik baris diambil dari sesi.
+
+`image: null` menghapus avatar. Bila `image` tidak dikirim, avatar lama dipertahankan. `name` selalu wajib karena `PATCH` belum parsial.
+
 ### Akun contoh (hanya saat pengembangan)
 
 Untuk masuk sebagai peran tertentu tanpa login Google. Halamannya ada di `/dev/login`. Di produksi semua alamat di bawah menjawab 404.
