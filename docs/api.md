@@ -254,6 +254,20 @@ await api<SesiDto>("/dev/session", {
 const { data: sesi } = await api<SesiDto | null>("/session");
 ```
 
+### Subkelas (F7)
+
+`POST /api/v1/classes/{classId}/subclasses`
+
+Membuat subkelas baru di dalam kelas.
+
+| Hal                | Isi                                                                      |
+| ------------------ | ------------------------------------------------------------------------ |
+| Siapa yang boleh   | Admin kelas                                                              |
+| Body               | `{ "nama": "Nama Subkelas", "pjAwal"?: ["user-id-1"] }`                  |
+| Respons berhasil   | 201 dengan `data: SubkelasDto`                                           |
+| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND` |
+| Tipe               | `SubkelasDto`, `BuatSubkelasInput` di `src/types/api/subclass.ts`        |
+
 ### Templat untuk endpoint baru
 
 Salin bagian ini lalu isi. Endpoint baru ditulis **di atas** bagian ini.
@@ -269,17 +283,3 @@ Penjelasan satu kalimat.
 | Respons berhasil   | status dan bentuk `data`    |
 | Galat yang mungkin | daftar `code`               |
 | Tipe               | nama DTO di `src/types/api` |
-
-### Subkelas (F7)
-
-`POST /api/v1/kelas/{classId}/subkelas`
-
-Membuat subkelas baru di dalam kelas.
-
-| Hal                | Isi                                                                      |
-| ------------------ | ------------------------------------------------------------------------ |
-| Siapa yang boleh   | Admin kelas                                                              |
-| Body               | `{ "nama": "Nama Subkelas", "pjAwal"?: ["user-id-1"] }`                  |
-| Respons berhasil   | 201 dengan `data: SubkelasDto`                                           |
-| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND` |
-| Tipe               | `SubkelasDto`, `BuatSubkelasInput` di `src/types/api/subkelas.ts`        |

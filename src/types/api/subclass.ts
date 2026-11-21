@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 /**
- * SKEMA ZOD (POST /api/v1/kelas/[classId]/subkelas)
+ * SKEMA ZOD (POST /api/v1/classes/[classId]/subclasses)
  */
-export const BuatSubkelasSchema = z.object({
+export const buatSubkelasSchema = z.object({
   name: z
     .string()
     .trim()
@@ -11,11 +11,12 @@ export const BuatSubkelasSchema = z.object({
     .max(150, "Nama subkelas maksimal 150 karakter"),
   pjAwal: z
     .array(z.string().trim().min(1, "ID pengguna tidak boleh kosong."))
+    .max(2, "Pj awal maksimal 1 orang")
     .optional()
     .default([]),
 });
 
-export type BuatSubkelas = z.infer<typeof BuatSubkelasSchema>;
+export type BuatSubkelasInput = z.infer<typeof buatSubkelasSchema>;
 
 export type SubkelasDto = {
   id: string;
