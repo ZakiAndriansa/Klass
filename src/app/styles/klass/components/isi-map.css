@@ -1,0 +1,369 @@
+/* ==========================================================================
+   Component: Isi Map (three features as desk artifacts)
+   Map materi, potongan jadwal, dan notifikasi HP. Artefak dekoratif duduk di
+   atas meja kertas; teks fitur ada di bawah garis putus-putus.
+   ========================================================================== */
+
+.ds .isi-map {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-12);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .ds .isi-map {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ds-space-8);
+  }
+}
+
+.ds .isi-map__fitur {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ds .isi-map__panggung {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 300px;
+  padding: var(--ds-space-5) var(--ds-space-4) var(--ds-space-8);
+}
+
+.ds .isi-map__panggung::after {
+  content: "";
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  width: 190px;
+  height: 20px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(28, 25, 23, 0.18), transparent 70%);
+  filter: blur(2px);
+}
+
+.ds .isi-map__teks {
+  padding-top: var(--ds-space-5);
+  border-top: var(--ds-border-base) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .isi-map__kode {
+  display: block;
+  margin-bottom: var(--ds-space-2);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .isi-map__teks h3 {
+  margin: 0 0 var(--ds-space-2);
+  font-size: var(--ds-text-xl);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.ds .isi-map__teks p {
+  margin: 0;
+  max-width: 38ch;
+  font-size: var(--ds-text-sm);
+  line-height: 1.65;
+  color: var(--ds-color-ink-secondary);
+}
+
+/* --- Artefak 1: map materi --- */
+.ds .mini-map {
+  position: relative;
+  width: 250px;
+  max-width: 100%;
+  padding-top: 28px;
+  transform: rotate(-1.4deg);
+  transition: transform var(--ds-duration-slow) var(--ds-ease-standard);
+}
+
+.ds .isi-map__fitur--materi:hover .mini-map {
+  transform: rotate(0deg) translateY(-4px);
+}
+
+.ds .mini-map__tab {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding-inline: var(--ds-space-4);
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-bottom: 0;
+  border-radius: var(--ds-radius-sm) var(--ds-radius-sm) 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+}
+
+.ds .mini-map__badan {
+  position: relative;
+  height: 148px;
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: 0 var(--ds-radius-sm) var(--ds-radius-sm) var(--ds-radius-sm);
+  box-shadow: var(--ds-shadow-artefak);
+}
+
+.ds .mini-map__berkas {
+  position: absolute;
+  right: var(--ds-space-4);
+  bottom: 12px;
+  left: var(--ds-space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: 38px;
+  padding-inline: var(--ds-space-3);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+  box-shadow: 0 2px 0 rgba(28, 25, 23, 0.16);
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform var(--ds-duration-slow) var(--ds-ease-standard);
+}
+
+.ds .mini-map__berkas--1 {
+  transform: rotate(-1deg);
+}
+
+.ds .mini-map__berkas--2 {
+  bottom: 54px;
+  transform: rotate(2deg) translateX(4px);
+}
+
+.ds .mini-map__berkas--3 {
+  bottom: 96px;
+  transform: rotate(-2.5deg) translateX(-3px);
+}
+
+.ds .isi-map__fitur--materi:hover .mini-map__berkas--1 {
+  transform: rotate(-2deg) translateY(-2px);
+}
+
+.ds .isi-map__fitur--materi:hover .mini-map__berkas--2 {
+  transform: rotate(3deg) translate(6px, -4px);
+}
+
+.ds .isi-map__fitur--materi:hover .mini-map__berkas--3 {
+  transform: rotate(-4deg) translate(-6px, -6px);
+}
+
+.ds .mini-map__label {
+  position: absolute;
+  top: var(--ds-space-3);
+  right: var(--ds-space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  color: var(--ds-color-ink-muted);
+}
+
+/* --- Artefak 2: potongan jadwal --- */
+.ds .jadwal-mini {
+  width: 272px;
+  max-width: 100%;
+  padding: var(--ds-space-4);
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-sm);
+  box-shadow: var(--ds-shadow-artefak);
+  transform: rotate(0.8deg);
+  transition: transform var(--ds-duration-slow) var(--ds-ease-standard);
+}
+
+.ds .isi-map__fitur--jadwal:hover .jadwal-mini {
+  transform: rotate(0deg) translateY(-4px);
+}
+
+.ds .jadwal-mini__kepala {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  padding-bottom: var(--ds-space-2);
+  border-bottom: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+}
+
+.ds .jadwal-mini__hari {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-block: var(--ds-space-2);
+  font-family: var(--ds-font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .jadwal-mini__baris {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: var(--ds-space-2);
+  align-items: center;
+  padding: 7px var(--ds-space-2);
+  border-radius: var(--ds-radius-xs);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.ds .jadwal-mini__baris--aktif {
+  background-color: var(--ds-color-primary);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  box-shadow: 0 2px 0 var(--ds-color-border-ink);
+  transform: translateX(4px);
+}
+
+.ds .jadwal-mini__jam {
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .jadwal-mini__blok {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.ds .jadwal-mini__pj {
+  padding: 2px 5px;
+  background-color: var(--ds-color-ink);
+  color: var(--ds-color-paper-surface);
+  border-radius: var(--ds-radius-xs);
+  font-family: var(--ds-font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* --- Artefak 3: notifikasi PWA --- */
+.ds .notif-mini {
+  width: 176px;
+  height: 278px;
+  padding: 9px;
+  background-color: var(--ds-color-ink);
+  border-radius: 28px;
+  box-shadow: var(--ds-shadow-artefak);
+  transform: rotate(2deg);
+  transition: transform var(--ds-duration-slow) var(--ds-ease-standard);
+}
+
+.ds .isi-map__fitur--pengingat:hover .notif-mini {
+  transform: rotate(0deg) translateY(-4px);
+}
+
+.ds .notif-mini__layar {
+  position: relative;
+  height: 100%;
+  padding: 22px 10px 14px;
+  overflow: hidden;
+  border-radius: 20px;
+  background-color: var(--ds-color-paper-well);
+}
+
+.ds .notif-mini__jam {
+  display: block;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+
+.ds .notif-mini__kamera {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  width: 42px;
+  height: 5px;
+  transform: translateX(-50%);
+  border-radius: var(--ds-radius-pill);
+  background-color: var(--ds-color-ink);
+}
+
+.ds .notif-mini__kartu {
+  display: flex;
+  gap: var(--ds-space-2);
+  margin-top: 40px;
+  padding: 10px 9px;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-sm);
+  box-shadow: 0 3px 0 rgba(28, 25, 23, 0.2);
+  transform: rotate(-1deg);
+  transition: transform var(--ds-duration-slow) var(--ds-ease-standard);
+}
+
+.ds .isi-map__fitur--pengingat:hover .notif-mini__kartu {
+  transform: rotate(0deg) translateY(-3px);
+}
+
+.ds .notif-mini__ikon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background-color: var(--ds-color-primary);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+}
+
+.ds .notif-mini__kartu strong {
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--ds-font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.ds .notif-mini__kartu p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .notif-mini__petunjuk {
+  position: absolute;
+  right: 0;
+  bottom: 12px;
+  left: 0;
+  font-family: var(--ds-font-mono);
+  font-size: 8px;
+  text-align: center;
+  letter-spacing: 0.06em;
+  color: var(--ds-color-ink-muted);
+}

@@ -1,0 +1,88 @@
+/* ==========================================================================
+   Component: Indeks Map (right-edge folder tabs)
+   Tab menempel di tepi kanan layar. Saat aktif atau disentuh, tab bergeser
+   keluar dan memperlihatkan label. Disembunyikan di bawah 1280px.
+   ========================================================================== */
+
+.ds .indeks-map {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  z-index: var(--ds-z-sticky);
+  display: none;
+  width: 190px;
+  padding-block: var(--ds-space-2);
+  overflow: hidden;
+  transform: translateY(-50%);
+}
+
+@media (min-width: 1280px) {
+  .ds .indeks-map {
+    display: block;
+  }
+}
+
+.ds .indeks-map__daftar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  list-style: none;
+}
+
+.ds .indeks-map__tautan {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--ds-space-2);
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 12px;
+  transform: translateX(calc(100% - 38px));
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-right: 0;
+  border-radius: var(--ds-radius-sm) 0 0 var(--ds-radius-sm);
+  box-shadow: -2px 2px 0 rgba(28, 25, 23, 0.14);
+  text-decoration: none;
+  transition:
+    transform var(--ds-duration-slow) var(--ds-ease-standard),
+    background-color var(--ds-duration-fast) var(--ds-ease-standard);
+}
+
+/* Tab aktif tetap menyempil; hanya hover/fokus yang membukanya supaya rail
+   tidak menutupi kartu di gutter kanan. */
+.ds .indeks-map__tautan.is-active {
+  background-color: var(--ds-color-primary);
+}
+
+.ds .indeks-map__tautan:hover,
+.ds .indeks-map__tautan:focus-visible {
+  background-color: var(--ds-color-folder-bg);
+  transform: translateX(0);
+}
+
+.ds .indeks-map__tautan.is-active:hover {
+  background-color: var(--ds-color-primary-hover);
+}
+
+.ds .indeks-map__nomor {
+  flex-shrink: 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--ds-tracking-wide);
+}
+
+.ds .indeks-map__label {
+  overflow: hidden;
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ds-color-ink-secondary);
+}

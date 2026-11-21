@@ -1,0 +1,353 @@
+/* ==========================================================================
+   Component: Surat Ajakan (landing closing)
+   Meja malam dengan surat undangan di atas map manila. Kolom kiri membawa
+   pesan dan CTA; surat di kanan dekoratif.
+   ========================================================================== */
+
+.ds .surat-ajakan {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(var(--ds-space-16), 10vw, var(--ds-space-24));
+  background-color: var(--ds-color-night);
+  background-image:
+    var(--ds-paper-grain),
+    radial-gradient(
+      ellipse 60% 70% at 78% 38%,
+      color-mix(in srgb, var(--ds-color-primary) 8%, transparent),
+      transparent 70%
+    );
+  color: var(--ds-color-paper-surface);
+}
+
+/* Watermark wordmark, pengingat hero di penutup halaman. */
+.ds .surat-ajakan::before {
+  content: "KLASS.";
+  position: absolute;
+  right: calc(-1 * var(--ds-space-4));
+  bottom: calc(-1 * var(--ds-space-10));
+  font-family: var(--ds-font-pixel);
+  font-size: clamp(140px, 20vw, 280px);
+  font-weight: 400;
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--ds-color-paper-surface) 12%, transparent);
+  pointer-events: none;
+  user-select: none;
+}
+
+.ds .surat-ajakan__inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-12);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .ds .surat-ajakan__inner {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: clamp(var(--ds-space-8), 6vw, var(--ds-space-16));
+  }
+}
+
+.ds .surat-ajakan .bab__penanda {
+  border-bottom-color: color-mix(in srgb, var(--ds-color-paper-surface) 34%, transparent);
+}
+
+.ds .surat-ajakan .bab__nomor {
+  background-color: var(--ds-color-paper-surface);
+  border-color: var(--ds-color-paper-surface);
+  color: var(--ds-color-ink);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--ds-color-paper-surface) 34%, transparent);
+}
+
+.ds .surat-ajakan .bab__label {
+  color: color-mix(in srgb, var(--ds-color-paper-surface) 68%, transparent);
+}
+
+.ds .surat-ajakan__judul {
+  margin: var(--ds-space-4) 0 var(--ds-space-5);
+  max-width: 12ch;
+  font-size: clamp(2.6rem, 5.2vw, 4.6rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  color: var(--ds-color-paper-surface);
+}
+
+.ds .surat-ajakan__aksen {
+  color: var(--ds-color-primary);
+}
+
+.ds .surat-ajakan__salinan {
+  margin: 0;
+  max-width: 36ch;
+  font-size: var(--ds-text-lg);
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--ds-color-paper-surface) 76%, transparent);
+}
+
+.ds .surat-ajakan__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-4) var(--ds-space-5);
+  margin-top: var(--ds-space-8);
+}
+
+.ds .surat-ajakan__masuk {
+  font-size: var(--ds-text-sm);
+  font-weight: 600;
+  color: var(--ds-color-paper-surface);
+  text-decoration: underline;
+  text-decoration-color: var(--ds-color-primary);
+  text-decoration-thickness: var(--ds-border-base);
+  text-underline-offset: 4px;
+}
+
+.ds .surat-ajakan__masuk:hover {
+  color: var(--ds-color-primary);
+}
+
+.ds .surat-ajakan__catatan {
+  margin: var(--ds-space-5) 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--ds-color-paper-surface) 52%, transparent);
+}
+
+/* --- Surat dan map di belakangnya --- */
+.ds .surat-ajakan__kanan {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+}
+
+.ds .surat__map {
+  position: relative;
+  width: min(430px, 100%);
+  padding-top: 34px;
+}
+
+.ds .surat__map::before {
+  content: "";
+  position: absolute;
+  inset: 34px -14px 18px 14px;
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+  box-shadow: 0 24px 40px -20px rgba(0, 0, 0, 0.7);
+  transform: rotate(-2.4deg);
+}
+
+.ds .surat__tab {
+  position: absolute;
+  top: 0;
+  left: var(--ds-space-5);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding-inline: var(--ds-space-4);
+  background-color: var(--ds-color-folder-bg);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-bottom: 0;
+  border-radius: var(--ds-radius-sm) var(--ds-radius-sm) 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink);
+}
+
+.ds .surat {
+  position: relative;
+  z-index: 1;
+  padding: 44px 32px 0 48px;
+  background-color: var(--ds-color-paper-surface);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 27px,
+    var(--ds-color-paper-line) 27px 28px
+  );
+  background-position: 0 18px;
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-radius: 0 var(--ds-radius-xs) var(--ds-radius-xs) var(--ds-radius-xs);
+  box-shadow: var(--ds-shadow-surat);
+  transform: rotate(1.4deg);
+}
+
+/* Garis margin merah seperti buku tulis. */
+.ds .surat::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 32px;
+  width: var(--ds-border-thin);
+  background-color: var(--ds-color-paper-margin);
+  opacity: 0.75;
+}
+
+.ds .surat__klip {
+  position: absolute;
+  top: calc(-1 * var(--ds-space-3));
+  left: var(--ds-space-5);
+  z-index: 2;
+  color: var(--ds-color-ink-muted);
+  transform: rotate(-14deg);
+  filter: drop-shadow(0 1px 1px rgba(28, 25, 23, 0.24));
+}
+
+.ds .surat__stamp {
+  position: absolute;
+  top: var(--ds-space-4);
+  right: var(--ds-space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 52px;
+  height: 62px;
+  background-color: var(--ds-color-primary);
+  border: var(--ds-border-base) dashed var(--ds-color-border-ink);
+  box-shadow: 0 2px 0 rgba(28, 25, 23, 0.18);
+  transform: rotate(4deg);
+}
+
+.ds .surat__stamp strong {
+  font-family: var(--ds-font-pixel);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.ds .surat__stamp span {
+  font-family: var(--ds-font-mono);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.ds .surat__kepada {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-right: 64px;
+  padding-bottom: var(--ds-space-3);
+  border-bottom: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .surat__kepada span {
+  font-family: var(--ds-font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .surat__kepada strong {
+  font-size: var(--ds-text-sm);
+  line-height: 1.35;
+}
+
+.ds .surat__perihal {
+  margin: var(--ds-space-4) 0 var(--ds-space-2);
+  font-family: var(--ds-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .surat__isi {
+  margin: 0;
+  max-width: 30ch;
+  font-size: var(--ds-text-sm);
+  line-height: 1.75;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .surat__ttd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  margin-top: var(--ds-space-6);
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ds .surat__segel {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--ds-color-stamp-red);
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--ds-color-paper-surface) 32%, transparent),
+    0 2px 4px rgba(28, 25, 23, 0.28);
+  color: var(--ds-color-paper-surface);
+  font-family: var(--ds-font-pixel);
+  font-size: 16px;
+  transform: rotate(-9deg);
+}
+
+.ds .surat__perforasi {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-6);
+  padding: var(--ds-space-3) 0 var(--ds-space-4);
+  border-top: var(--ds-border-base) dashed var(--ds-color-border-ink);
+  font-family: var(--ds-font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ds-color-ink-muted);
+}
+
+@media (max-width: 899px) {
+  .ds .surat-ajakan__kanan {
+    min-height: 0;
+  }
+
+  .ds .surat__map {
+    width: min(400px, 100%);
+  }
+}
+
+@media (max-width: 560px) {
+  .ds .surat {
+    padding: 38px 20px 0 36px;
+  }
+
+  .ds .surat::before {
+    left: 22px;
+  }
+
+  .ds .surat__kepada {
+    padding-right: 52px;
+  }
+
+  .ds .surat__stamp {
+    width: 46px;
+    height: 54px;
+  }
+
+  .ds .surat__stamp strong {
+    font-size: 20px;
+  }
+}

@@ -1,0 +1,637 @@
+/* ==========================================================================
+   Component: Peta Kelas ("Jelajahi semua kelas")
+   Bidang meja kerja selebar layar dengan tab map di tepi atas. Enam map
+   kelas duduk di atasnya; tiap map bisa dibuka dan mengeluarkan tiga berkas.
+   Bentuk map mengikuti folder fisik: punggung bertab, tumpukan kertas, lalu
+   tutup depan berlabel.
+   ========================================================================== */
+
+.ds .peta-kelas {
+  position: relative;
+  margin-top: var(--ds-peta-tab-height);
+  padding-block: clamp(var(--ds-space-12), 6vw, var(--ds-space-20));
+  background-color: var(--ds-color-desk);
+  background-image:
+    var(--ds-paper-grain),
+    linear-gradient(to right, var(--ds-color-desk-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--ds-color-desk-line) 1px, transparent 1px);
+  background-size:
+    180px 180px,
+    32px 32px,
+    32px 32px;
+  border-block: var(--ds-border-base) solid var(--ds-color-border-ink);
+  scroll-margin-top: var(--ds-space-6);
+}
+
+/* Tab map yang menempel di tepi atas bidang. */
+.ds .peta-kelas__tab {
+  position: absolute;
+  top: 0;
+  left: var(--ds-space-4);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  height: var(--ds-peta-tab-height);
+  padding-inline: var(--ds-space-5);
+  transform: translateY(-100%);
+  background-color: var(--ds-color-desk);
+  border: var(--ds-border-base) solid var(--ds-color-border-ink);
+  border-bottom: 0;
+  border-radius: var(--ds-radius-md) var(--ds-radius-md) 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+  .ds .peta-kelas__tab {
+    left: var(--ds-peta-gutter);
+  }
+}
+
+.ds .peta-kelas .bab {
+  margin-bottom: var(--ds-space-6);
+}
+
+.ds .peta-kelas .bab__penanda {
+  border-bottom-color: color-mix(in srgb, var(--ds-color-ink) 42%, transparent);
+}
+
+.ds .peta-kelas .bab__nomor {
+  background-color: var(--ds-color-paper-surface);
+}
+
+.ds .peta-kelas__baris {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ds-space-3) var(--ds-space-6);
+  margin-bottom: var(--ds-space-4);
+}
+
+.ds .peta-kelas__petunjuk {
+  margin: 0;
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ds-color-ink);
+  transform: rotate(-1.5deg);
+}
+
+.ds .peta-kelas__petunjuk span {
+  display: inline-block;
+  margin-right: var(--ds-space-1);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .peta-kelas__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  row-gap: var(--ds-space-12);
+  column-gap: var(--ds-folder-card-gap);
+  margin-top: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .ds .peta-kelas__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ==========================================================================
+   Satu map kelas
+   Struktur mengikuti folder fisik di referensi:
+     1. punggung bertab (belakang)
+     2. tiga lembar berkas (tengah) — hanya tepinya mengintip saat tertutup
+     3. tutup depan berlabel + kendali (depan)
+   Kertas duduk DI BELAKANG tutup depan, jadi bagian bawahnya tertutup persis
+   seperti map asli. Map tidak pernah berubah ukuran; hanya kertas yang naik.
+   ========================================================================== */
+
+.ds .folder-kelas {
+  --folder-tab-lebar: 46%;
+  --folder-tab-tinggi: 13%;
+  --folder-rim: 9%;
+
+  position: relative;
+  min-width: 0;
+}
+
+.ds .folder-kelas__map {
+  /* Skala teks mengikuti lebar kartu, bukan lebar layar. */
+  container-type: inline-size;
+
+  position: relative;
+  aspect-ratio: 1 / 0.78;
+  isolation: isolate;
+  perspective: 900px;
+  transition: transform var(--ds-duration-slow) var(--ds-ease-standard);
+}
+
+/* --- 1. Punggung map --- */
+.ds .folder-kelas__punggung {
+  position: absolute;
+  inset: var(--folder-tab-tinggi) 0 0;
+  z-index: 1;
+  background-color: var(--folder-punggung);
+  border: var(--ds-border-thin) solid var(--folder-garis);
+  /* Sudut kiri-atas sengaja 0: di situlah tab menempel, dan di folder asli
+     sisi kiri tab menyambung lurus ke badan. Kalau sudut ini dibulatkan,
+     muncul lekuk kecil tepat di bawah tab. */
+  border-radius: 0 var(--folder-radius) var(--folder-radius-lg) var(--folder-radius-lg);
+  box-shadow:
+    inset 0 1px 0 var(--ds-color-highlight-specular),
+    var(--ds-shadow-folder-card);
+}
+
+/* Tab punggung: tonjolan di tepi atas kiri, menyatu dengan badan. */
+.ds .folder-kelas__punggung::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% - var(--ds-border-thin));
+  /* `left: 0` akan menghitung dari padding box, jadi tab tergeser ke dalam
+     sebesar border induk dan menyisakan tangga kecil di sambungan. */
+  left: calc(-1 * var(--ds-border-thin));
+  width: var(--folder-tab-lebar);
+  height: calc(var(--folder-tab-tinggi) + 2px);
+  background-color: inherit;
+  border: var(--ds-border-thin) solid var(--folder-garis);
+  border-bottom: 0;
+  border-radius: var(--folder-radius-lg) var(--folder-radius-lg) 0 0;
+  box-shadow: inset 0 1px 0 var(--ds-color-highlight-specular);
+}
+
+/* --- Varian warna map --- */
+.ds .folder-kelas__map {
+  --folder-depan: var(--ds-color-folder-plain);
+  --folder-punggung: var(--ds-color-folder-bg);
+  --folder-garis: var(--ds-color-folder-plain-edge);
+  --folder-radius: 14px;
+  --folder-radius-lg: 18px;
+}
+
+.ds .folder-kelas__map--lilac {
+  --folder-depan: var(--ds-color-folder-lilac);
+  --folder-punggung: color-mix(in srgb, var(--ds-color-folder-lilac) 88%, var(--ds-color-folder-lilac-edge));
+  --folder-garis: var(--ds-color-folder-lilac-edge);
+}
+
+.ds .folder-kelas__map--green {
+  /* Hijau Klass dicampur kertas: tetap jelas hijau, tetapi tidak menyala
+     sehingga tepi kertas dan label tetap terbaca. */
+  --folder-depan: color-mix(in srgb, var(--ds-color-folder-green) 46%, var(--ds-color-paper-surface));
+  --folder-punggung: color-mix(in srgb, var(--ds-color-folder-green) 58%, var(--ds-color-paper-surface));
+  --folder-garis: color-mix(in srgb, var(--ds-color-folder-green) 42%, var(--ds-color-border-ink));
+}
+
+/* --- 2. Tepi kertas yang mengintip (kondisi tertutup) --- */
+.ds .folder-kelas__intip {
+  position: absolute;
+  right: calc(var(--folder-rim) + 2%);
+  bottom: 38%;
+  left: calc(var(--folder-rim) + 2%);
+  z-index: 2;
+  height: 58px;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+/* Tiga tepi kertas. Bagian bawah tiap lembar tertutup tutup depan, jadi yang
+   terlihat hanya busur tipis di atas bibir map — persis seperti referensi. */
+.ds .folder-kelas__intip span {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  width: 100%;
+  height: 48px;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-subtle);
+  border-radius: 7px 7px 0 0;
+  box-shadow:
+    inset 0 1px 0 var(--ds-color-highlight-specular),
+    0 -1px 2px rgba(28, 25, 23, 0.06);
+}
+
+.ds .folder-kelas__intip span:nth-child(1) {
+  right: 0;
+  left: auto;
+  width: 74%;
+  transform: rotate(-2.8deg);
+}
+
+.ds .folder-kelas__intip span:nth-child(2) {
+  right: 0;
+  left: auto;
+  width: 90%;
+  transform: rotate(1.6deg);
+}
+
+.ds .folder-kelas__intip span:nth-child(3) {
+  transform: rotate(-0.6deg);
+}
+
+.ds .folder-kelas.is-open .folder-kelas__intip {
+  opacity: 0;
+}
+
+/* --- 3. Tutup depan --- */
+.ds .folder-kelas__depan {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 6;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  height: 42%;
+  padding: 4.8cqw 5.5cqw 4.4cqw;
+  background-color: var(--folder-depan);
+  background-image: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--ds-color-paper-surface) 42%, transparent) 0%,
+    transparent 46%
+  );
+  border: var(--ds-border-thin) solid var(--folder-garis);
+  /* Sama seperti punggung: sudut kiri-atas 0 karena di situlah bibir depan
+     menempel. Membulatkannya menyisakan lekuk tepat di bawah bibir. */
+  border-radius: 0 var(--folder-radius-lg) var(--folder-radius-lg) var(--folder-radius-lg);
+  box-shadow:
+    inset 0 1px 0 var(--ds-color-highlight-specular),
+    0 -1px 0 var(--folder-garis),
+    0 10px 22px -12px rgba(28, 25, 23, 0.4);
+  /* Klik harus menembus tutup depan ke tombol pembuka di bawahnya. */
+  pointer-events: none;
+  transition:
+    transform var(--ds-duration-slow) var(--ds-ease-standard),
+    box-shadow var(--ds-duration-slow) var(--ds-ease-standard);
+}
+
+/* Bibir tutup depan: tonjolan kecil di kiri atas, seperti di referensi. */
+.ds .folder-kelas__depan::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% - var(--ds-border-thin));
+  left: calc(-1 * var(--ds-border-thin));
+  width: 26%;
+  height: 14px;
+  background-color: inherit;
+  border: var(--ds-border-thin) solid var(--folder-garis);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  box-shadow: inset 0 1px 0 var(--ds-color-highlight-specular);
+}
+
+.ds .folder-kelas.is-open .folder-kelas__depan {
+  box-shadow:
+    inset 0 1px 0 var(--ds-color-highlight-specular),
+    0 -1px 0 var(--folder-garis),
+    0 18px 30px -16px rgba(28, 25, 23, 0.5);
+}
+
+/* Saat disentuh, map condong sedikit ke arah pembaca dan tutup depan maju —
+   gerakan kecil yang sama seperti referensi. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ds .folder-kelas:hover .folder-kelas__map {
+    transform: rotateX(3.5deg) translateY(-4px);
+  }
+
+  .ds .folder-kelas:hover .folder-kelas__depan {
+    transform: translateY(-3px);
+  }
+
+  .ds .folder-kelas.is-open:hover .folder-kelas__map {
+    transform: rotateX(0deg) translateY(0);
+  }
+}
+
+.ds .folder-kelas__punggung {
+  transition: transform var(--ds-duration-slow) var(--ds-ease-standard);
+}
+
+.ds .folder-kelas__label {
+  min-width: 0;
+}
+
+.ds .folder-kelas__judul {
+  margin: 0;
+  font-size: clamp(14px, 3.1cqw, 19px);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--ds-color-ink);
+}
+
+.ds .folder-kelas__meta {
+  margin: 0.35em 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: clamp(8px, 1.7cqw, 10px);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ds-color-ink) 58%, transparent);
+}
+
+/* Kendali di pojok: cip kertas, ikon chevron. */
+.ds .folder-kelas__kendali {
+  display: grid;
+  place-items: center;
+  width: clamp(30px, 7.2cqw, 44px);
+  height: clamp(30px, 7.2cqw, 44px);
+  flex-shrink: 0;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: 10px;
+  box-shadow:
+    0 2px 0 var(--ds-color-border-ink),
+    0 4px 8px -3px rgba(28, 25, 23, 0.3);
+  color: var(--ds-color-ink);
+}
+
+.ds .folder-kelas__kendali svg {
+  transition: transform var(--ds-duration-slow) var(--ds-ease-standard);
+}
+
+.ds .folder-kelas.is-open .folder-kelas__kendali svg {
+  transform: rotate(180deg);
+}
+
+/* --- Tombol pembuka: seluruh permukaan map --- */
+.ds .folder-kelas__toggle {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--folder-radius-lg);
+  color: inherit;
+  cursor: pointer;
+}
+
+.ds .folder-kelas__toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-shadow-focus);
+}
+
+/* --- 4. Berkas: naik dari balik tutup depan lalu menyebar ---
+   Tumpukan tumbuh ke BAWAH dari tepi atas punggung map, bukan ke atas.
+   Dengan begitu kertas tidak pernah keluar melewati punggung map: bagian
+   atasnya mengintip, bagian bawahnya tertutup tutup depan. Persis referensi. */
+.ds .folder-kelas__panel {
+  position: absolute;
+  top: calc(var(--folder-tab-tinggi) + 3.5cqw);
+  right: var(--folder-rim);
+  left: var(--folder-rim);
+  z-index: 5;
+  display: grid;
+  pointer-events: none;
+}
+
+.ds .berkas-kelas {
+  grid-area: 1 / 1;
+
+  display: grid;
+  align-content: start;
+  grid-auto-rows: min-content;
+  gap: 0;
+  min-height: 36cqw;
+  padding: 3.2cqw 3.6cqw 4.6cqw;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-subtle);
+  border-radius: 9px;
+  box-shadow:
+    inset 0 1px 0 var(--ds-color-highlight-specular),
+    0 10px 22px -14px rgba(28, 25, 23, 0.5);
+  text-decoration: none;
+  color: var(--ds-color-ink);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(var(--berkas-tutup, 130%)) rotate(0deg) scale(0.94);
+  transition:
+    transform 560ms var(--ds-ease-kertas),
+    opacity 240ms var(--ds-ease-standard),
+    visibility 0s linear 560ms,
+    box-shadow var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+/* Tumpukan: yang pertama paling depan, sisanya mengintip di belakang. */
+.ds .berkas-kelas:nth-child(1) {
+  --berkas-tutup: 76%;
+  --berkas-buka: translate(-0.6cqw, 9.4cqw) rotate(-2.4deg);
+
+  z-index: 3;
+}
+
+.ds .berkas-kelas:nth-child(2) {
+  --berkas-tutup: 68%;
+  --berkas-buka: translate(1.4cqw, 4.7cqw) rotate(1.8deg);
+
+  z-index: 2;
+}
+
+.ds .berkas-kelas:nth-child(3) {
+  --berkas-tutup: 60%;
+  --berkas-buka: translate(-1.2cqw, 0) rotate(-2.8deg);
+
+  z-index: 1;
+}
+
+.ds .folder-kelas.is-open .berkas-kelas {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: var(--berkas-buka);
+  transition-delay: calc(var(--berkas-urutan, 0) * 90ms);
+}
+
+.ds .folder-kelas.is-open .berkas-kelas:hover,
+.ds .folder-kelas.is-open .berkas-kelas:focus-visible {
+  transform: var(--berkas-buka) translateY(-4px) scale(1.015);
+  box-shadow:
+    inset 0 1px 0 var(--ds-color-highlight-specular),
+    0 16px 26px -14px rgba(28, 25, 23, 0.55);
+  transition-delay: 0ms;
+}
+
+/* Isi kertas: pita atas (judul + meta) adalah bagian yang selalu terlihat
+   saat kertas bertumpuk; sisanya muncul saat map dibuka penuh. */
+.ds .berkas-kelas__kepala {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2cqw;
+  white-space: nowrap;
+}
+
+.ds .berkas-kelas__judul {
+  overflow: hidden;
+  font-size: clamp(9px, 2.2cqw, 13px);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds .berkas-kelas__meta {
+  flex-shrink: 0;
+  font-family: var(--ds-font-mono);
+  font-size: clamp(6px, 1.45cqw, 9px);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  color: var(--ds-color-ink-muted);
+}
+
+/* Kartu sempit (ponsel, 2 kolom tablet): judul dan meta ditumpuk supaya
+   tidak terpotong. Di kartu lebar keduanya sebaris seperti referensi. */
+@container (max-width: 400px) {
+  .ds .berkas-kelas__kepala {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35em;
+    white-space: normal;
+  }
+
+  .ds .berkas-kelas__judul {
+    white-space: normal;
+  }
+
+  .ds .berkas-kelas__meta {
+    font-size: clamp(7px, 2.6cqw, 9px);
+  }
+}
+
+.ds .berkas-kelas__badan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  margin-top: 2cqw;
+  padding-top: 1.6cqw;
+  border-top: var(--ds-border-thin) solid var(--ds-color-folder-edge);
+}
+
+.ds .berkas-kelas__jenis {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 5px;
+  flex-shrink: 0;
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-xs);
+  background-color: var(--berkas-aksen, var(--ds-color-folder-bg));
+  font-family: var(--ds-font-mono);
+  font-size: clamp(6px, 1.5cqw, 9px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ds .berkas-kelas__garis {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  max-width: 46%;
+}
+
+.ds .berkas-kelas__garis span {
+  display: block;
+  height: 4px;
+  border-radius: var(--ds-radius-pill);
+  background-color: color-mix(in srgb, var(--ds-color-ink) 11%, transparent);
+}
+
+.ds .berkas-kelas__garis span:nth-child(1) {
+  width: 100%;
+}
+
+.ds .berkas-kelas__garis span:nth-child(2) {
+  width: 62%;
+}
+
+.ds .berkas-kelas__panah {
+  position: absolute;
+  right: 3cqw;
+  bottom: 3cqw;
+  color: var(--ds-color-ink-muted);
+  transition:
+    transform var(--ds-duration-base) var(--ds-ease-standard),
+    color var(--ds-duration-base) var(--ds-ease-standard);
+}
+
+.ds .folder-kelas.is-open .berkas-kelas:hover .berkas-kelas__panah {
+  transform: translate(2px, -2px);
+  color: var(--ds-color-ink);
+}
+
+.ds .berkas-kelas--materi {
+  --berkas-aksen: var(--ds-color-folder-lilac);
+}
+
+.ds .berkas-kelas--tugas {
+  --berkas-aksen: var(--ds-color-primary);
+}
+
+.ds .berkas-kelas--jadwal {
+  --berkas-aksen: var(--ds-color-secondary-soft);
+}
+
+/* Map terbuka naik di atas tetangganya supaya kertas tidak terpotong. */
+.ds .folder-kelas.is-open {
+  z-index: var(--ds-z-dropdown);
+}
+
+/* --- Kaki pita --- */
+.ds .peta-kelas__kaki {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  margin-top: var(--ds-space-12);
+  padding-top: var(--ds-space-6);
+  border-top: var(--ds-border-base) dashed color-mix(in srgb, var(--ds-color-ink) 38%, transparent);
+}
+
+.ds .peta-kelas__kaki p {
+  margin: 0;
+  font-family: var(--ds-font-hand);
+  font-size: clamp(var(--ds-text-2xl), 3vw, var(--ds-text-3xl));
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+/* ==========================================================================
+   Responsif
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  .ds .peta-kelas__grid {
+    row-gap: var(--ds-space-10);
+  }
+
+  .ds .berkas-kelas {
+    grid-template-columns: 74px minmax(0, 1fr) 16px;
+    column-gap: var(--ds-space-2);
+    padding-inline: 10px;
+  }
+
+  .ds .folder-kelas__catatan {
+    text-align: left;
+  }
+}

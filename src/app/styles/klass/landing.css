@@ -1,22 +1,42 @@
 /* ==========================================================================
-   Halaman utama (landing)
-   Hanya mengatur susunan section yang khas landing page Figma 60:640.
+   Halaman utama (landing) — "Buka Mapnya"
+   Aturan susunan halaman dan utilitas kecil yang hanya dipakai landing.
    Tampilan tiap komponen tetap milik file komponennya masing-masing.
    ========================================================================== */
 
-/* Jelajah pilihan — Figma 60:724: tautan "Jelajahi semua kelas" di atas grid
-   (jarak 34px), lalu judul penutup 34px di bawah grid. */
-.ds .landing-jelajah__head {
-  margin-bottom: var(--ds-space-8);
+/* Rotasi dan surat di tepi section bisa melewati lebar konten. `clip`
+   memotongnya tanpa membuat scroll container baru (sticky tetap bekerja). */
+.ds .landing-main {
+  overflow-x: clip;
 }
 
-.ds .landing-jelajah__title {
-  margin-top: var(--ds-space-8);
-  /* Judul ini menutup section; jarak bawah sudah diurus padding section. */
-  margin-bottom: 0;
+/* Sorotan stabilo untuk potongan kalimat di judul. */
+.ds .sorot {
+  background-image: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--ds-color-primary) 78%, transparent) 0 0.38em,
+    transparent 0.38em
+  );
+  background-repeat: no-repeat;
+  padding-inline: 0.04em;
+  margin-inline: -0.04em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
-/* Figma memakai H2 Bold 700; judul section lain memakai ExtraBold 800. */
-.ds .landing-jelajah__title .section__head-title {
-  font-weight: 700;
+/* Footer landing menempel langsung ke bidang tinta penutup. */
+.ds .landing-footer {
+  margin-top: 0;
+}
+
+/* Anchor section tidak perlu ruang tambahan karena navbar tidak sticky,
+   tetapi sedikit napas membantu saat tautan indeks dipakai. */
+.ds .manifesto-section,
+.ds .isi-map-section,
+.ds .alur-section,
+.ds .peta-kelas,
+.ds .papan-kabar-section,
+.ds .tanya-section,
+.ds .surat-ajakan {
+  scroll-margin-top: var(--ds-space-6);
 }
