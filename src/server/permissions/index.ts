@@ -15,5 +15,5 @@ export {
   type AksesKelas,
   type OpsiIzin,
 } from "./kelas";
-export { untukHalaman, wajibLogin, wajibSuperadmin } from "./halaman";
+export { untukHalaman, wajibLogin } from "./halaman";
 export { requireSuperadmin } from "./superadmin";

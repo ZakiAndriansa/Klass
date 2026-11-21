@@ -49,7 +49,7 @@ Belum diputuskan: bagaimana tema kelas (F6) dihubungkan dengan token `--ds-*`.
 ## 18 November 2026: URL memakai bahasa Inggris
 
 Alamat halaman dan API memakai bahasa Inggris huruf kecil, mengikuti nama use case yang dikenal
-pengguna (`/dashboard`, `/classes`, `/login`, `/admin/requests`), bukan terjemahan harfiah dari
+pengguna (`/dashboard`, `/classes`, `/login`, `/classes/request`), bukan terjemahan harfiah dari
 bahasa Indonesia.
 
 Alasan: alamat lebih mudah ditebak dan diketik, cocok dengan istilah yang sudah lazim di produk
@@ -83,7 +83,7 @@ Yang **tidak** berubah:
   sana, tetapi `className` miliknya sendiri sudah memakai kelas Klass (`kartu-status__*`).
 - Token warna, jarak, dan tipografi tetap `--ds-*`; tidak ada warna mentah baru.
 - Kelas baru ditulis di berkas yang sesuai: `shell.css` untuk cangkang halaman, `kelas.css` untuk
-  halaman kelas, `dashboard.css` untuk dasbor.
+  halaman kelas, `meja.css` untuk dasbor (dulu `dashboard.css`, dihapus 21 November 2026).
 
 ## 20 November 2026: setiap koneksi MySQL dipaksa memakai UTC
 
@@ -129,6 +129,39 @@ tanpa file dan tautan, kelas privat tanpa kode undangan, pengingat tidak sebelum
 berulang dalam satu perubahan urutan), dan hari jadwal di luar 1 sampai 7 sekarang dijawab 400,
 bukan 500. Patokannya: 400 bila kiriman yang sama tidak akan pernah berhasil, 409 bila kirimannya
 benar tetapi keadaan datanya tidak memungkinkan.
+
+## 21 November 2026: `/dashboard` jadi Meja, `/admin` dihapus
+
+`/admin` dihapus dan disatukan ke `/dashboard`. Satu rute, dua tampilan,
+dipilih dari `users.is_superadmin`:
+
+| Peran      | Tampilan | Isi                                              |
+| ---------- | -------- | ------------------------------------------------ |
+| pengguna   | Meja     | agenda lintas kelas, tenggat, tab map, kabar     |
+| superadmin | Loket    | antrean pengajuan, undangan admin, kondisi situs |
+
+Alasan: `/admin` pada dasarnya adalah pratinjau `/dashboard` untuk peran lain,
+dan memisahkannya membuat superadmin kehilangan agenda pribadinya. Peran
+website dan peran kelas berlaku di scope berbeda, jadi tidak seharusnya
+menghalangi akses ke Meja.
+
+Yang ikut berubah:
+
+- Redirect superadmin ke `/admin` dihapus; `redirectTo` akun contoh superadmin
+  menjadi `/dashboard`.
+- Sidebar `SisiDasbor` dan `KerangkaDasbor` dihapus. Navigasi memakai satu
+  navbar dengan tiga tab (Meja/Loket, Kelas, Profil), sehingga tidak ada dua
+  sumber navigasi untuk tujuan yang sama.
+- `dashboard.css` (1027 baris, 22 kelas mati) diganti `meja.css`. Token
+  `--ds-dash-*` yang hanya dipakai dasbor lama dihapus; `--ds-shadow-dash-sheet`
+  dipertahankan karena masih dipakai `kelas.css`.
+- `wajibSuperadmin()` dihapus karena tidak ada lagi halaman yang perlu menolak
+  peran. Tampilan dipilih, bukan ditolak.
+- Kartu statistik dihapus. Metrik yang dipantau peran ini adalah umur pengajuan
+  tertua, ditulis sebagai kalimat di kepala antrean dan berubah merah setelah
+  48 jam.
+- Penolakan pengajuan sekarang wajib beralasan; sebelumnya alasan sudah
+  ditampilkan ke pengaju tetapi UI tidak pernah memintanya.
 
 ## Ditunda
 

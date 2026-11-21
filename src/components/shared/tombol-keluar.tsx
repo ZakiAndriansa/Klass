@@ -12,6 +12,11 @@ import { api } from "@/lib/api-client";
  * Berbeda dari tautan biasa ke `/login`, tombol ini benar-benar menghapus sesi
  * lewat `DELETE /api/v1/session`, jadi pengguna tidak lagi tercatat login.
  * Berlaku untuk akun contoh maupun login Google, saat pengembangan maupun produksi.
+ *
+ * Ini satu-satunya jalan keluar di aplikasi. Navbar sengaja tidak memakainya:
+ * tombol kanan atas di semua halaman area login adalah tautan ke Meja, supaya
+ * aksi yang mengakhiri sesi tidak menempel di setiap halaman. Satu-satunya
+ * pemakai komponen ini adalah buku profil (`/profile`).
  */
 type TombolKeluarProps = {
   label?: string;

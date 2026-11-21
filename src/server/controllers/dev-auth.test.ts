@@ -21,7 +21,7 @@ const { modus, akunSuperadmin } = vi.hoisted(() => ({
     role: "superadmin",
     roleLabel: "Superadmin",
     description: "Mengurus website.",
-    redirectTo: "/admin",
+    redirectTo: "/dashboard",
   },
 }));
 

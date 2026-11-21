@@ -8,7 +8,7 @@ import {
   UnauthorizedError,
 } from "@/server/http/errors";
 
-import { untukHalaman, wajibLogin, wajibSuperadmin } from "./halaman";
+import { untukHalaman, wajibLogin } from "./halaman";
 
 /**
  * `redirect()` dan `notFound()` milik Next.js bekerja dengan melempar galat.
@@ -45,23 +45,6 @@ describe("wajibLogin", () => {
   it("memindahkan ke /login bila belum login", async () => {
     masukSebagai(null);
     await expect(wajibLogin()).rejects.toThrow("PINDAH:/login");
-  });
-});
-
-describe("wajibSuperadmin", () => {
-  it("meloloskan superadmin", async () => {
-    masukSebagai(true);
-    await expect(wajibSuperadmin()).resolves.toMatchObject({ isSuperadmin: true });
-  });
-
-  it("menjawab 404 untuk pengguna biasa", async () => {
-    masukSebagai(false);
-    await expect(wajibSuperadmin()).rejects.toThrow("TIDAK_DITEMUKAN");
-  });
-
-  it("memindahkan ke /login bila belum login", async () => {
-    masukSebagai(null);
-    await expect(wajibSuperadmin()).rejects.toThrow("PINDAH:/login");
   });
 });
 

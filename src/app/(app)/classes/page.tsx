@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { BookOpen, ListChecks, Users } from "lucide-react";
 
 import { Navbar } from "@/components/shared/navbar";
+import { ambilSesiSaya } from "@/server/auth";
 
 import { daftarKelas } from "@/components/features/kelas/data-contoh";
 import { DaftarKelas } from "@/components/features/kelas/daftar-kelas";
@@ -26,12 +28,9 @@ export default function HalamanDaftarKelas() {
 
   return (
     <div className="kelas-page kelas-aksen--kuning">
-      <Navbar
-        className="navbar--dash"
-        merek="Klass"
-        merekHref="/dashboard"
-        aksi={{ label: "Keluar", href: "/login", keluar: true }}
-      />
+      <Suspense fallback={<Navbar className="navbar--dash" merek="Klass" merekHref="/dashboard" />}>
+        <NavbarDaftarKelas />
+      </Suspense>
 
       <main className="kelas-daftar-halaman">
         <div className="container">
@@ -77,5 +76,23 @@ export default function HalamanDaftarKelas() {
         </div>
       </main>
     </div>
+  );
+}
+
+/**
+ * Navbar daftar kelas. Dibaca terpisah di dalam `<Suspense>` supaya isi
+ * halaman tetap bisa diprerender walau sesi butuh cookie.
+ */
+async function NavbarDaftarKelas() {
+  const pengguna = await ambilSesiSaya();
+
+  return (
+    <Navbar
+      className="navbar--dash"
+      merek="Klass"
+      merekHref="/dashboard"
+      aksi={{ label: "Meja", href: "/dashboard" }}
+      pengguna={pengguna ? { name: pengguna.name, image: pengguna.image } : null}
+    />
   );
 }

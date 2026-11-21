@@ -32,5 +32,5 @@ export function proxy(request: NextRequest) {
 
 /** Halaman yang wajib login. `/api` tidak termasuk: API menjawab 401 dalam bentuk JSON. */
 export const config = {
-  matcher: ["/dashboard/:path*", "/classes/:path*", "/admin/:path*"],
+  matcher: ["/dashboard/:path*", "/classes/:path*", "/profile/:path*"],
 };

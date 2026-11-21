@@ -94,6 +94,58 @@
   padding-block: var(--ds-space-2);
 }
 
+/* Identitas pengguna: avatar + nama, mengarah ke /profile. */
+.ds .navbar__profil {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  max-width: 22ch;
+  padding: 3px var(--ds-space-3) 3px 3px;
+  background-color: var(--ds-color-paper-surface);
+  border: var(--ds-border-thin) solid var(--ds-color-border-ink);
+  border-radius: var(--ds-radius-pill);
+  box-shadow: 0 2px 0 var(--ds-color-border-ink);
+  text-decoration: none;
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-ease-standard),
+    transform var(--ds-duration-fast) var(--ds-ease-standard);
+}
+
+.ds .navbar__profil:hover {
+  background-color: var(--ds-color-warning-soft);
+  transform: translateY(-2px);
+}
+
+.ds .navbar__profil.is-active {
+  background-color: var(--ds-color-primary);
+}
+
+.ds .navbar__profil-nama {
+  overflow: hidden;
+  font-size: var(--ds-text-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Di layar sempit nama disembunyikan; avatar saja sudah cukup. */
+@media (max-width: 600px) {
+  .ds .navbar__profil {
+    padding: 3px;
+  }
+
+  .ds .navbar__profil-nama {
+    display: none;
+  }
+}
+
+/* Tombol aksi di navbar (Masuk, Meja, Beranda) memakai radius yang sama
+   dengan chip profil di sebelahnya, supaya keduanya terbaca satu kelompok. */
+.ds .navbar__aksi {
+  border-radius: var(--ds-radius-pill);
+}
+
 .ds .navbar__toggle {
   display: inline-flex;
   align-items: center;

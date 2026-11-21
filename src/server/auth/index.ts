@@ -8,4 +8,5 @@ import "server-only";
  */
 export { ambilAuth, penanganAuth, type Sesi } from "./konfigurasi";
 export { ambilSesi, keluar, requireAuth } from "./sesi";
+export { ambilSesiSaya, type PenggunaAktif } from "./pengguna";
 export { AKUN_DEV, cariAkunDev, masukAkunDev } from "./akun-dev";

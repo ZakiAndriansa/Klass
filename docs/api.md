@@ -89,7 +89,6 @@ Yang terjadi bila pengguna membuka sesuatu yang bukan haknya:
 | Bukan anggota, kelasnya tidak terdaftar (privat) | 404 `NOT_FOUND`    | halaman 404                      |
 | Bukan anggota, kelasnya terdaftar                | 403 `FORBIDDEN`    | halaman `/forbidden`             |
 | Anggota, tetapi perannya kurang                  | 403 `FORBIDDEN`    | halaman `/forbidden`             |
-| Bukan superadmin membuka `/admin`                | 403 `FORBIDDEN`    | halaman 404                      |
 | Mengubah isi kelas yang sudah diarsipkan         | 409 `CONFLICT`     | pesan galat di tempat            |
 
 Untuk kelas privat jawabannya 404, bukan 403, supaya orang luar tidak bisa menebak kelas itu ada.
@@ -220,7 +219,7 @@ Daftar akun contoh, satu per peran. Tidak butuh login.
       "role": "superadmin",
       "roleLabel": "Superadmin",
       "description": "Mengurus website: menyetujui pengajuan kelas dan mengelola poster.",
-      "redirectTo": "/admin"
+      "redirectTo": "/dashboard"
     }
   ]
 }

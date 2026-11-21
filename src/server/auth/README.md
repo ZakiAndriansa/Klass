@@ -36,7 +36,7 @@ Selama kredensial Google belum diisi, masuknya lewat http://localhost:3000/dev/l
 
 | `id` (sama dengan `users.id`) | Peran         | Dibuka setelah masuk |
 | ----------------------------- | ------------- | -------------------- |
-| `dev-superadmin`              | Superadmin    | `/admin`             |
+| `dev-superadmin`              | Superadmin    | `/dashboard`         |
 | `dev-admin-kelas`             | Admin kelas   | `/classes`           |
 | `dev-pj`                      | PJ subkelas   | `/classes`           |
 | `dev-anggota`                 | Anggota       | `/classes`           |

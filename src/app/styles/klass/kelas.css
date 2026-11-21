@@ -247,7 +247,7 @@
   background-color: var(--ds-color-paper-surface);
   border: var(--ds-border-thick) solid var(--ds-color-border-ink);
   border-radius: var(--ds-radius-sm);
-  box-shadow: var(--ds-shadow-dash-sheet);
+  box-shadow: var(--ds-shadow-kertas-panel);
 }
 
 .ds .kelas-kode::before {
@@ -294,7 +294,7 @@
   background-color: var(--ds-color-paper-surface);
   border: var(--ds-border-thick) solid var(--ds-color-border-ink);
   border-radius: var(--ds-radius-sm);
-  box-shadow: var(--ds-shadow-dash-sheet);
+  box-shadow: var(--ds-shadow-kertas-panel);
 }
 
 .ds .kelas-progres-mini__atas {
@@ -454,7 +454,7 @@
   background-color: var(--ds-color-paper-surface);
   border: var(--ds-border-thick) solid var(--ds-color-border-ink);
   border-radius: var(--ds-radius-md);
-  box-shadow: var(--ds-shadow-dash-sheet);
+  box-shadow: var(--ds-shadow-kertas-panel);
 }
 
 @media (min-width: 768px) {
@@ -1634,7 +1634,7 @@
   background-color: var(--ds-color-paper-surface);
   border: var(--ds-border-thick) solid var(--ds-color-border-ink);
   border-radius: var(--ds-radius-sm);
-  box-shadow: var(--ds-shadow-dash-sheet);
+  box-shadow: var(--ds-shadow-kertas-panel);
 }
 
 .ds .kelas-ringkas-strip > div {
@@ -2250,7 +2250,7 @@
   background-color: var(--ds-color-folder-bg);
   border: var(--ds-border-thick) solid var(--ds-color-border-ink);
   border-radius: var(--ds-radius-md);
-  box-shadow: var(--ds-shadow-dash-sheet);
+  box-shadow: var(--ds-shadow-kertas-panel);
 }
 
 @media (min-width: 900px) {
