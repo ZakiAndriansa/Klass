@@ -238,7 +238,7 @@ Mengubah nama dan avatar pengguna yang sedang login.
 | Body               | `name` wajib, string 3–50 karakter. `image` opsional, URL http/https maks 2048 karakter |
 | Respons berhasil   | 200, `{ "data": ProfileDto }`                                                           |
 | Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `NOT_FOUND`                                         |
-| Tipe               | `UbahProfileInput` (masukan), `ProfileDto` (keluaran)                                   |
+| Tipe               | `UpdateProfileInput` (masukan), `ProfileDto` (keluaran)                                 |
 
 `id`, `email`, dan `isSuperadmin` tidak pernah dibaca dari body; pemilik baris diambil dari sesi.
 
