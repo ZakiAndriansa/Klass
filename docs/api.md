@@ -28,7 +28,7 @@ Rinciannya:
 1. Nama field memakai `camelCase`. Bila field itu berasal dari kolom database, namanya mengikuti kolomnya: kolom `class_id` menjadi `classId`, `created_at` menjadi `createdAt`. Jangan diterjemahkan menjadi `idKelas` atau `nama`.
 2. Tanggal dikirim sebagai teks ISO 8601 UTC, misalnya `"2026-11-20T03:00:00.000Z"`.
 3. Nama berkas di `src/app/api`, `src/server/controllers`, dan `src/types/api` mengikuti nama sumber daya di URL: `subclass.ts`, `session.ts`, `class-access.ts`.
-4. Nama fungsi, variabel, dan tipe di dalam kode tetap seperti biasa (`buatSubkelas`, `SesiDto`). Aturan ini hanya untuk yang dikirim lewat jaringan.
+4. Di backend, nama fungsi, model, tipe, dan berkas juga bahasa Inggris: `createSubclass`, `classModel.findById`, `SessionDto`, `class-member.ts`. Yang tetap bahasa Indonesia hanya yang dibaca orang: komentar, `message`, dan nama tes. Daftar padanan nama lama dan baru ada di `docs/keputusan.md` (21 November 2026).
 
 ## Bentuk respons
 
@@ -98,7 +98,7 @@ Yang perlu diingat frontend:
 
 1. **401 sudah ditangani `api()`.** Saat API menjawab 401, `api()` di `src/lib/api-client.ts` langsung memindahkan pengguna ke `/login?next=<halaman sekarang>`. Komponen tidak perlu menulis penanganan 401 sendiri.
 2. **Menyembunyikan tombol bukan pengamanan.** `GET .../access` dipakai untuk memutuskan tombol mana yang tampil. Server tetap memeriksa izin di setiap endpoint, jadi tombol yang lupa disembunyikan akan dijawab 403.
-3. **Di Server Component**, panggil controller lewat `untukHalaman()` dari `@/server/permissions`. Fungsi itu mengubah penolakan menjadi perpindahan halaman seperti tabel di atas.
+3. **Di Server Component**, panggil controller lewat `forPage()` dari `@/server/permissions`. Fungsi itu mengubah penolakan menjadi perpindahan halaman seperti tabel di atas.
 
 ## Daftar endpoint
 
@@ -118,17 +118,17 @@ Respons 200:
 
 ### Sesi
 
-Tipe: `SesiDto` di `src/types/api/session.ts`.
+Tipe: `SessionDto` di `src/types/api/session.ts`.
 
 `GET /api/v1/session`
 
 Siapa yang sedang login. Berlaku untuk akun contoh maupun login Google.
 
-| Hal                | Isi                                                           |
-| ------------------ | ------------------------------------------------------------- |
-| Siapa yang boleh   | Siapa saja                                                    |
-| Respons berhasil   | 200, `data` berbentuk `SesiDto`, atau `null` bila belum login |
-| Galat yang mungkin | tidak ada; belum login bukan galat di sini                    |
+| Hal                | Isi                                                              |
+| ------------------ | ---------------------------------------------------------------- |
+| Siapa yang boleh   | Siapa saja                                                       |
+| Respons berhasil   | 200, `data` berbentuk `SessionDto`, atau `null` bila belum login |
+| Galat yang mungkin | tidak ada; belum login bukan galat di sini                       |
 
 ```json
 {
@@ -148,7 +148,7 @@ Keluar. Respons 200 dengan `{ "data": null }`, juga bila memang belum login. Di 
 
 ### Peran di sebuah kelas
 
-Tipe: `AksesKelasDto` di `src/types/api/class-access.ts`.
+Tipe: `ClassAccessDto` di `src/types/api/class-access.ts`.
 
 `GET /api/v1/classes/{classId}/access`
 
@@ -157,7 +157,7 @@ Peran pengguna yang sedang login di kelas ini.
 | Hal                | Isi                                                                          |
 | ------------------ | ---------------------------------------------------------------------------- |
 | Siapa yang boleh   | Siapa saja yang sudah login                                                  |
-| Respons berhasil   | 200, `data` berbentuk `AksesKelasDto`                                        |
+| Respons berhasil   | 200, `data` berbentuk `ClassAccessDto`                                       |
 | Galat yang mungkin | `UNAUTHORIZED`, `NOT_FOUND` (kelas tidak ada, atau privat dan bukan anggota) |
 
 ```json
@@ -248,7 +248,7 @@ Mengubah nama dan avatar pengguna yang sedang login.
 
 Untuk masuk sebagai peran tertentu tanpa login Google. Halamannya ada di `/dev/login`. Di produksi semua alamat di bawah menjawab 404.
 
-Tipe: `AkunDevDto` di `src/types/api/dev-auth.ts`.
+Tipe: `DevAccountDto` di `src/types/api/dev-auth.ts`.
 
 `GET /api/v1/dev/accounts`
 
@@ -280,7 +280,7 @@ Masuk sebagai salah satu akun contoh. Server memasang cookie sesi, jadi perminta
 | ------------------ | ------------------------------------------------------------- |
 | Siapa yang boleh   | Siapa saja, hanya saat pengembangan                           |
 | Body               | `{ "accountId": "dev-pj" }`                                   |
-| Respons berhasil   | 200, `data` berbentuk `SesiDto`                               |
+| Respons berhasil   | 200, `data` berbentuk `SessionDto`                            |
 | Galat yang mungkin | `VALIDATION_ERROR` (body salah), `NOT_FOUND` (akun tidak ada) |
 
 Membaca sesi dan keluar memakai `/api/v1/session` di atas, sama seperti di produksi.
@@ -289,29 +289,29 @@ Contoh pemakaian dari Client Component:
 
 ```ts
 import { api } from "@/lib/api-client";
-import type { SesiDto } from "@/types/api/session";
+import type { SessionDto } from "@/types/api/session";
 
-await api<SesiDto>("/dev/session", {
+await api<SessionDto>("/dev/session", {
   method: "POST",
   body: JSON.stringify({ accountId: "dev-pj" }),
 });
-const { data: sesi } = await api<SesiDto | null>("/session");
+const { data: sesi } = await api<SessionDto | null>("/session");
 ```
 
 ### Subkelas (F7)
 
 `POST /api/v1/classes/{classId}/subclasses`
 
-Membuat subkelas baru di dalam kelas. `pjAwal` boleh tidak dikirim; isinya paling banyak 2 ID
+Membuat subkelas baru di dalam kelas. `pjUserIds` boleh tidak dikirim; isinya paling banyak 2 ID
 pengguna, dan semuanya harus sudah menjadi anggota kelas itu.
 
 | Hal                | Isi                                                                      |
 | ------------------ | ------------------------------------------------------------------------ |
 | Siapa yang boleh   | Admin kelas                                                              |
-| Body               | `{ "name": "Nama Subkelas", "pjAwal"?: ["user-id-1"] }`                  |
-| Respons berhasil   | 201 dengan `data: SubkelasDto`                                           |
+| Body               | `{ "name": "Nama Subkelas", "pjUserIds"?: ["user-id-1"] }`               |
+| Respons berhasil   | 201 dengan `data: SubclassDto`                                           |
 | Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND` |
-| Tipe               | `SubkelasDto`, `BuatSubkelasInput` di `src/types/api/subclass.ts`        |
+| Tipe               | `SubclassDto`, `CreateSubclassInput` di `src/types/api/subclass.ts`      |
 
 ### Templat untuk endpoint baru
 

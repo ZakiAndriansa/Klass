@@ -1,7 +1,7 @@
 import "server-only";
 import { notFound, redirect } from "next/navigation";
 
-import { ambilSesi, type Sesi } from "@/server/auth";
+import { getSession, type Session } from "@/server/auth";
 import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/server/http/errors";
 
 /**
@@ -18,13 +18,13 @@ import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/server/http/
  * `<Suspense>` (aturan Cache Components, lihat skill `klass-halaman`).
  */
 
-const HALAMAN_LOGIN = "/login";
-const HALAMAN_TANPA_IZIN = "/forbidden";
+const LOGIN_PAGE = "/login";
+const FORBIDDEN_PAGE = "/forbidden";
 
 /** Dipasang di layout `(app)`: semua halaman di bawahnya wajib login. */
-export async function wajibLogin(): Promise<Sesi["user"]> {
-  const sesi = await ambilSesi();
-  if (!sesi) redirect(HALAMAN_LOGIN);
+export async function requirePageLogin(): Promise<Session["user"]> {
+  const sesi = await getSession();
+  if (!sesi) redirect(LOGIN_PAGE);
 
   return sesi.user;
 }
@@ -33,8 +33,8 @@ export async function wajibLogin(): Promise<Sesi["user"]> {
  * Dipasang di layout `/admin`. Yang bukan superadmin mendapat 404, bukan
  * "tidak punya izin", supaya area admin tidak terlihat ada.
  */
-export async function wajibSuperadmin(): Promise<Sesi["user"]> {
-  const user = await wajibLogin();
+export async function requirePageSuperadmin(): Promise<Session["user"]> {
+  const user = await requirePageLogin();
   if (!user.isSuperadmin) notFound();
 
   return user;
@@ -44,17 +44,17 @@ export async function wajibSuperadmin(): Promise<Sesi["user"]> {
  * Membungkus pemanggilan controller dari halaman.
  *
  * Pemakaian:
- *   const akses = await untukHalaman(() => aksesKelasSaya(classId));
+ *   const akses = await forPage(() => getMyClassAccess(classId));
  *
  * Galat lain (misalnya database mati) diteruskan ke `error.tsx`.
  */
-export async function untukHalaman<T>(ambil: () => Promise<T>): Promise<T> {
+export async function forPage<T>(ambil: () => Promise<T>): Promise<T> {
   try {
     return await ambil();
   } catch (galat) {
-    if (galat instanceof UnauthorizedError) redirect(HALAMAN_LOGIN);
+    if (galat instanceof UnauthorizedError) redirect(LOGIN_PAGE);
     if (galat instanceof NotFoundError) notFound();
-    if (galat instanceof ForbiddenError) redirect(HALAMAN_TANPA_IZIN);
+    if (galat instanceof ForbiddenError) redirect(FORBIDDEN_PAGE);
     throw galat;
   }
 }

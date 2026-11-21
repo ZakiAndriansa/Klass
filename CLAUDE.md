@@ -2,7 +2,7 @@
 
 @AGENTS.md
 
-Platform komunitas pengelola kelas. Kebutuhan ada di `docs/PRD-Klass.md`. Tim beranggotakan tujuh mahasiswa yang masih belajar, jadi kode dan komentar ditulis sederhana, berbahasa Indonesia, dan mudah ditiru.
+Platform komunitas pengelola kelas. Kebutuhan ada di `docs/PRD-Klass.md`. Tim beranggotakan tujuh mahasiswa yang masih belajar, jadi kode ditulis sederhana dan mudah ditiru. Komentar dan pesan untuk pengguna berbahasa Indonesia; nama di backend berbahasa Inggris (aturan nomor 8 di bawah).
 
 ## Stack
 
@@ -29,7 +29,8 @@ npm run build
 4. Berkas di `src/server/**` diawali `import "server-only";`.
 5. Variabel lingkungan dibaca lewat `env` dari `@/env`, bukan `process.env`.
 6. Karena Cache Components aktif, bagian halaman yang mengambil data dibungkus `<Suspense>`; polanya ada di skill `klass-halaman`. Jangan memakai `export const dynamic`.
-7. Pemeriksaan peran hanya ditulis di `src/server/permissions`. Controller memanggil `requireAuth()` atau salah satu `require...` sebelum model; halaman memanggil controller lewat `untukHalaman()`. `route.ts` membaca body dengan `bacaJson(req)`, bukan `req.json()`.
+7. Pemeriksaan peran hanya ditulis di `src/server/permissions`. Controller memanggil `requireAuth()` atau salah satu `require...` sebelum model; halaman memanggil controller lewat `forPage()`. `route.ts` membaca body dengan `readJson(req)`, bukan `req.json()`.
+8. Di backend (`src/server`, `src/types/api`, `src/app/api`), nama fungsi, model, tipe, dan berkas berbahasa Inggris: `classModel.findById`, `createSubclass`, `SessionDto`, `class-member.ts`. Komentar, `message` galat, dan nama tes tetap bahasa Indonesia. Padanan nama lama dan baru ada di `docs/keputusan.md` (21 November 2026).
 
 ## Tampilan
 

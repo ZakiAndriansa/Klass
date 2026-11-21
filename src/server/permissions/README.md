@@ -7,9 +7,9 @@ Tempat aturan "siapa boleh melakukan apa". Semua pemeriksaan peran ada di folder
 | Berkas          | Isi                                                                 |
 | --------------- | ------------------------------------------------------------------- |
 | `index.ts`      | Pintu masuk folder. Kode lain mengimpor dari `@/server/permissions` |
-| `kelas.ts`      | Izin tingkat kelas dan subkelas                                     |
+| `class.ts`      | Izin tingkat kelas dan subkelas                                     |
 | `superadmin.ts` | Izin superadmin                                                     |
-| `halaman.ts`    | Penjaga untuk halaman (Server Component)                            |
+| `page.ts`       | Penjaga untuk halaman (Server Component)                            |
 
 ## Untuk controller
 
@@ -18,15 +18,15 @@ Panggil satu fungsi `require...` setelah validasi dan sebelum model:
 ```ts
 import { requireClassAdmin } from "@/server/permissions";
 
-export async function buatSubkelas(classId: string, masukan: unknown) {
-  const input = buatSubkelasSchema.parse(masukan); // 1. validasi
+export async function createSubclass(classId: string, masukan: unknown) {
+  const input = createSubclassSchema.parse(masukan); // 1. validasi
   await requireClassAdmin(classId); // 2. izin
-  const baris = await subkelasModel.buat({ classId, name: input.name }); // 3. model
+  const baris = await subclassModel.create({ classId, name: input.name }); // 3. model
   // 4. bentuk DTO
 }
 ```
 
-Bila lolos, fungsi mengembalikan `{ user, kelas, role }`. Bila tidak, fungsi melempar galat dan `handle()` mengubahnya menjadi respons. Controller tidak perlu `try` dan `catch`.
+Bila lolos, fungsi mengembalikan `{ user, classData, role }`. Bila tidak, fungsi melempar galat dan `handle()` mengubahnya menjadi respons. Controller tidak perlu `try` dan `catch`.
 
 | Fungsi                                 | Siapa yang lolos                         | Dipakai untuk                        |
 | -------------------------------------- | ---------------------------------------- | ------------------------------------ |
@@ -53,18 +53,18 @@ Hal yang sering keliru:
 1. **Peran berlaku per kelas.** Yang diperiksa selalu `classId` atau `subclassId` dari URL, bukan "peran pengguna".
 2. **Superadmin bukan admin kelas.** Superadmin boleh melihat isi kelas untuk moderasi, tetapi `requireClassAdmin` dan `requireSubclassManager` menolaknya.
 3. **PJ subkelas lain ditolak.** PJ Basis Data tidak boleh mengubah materi Jaringan, walaupun satu kelas.
-4. **Kelas yang diarsipkan hanya bisa dibaca.** `requireClassAdmin` dan `requireSubclassManager` menolaknya dengan 409. Untuk endpoint yang hanya membaca, pakai `requireClassAdmin(classId, { bolehArsip: true })`.
+4. **Kelas yang diarsipkan hanya bisa dibaca.** `requireClassAdmin` dan `requireSubclassManager` menolaknya dengan 409. Untuk endpoint yang hanya membaca, pakai `requireClassAdmin(classId, { allowArchived: true })`.
 5. **Yang di-ban** sudah bukan anggota, jadi diperlakukan sama dengan orang luar.
 
 ## Untuk halaman
 
 Halaman tidak punya `handle()`, jadi penolakan diterjemahkan menjadi perpindahan halaman:
 
-| Fungsi              | Guna                                                                                        |
-| ------------------- | ------------------------------------------------------------------------------------------- |
-| `untukHalaman(fn)`  | Membungkus pemanggilan controller: 401 ke `/login`, 404 ke halaman 404, 403 ke `/forbidden` |
-| `wajibLogin()`      | Untuk halaman yang belum mengambil data tetapi wajib login                                  |
-| `wajibSuperadmin()` | Untuk halaman di bawah `/admin`; yang bukan superadmin mendapat 404                         |
+| Fungsi                    | Guna                                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------- |
+| `forPage(fn)`             | Membungkus pemanggilan controller: 401 ke `/login`, 404 ke halaman 404, 403 ke `/forbidden` |
+| `requirePageLogin()`      | Untuk halaman yang belum mengambil data tetapi wajib login                                  |
+| `requirePageSuperadmin()` | Untuk halaman di bawah `/admin`; yang bukan superadmin mendapat 404                         |
 
 ```tsx
 export default function Halaman({ params }: { params: Promise<{ classId: string }> }) {
@@ -77,7 +77,7 @@ export default function Halaman({ params }: { params: Promise<{ classId: string 
 
 async function Isi({ params }: { params: Promise<{ classId: string }> }) {
   const { classId } = await params;
-  const akses = await untukHalaman(() => aksesKelasSaya(classId));
+  const akses = await forPage(() => getMyClassAccess(classId));
   // ...
 }
 ```
@@ -91,7 +91,7 @@ Ketiga fungsi membaca cookie, jadi pemanggilnya harus di dalam `<Suspense>`.
 | Lapis         | Letak                       | Yang diperiksa                                                                  |
 | ------------- | --------------------------- | ------------------------------------------------------------------------------- |
 | 1. Proxy      | `src/proxy.ts`              | Ada cookie sesi atau tidak. Hanya untuk mengalihkan cepat, **bukan** pengamanan |
-| 2. Halaman    | `untukHalaman`, `wajib...`  | Sesi masih berlaku, dan penolakan controller                                    |
+| 2. Halaman    | `forPage`, `wajib...`       | Sesi masih berlaku, dan penolakan controller                                    |
 | 3. Controller | `requireAuth`, `require...` | Sesi dan peran. **Inilah pengaman yang sesungguhnya**                           |
 
 Lapis 3 wajib ada di setiap controller yang membaca atau mengubah data, karena API bisa dipanggil langsung tanpa melewati halaman.

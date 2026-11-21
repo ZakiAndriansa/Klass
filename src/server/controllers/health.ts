@@ -15,7 +15,7 @@ import type { HealthDto } from "@/types/api/health";
  * Controller mengembalikan data biasa, bukan `Response`, supaya bisa dipanggil
  * dari URL (`route.ts`) maupun langsung dari halaman (Server Component).
  */
-export async function cekKesehatan(): Promise<HealthDto> {
+export async function checkHealth(): Promise<HealthDto> {
   let database: HealthDto["database"] = "connected";
 
   try {

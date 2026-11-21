@@ -8,7 +8,7 @@
  * secara terpisah, jadi layout tidak bisa menahan isi halaman. Penjagaannya dua lapis:
  *
  * 1. `src/proxy.ts` memindahkan pengunjung tanpa cookie sesi ke `/login`.
- * 2. Halaman yang mengambil data memanggil controller lewat `untukHalaman()`
+ * 2. Halaman yang mengambil data memanggil controller lewat `forPage()`
  *    (`@/server/permissions`). Controller memeriksa sesi dan peran; bila ditolak,
  *    pengguna dipindahkan ke `/login`, halaman 404, atau `/forbidden`.
  */

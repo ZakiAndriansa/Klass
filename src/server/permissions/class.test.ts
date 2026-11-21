@@ -2,17 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { requireAuth } from "@/server/auth";
 import { UnauthorizedError } from "@/server/http/errors";
-import { anggotaKelasModel } from "@/server/models/anggota-kelas";
-import { kelasModel } from "@/server/models/kelas";
-import { subkelasModel } from "@/server/models/subkelas";
+import { classMemberModel } from "@/server/models/class-member";
+import { classModel } from "@/server/models/class";
+import { subclassModel } from "@/server/models/subclass";
 
 import {
-  bacaAksesKelas,
+  readClassAccess,
   requireClassAdmin,
   requireClassMember,
   requireSubclassManager,
   requireSubclassMember,
-} from "./kelas";
+} from "./class";
 
 /**
  * Uji izin per peran. Sesi dan model diganti tiruan, jadi uji ini tidak butuh database.
@@ -22,10 +22,10 @@ import {
  * dan orang luar (termasuk admin kelas lain dan yang di-ban, karena keduanya bukan anggota).
  */
 vi.mock("@/server/auth", () => ({ requireAuth: vi.fn() }));
-vi.mock("@/server/models/kelas", () => ({ kelasModel: { cariPerId: vi.fn() } }));
-vi.mock("@/server/models/anggota-kelas", () => ({ anggotaKelasModel: { cariAnggota: vi.fn() } }));
-vi.mock("@/server/models/subkelas", () => ({
-  subkelasModel: { cariPerId: vi.fn(), cariPj: vi.fn(), daftarIdPerPj: vi.fn() },
+vi.mock("@/server/models/class", () => ({ classModel: { findById: vi.fn() } }));
+vi.mock("@/server/models/class-member", () => ({ classMemberModel: { findMember: vi.fn() } }));
+vi.mock("@/server/models/subclass", () => ({
+  subclassModel: { findById: vi.fn(), findPj: vi.fn(), listIdsByPj: vi.fn() },
 }));
 
 type Peran = "superadmin" | "admin" | "pj" | "pjLain" | "anggota" | "orangLuar";
@@ -53,7 +53,7 @@ function sebagai(
     } as Awaited<ReturnType<typeof requireAuth>>);
   }
 
-  vi.mocked(kelasModel.cariPerId).mockResolvedValue(
+  vi.mocked(classModel.findById).mockResolvedValue(
     kelas === null
       ? null
       : ({
@@ -61,16 +61,16 @@ function sebagai(
           name: "Kelas A",
           status: kelas.status ?? "active",
           isListed: kelas.isListed ?? true,
-        } as Awaited<ReturnType<typeof kelasModel.cariPerId>>),
+        } as Awaited<ReturnType<typeof classModel.findById>>),
   );
 
   const role = peran === "admin" ? "admin" : "member";
   const anggota = ["admin", "pj", "pjLain", "anggota"].includes(peran);
-  vi.mocked(anggotaKelasModel.cariAnggota).mockResolvedValue(
+  vi.mocked(classMemberModel.findMember).mockResolvedValue(
     atauNull(anggota ? { classId: "kelas-a", userId: `u-${peran}`, role, createdAt: waktu } : null),
   );
 
-  vi.mocked(subkelasModel.cariPerId).mockImplementation(async (id) =>
+  vi.mocked(subclassModel.findById).mockImplementation(async (id) =>
     atauNull(
       id === "sub-a"
         ? {
@@ -84,12 +84,12 @@ function sebagai(
     ),
   );
   // "pj" memegang sub-a; "pjLain" memegang subkelas lain di kelas yang sama.
-  vi.mocked(subkelasModel.cariPj).mockImplementation(async (subclassId, userId) =>
+  vi.mocked(subclassModel.findPj).mockImplementation(async (subclassId, userId) =>
     atauNull(
       subclassId === "sub-a" && userId === "u-pj" ? { subclassId, userId, createdAt: waktu } : null,
     ),
   );
-  vi.mocked(subkelasModel.daftarIdPerPj).mockImplementation(async (_classId, userId) =>
+  vi.mocked(subclassModel.listIdsByPj).mockImplementation(async (_classId, userId) =>
     userId === "u-pj" ? ["sub-a"] : userId === "u-pjLain" ? ["sub-b"] : [],
   );
 }
@@ -150,7 +150,7 @@ describe("requireClassMember (melihat isi kelas)", () => {
   it("yang belum login mendapat 401 walaupun kelasnya tidak ada", async () => {
     sebagai("tanpaLogin", null);
     expect(await status(() => requireClassMember("tidak-ada"))).toBe(401);
-    expect(kelasModel.cariPerId).not.toHaveBeenCalled();
+    expect(classModel.findById).not.toHaveBeenCalled();
   });
 });
 
@@ -171,7 +171,7 @@ describe("requireClassAdmin (mengatur kelas)", () => {
     sebagai("admin");
     await expect(requireClassAdmin("kelas-a")).resolves.toMatchObject({
       user: { id: "u-admin" },
-      kelas: { id: "kelas-a" },
+      classData: { id: "kelas-a" },
       role: "admin",
     });
   });
@@ -186,9 +186,9 @@ describe("requireClassAdmin (mengatur kelas)", () => {
     expect(await status(() => requireClassAdmin("kelas-a"))).toBe(409);
   });
 
-  it("admin boleh membaca kelas yang diarsipkan bila bolehArsip", async () => {
+  it("admin boleh membaca kelas yang diarsipkan bila allowArchived", async () => {
     sebagai("admin", { status: "archived" });
-    expect(await status(() => requireClassAdmin("kelas-a", { bolehArsip: true }))).toBe(200);
+    expect(await status(() => requireClassAdmin("kelas-a", { allowArchived: true }))).toBe(200);
   });
 
   it("anggota biasa tetap 403 di kelas yang diarsipkan, bukan 409", async () => {
@@ -215,8 +215,8 @@ describe("requireSubclassManager (mengelola materi, jadwal, tugas)", () => {
     sebagai("pj");
     await expect(requireSubclassManager("sub-a")).resolves.toMatchObject({
       user: { id: "u-pj" },
-      kelas: { id: "kelas-a" },
-      subkelas: { id: "sub-a" },
+      classData: { id: "kelas-a" },
+      subclass: { id: "sub-a" },
       role: "member",
     });
   });
@@ -252,10 +252,10 @@ describe("requireSubclassMember (melihat isi subkelas)", () => {
   });
 });
 
-describe("bacaAksesKelas (ringkasan hak untuk frontend)", () => {
+describe("readClassAccess (ringkasan hak untuk frontend)", () => {
   it("admin kelas", async () => {
     sebagai("admin");
-    await expect(bacaAksesKelas("kelas-a")).resolves.toMatchObject({
+    await expect(readClassAccess("kelas-a")).resolves.toMatchObject({
       role: "admin",
       pjSubclassIds: [],
     });
@@ -263,7 +263,7 @@ describe("bacaAksesKelas (ringkasan hak untuk frontend)", () => {
 
   it("PJ mendapat daftar subkelas yang dipegangnya", async () => {
     sebagai("pj");
-    await expect(bacaAksesKelas("kelas-a")).resolves.toMatchObject({
+    await expect(readClassAccess("kelas-a")).resolves.toMatchObject({
       role: "member",
       pjSubclassIds: ["sub-a"],
     });
@@ -271,20 +271,20 @@ describe("bacaAksesKelas (ringkasan hak untuk frontend)", () => {
 
   it("orang luar di kelas terdaftar tidak ditolak, tetapi role-nya null", async () => {
     sebagai("orangLuar");
-    await expect(bacaAksesKelas("kelas-a")).resolves.toMatchObject({
+    await expect(readClassAccess("kelas-a")).resolves.toMatchObject({
       role: null,
       pjSubclassIds: [],
     });
-    expect(subkelasModel.daftarIdPerPj).not.toHaveBeenCalled();
+    expect(subclassModel.listIdsByPj).not.toHaveBeenCalled();
   });
 
   it("orang luar di kelas tidak terdaftar mendapat 404", async () => {
     sebagai("orangLuar", { isListed: false });
-    expect(await status(() => bacaAksesKelas("kelas-a"))).toBe(404);
+    expect(await status(() => readClassAccess("kelas-a"))).toBe(404);
   });
 
   it("yang belum login mendapat 401", async () => {
     sebagai("tanpaLogin");
-    expect(await status(() => bacaAksesKelas("kelas-a"))).toBe(401);
+    expect(await status(() => readClassAccess("kelas-a"))).toBe(401);
   });
 });

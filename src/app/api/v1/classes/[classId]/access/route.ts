@@ -1,4 +1,4 @@
-import { aksesKelasSaya } from "@/server/controllers/class-access";
+import { getMyClassAccess } from "@/server/controllers/class-access";
 import { handle, ok } from "@/server/http";
 
 /**
@@ -7,5 +7,5 @@ import { handle, ok } from "@/server/http";
 export const GET = handle(async (_req, { params }: { params: Promise<{ classId: string }> }) => {
   const { classId } = await params;
 
-  return ok(await aksesKelasSaya(classId));
+  return ok(await getMyClassAccess(classId));
 });

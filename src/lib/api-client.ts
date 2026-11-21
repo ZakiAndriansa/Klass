@@ -1,4 +1,4 @@
-import type { ApiGagal, ApiSukses } from "@/types/api/umum";
+import type { ApiFailure, ApiSuccess } from "@/types/api/common";
 
 import { alamatLogin } from "./tujuan";
 
@@ -38,13 +38,13 @@ type OpsiApi = RequestInit & {
 export async function api<T>(
   path: string,
   { alihkanSaat401 = true, ...init }: OpsiApi = {},
-): Promise<ApiSukses<T>> {
+): Promise<ApiSuccess<T>> {
   const respons = await fetch(`/api/v1${path}`, {
     ...init,
     headers: { "Content-Type": "application/json", ...init.headers },
   });
 
-  const isi = (await respons.json().catch(() => null)) as ApiSukses<T> | ApiGagal | null;
+  const isi = (await respons.json().catch(() => null)) as ApiSuccess<T> | ApiFailure | null;
 
   if (isi && "error" in isi) {
     if (respons.status === 401 && alihkanSaat401 && typeof window !== "undefined") {

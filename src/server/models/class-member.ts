@@ -3,37 +3,37 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema/auth";
-import { classAdminInvites, classBans, classMembers } from "@/server/db/schema/kelas";
-import { subclassPj, subclasses } from "@/server/db/schema/subkelas";
+import { classAdminInvites, classBans, classMembers } from "@/server/db/schema/class";
+import { subclassPj, subclasses } from "@/server/db/schema/subclass";
 import { ConflictError } from "@/server/http/errors";
 
-import { kunciKelas } from "./keanggotaan";
-import { ambilHalaman, type Halaman, type Transaksi } from "./query";
+import { lockClass } from "./membership";
+import { paginate, type Pagination, type Transaction } from "./query";
 
-type Anggota = typeof classMembers.$inferSelect;
-type UndanganBaru = Pick<typeof classAdminInvites.$inferInsert, "classId" | "email" | "invitedBy">;
-type OpsiKeluarkan = { ban?: { reason?: (typeof classBans.$inferInsert)["reason"] } };
+type Member = typeof classMembers.$inferSelect;
+type NewInvite = Pick<typeof classAdminInvites.$inferInsert, "classId" | "email" | "invitedBy">;
+type RemoveOptions = { ban?: { reason?: (typeof classBans.$inferInsert)["reason"] } };
 
-const idAnggota = (classId: string, userId: string) =>
+const memberFilter = (classId: string, userId: string) =>
   and(eq(classMembers.classId, classId), eq(classMembers.userId, userId));
-const idBan = (classId: string, userId: string) =>
+const banFilter = (classId: string, userId: string) =>
   and(eq(classBans.classId, classId), eq(classBans.userId, userId));
 
-async function bacaAnggota(koneksi: Pick<typeof db, "select">, classId: string, userId: string) {
+async function readMember(koneksi: Pick<typeof db, "select">, classId: string, userId: string) {
   const [anggota] = await koneksi
     .select()
     .from(classMembers)
-    .where(idAnggota(classId, userId))
+    .where(memberFilter(classId, userId))
     .limit(1);
   return anggota ?? null;
 }
 
-async function bacaBan(koneksi: Pick<typeof db, "select">, classId: string, userId: string) {
-  const [ban] = await koneksi.select().from(classBans).where(idBan(classId, userId)).limit(1);
+async function readBan(koneksi: Pick<typeof db, "select">, classId: string, userId: string) {
+  const [ban] = await koneksi.select().from(classBans).where(banFilter(classId, userId)).limit(1);
   return ban ?? null;
 }
 
-async function jagaAdminTerakhir(transaksi: Transaksi, anggota: Anggota) {
+async function guardLastAdmin(transaksi: Transaction, anggota: Member) {
   if (anggota.role !== "admin") return;
 
   const jumlah = await transaksi.$count(
@@ -43,26 +43,26 @@ async function jagaAdminTerakhir(transaksi: Transaksi, anggota: Anggota) {
   if (jumlah <= 1) throw new ConflictError("Kelas harus memiliki minimal satu admin.");
 }
 
-async function pastikanAdaKuota(transaksi: Transaksi, classId: string, memberLimit: number | null) {
+async function ensureCapacity(transaksi: Transaction, classId: string, memberLimit: number | null) {
   if (memberLimit === null) return;
   const jumlah = await transaksi.$count(classMembers, eq(classMembers.classId, classId));
   if (jumlah >= memberLimit) throw new ConflictError("Kelas sudah penuh.");
 }
 
-export const anggotaKelasModel = {
-  cariAnggota(classId: string, userId: string) {
-    return bacaAnggota(db, classId, userId);
+export const classMemberModel = {
+  findMember(classId: string, userId: string) {
+    return readMember(db, classId, userId);
   },
 
-  cariBan(classId: string, userId: string) {
-    return bacaBan(db, classId, userId);
+  findBan(classId: string, userId: string) {
+    return readBan(db, classId, userId);
   },
 
-  async daftarAnggota(classId: string, halaman: Halaman) {
+  async listMembers(classId: string, halaman: Pagination) {
     const filter = eq(classMembers.classId, classId);
-    return ambilHalaman(halaman, db.$count(classMembers, filter), (limit, offset) =>
+    return paginate(halaman, db.$count(classMembers, filter), (limit, offset) =>
       db
-        .select({ anggota: classMembers, name: users.name, image: users.image })
+        .select({ member: classMembers, name: users.name, image: users.image })
         .from(classMembers)
         .innerJoin(users, eq(classMembers.userId, users.id))
         .where(filter)
@@ -72,9 +72,9 @@ export const anggotaKelasModel = {
     );
   },
 
-  async daftarBan(classId: string, halaman: Halaman) {
+  async listBans(classId: string, halaman: Pagination) {
     const filter = eq(classBans.classId, classId);
-    return ambilHalaman(halaman, db.$count(classBans, filter), (limit, offset) =>
+    return paginate(halaman, db.$count(classBans, filter), (limit, offset) =>
       db
         .select({ ban: classBans, name: users.name })
         .from(classBans)
@@ -86,9 +86,9 @@ export const anggotaKelasModel = {
     );
   },
 
-  async gabung(classId: string, userId: string, inviteCode?: string) {
+  async join(classId: string, userId: string, inviteCode?: string) {
     return db.transaction(async (transaksi) => {
-      const kelas = await kunciKelas(transaksi, classId);
+      const kelas = await lockClass(transaksi, classId);
       if (!kelas || kelas.status !== "active") return null;
       if (
         (inviteCode !== undefined || !kelas.isListed) &&
@@ -97,39 +97,39 @@ export const anggotaKelasModel = {
         return null;
       }
 
-      if (await bacaBan(transaksi, classId, userId)) {
+      if (await readBan(transaksi, classId, userId)) {
         throw new ConflictError("Pengguna diblokir dari kelas ini.");
       }
-      if (await bacaAnggota(transaksi, classId, userId)) {
+      if (await readMember(transaksi, classId, userId)) {
         throw new ConflictError("Pengguna sudah menjadi anggota kelas ini.");
       }
-      await pastikanAdaKuota(transaksi, classId, kelas.memberLimit);
+      await ensureCapacity(transaksi, classId, kelas.memberLimit);
 
       await transaksi.insert(classMembers).values({ classId, userId, role: "member" });
-      const anggota = await bacaAnggota(transaksi, classId, userId);
+      const anggota = await readMember(transaksi, classId, userId);
       if (!anggota) throw new Error("Keanggotaan yang baru dibuat tidak ditemukan.");
       return anggota;
     });
   },
 
-  async ubahPeran(classId: string, userId: string, role: Anggota["role"]) {
+  async updateRole(classId: string, userId: string, role: Member["role"]) {
     return db.transaction(async (transaksi) => {
-      if (!(await kunciKelas(transaksi, classId))) return null;
-      const anggota = await bacaAnggota(transaksi, classId, userId);
+      if (!(await lockClass(transaksi, classId))) return null;
+      const anggota = await readMember(transaksi, classId, userId);
       if (!anggota || anggota.role === role) return anggota;
 
-      if (role === "member") await jagaAdminTerakhir(transaksi, anggota);
-      await transaksi.update(classMembers).set({ role }).where(idAnggota(classId, userId));
+      if (role === "member") await guardLastAdmin(transaksi, anggota);
+      await transaksi.update(classMembers).set({ role }).where(memberFilter(classId, userId));
       return { ...anggota, role };
     });
   },
 
-  async keluarkanAnggota(classId: string, userId: string, { ban }: OpsiKeluarkan = {}) {
+  async removeMember(classId: string, userId: string, { ban }: RemoveOptions = {}) {
     return db.transaction(async (transaksi) => {
-      if (!(await kunciKelas(transaksi, classId))) return null;
-      const anggota = await bacaAnggota(transaksi, classId, userId);
+      if (!(await lockClass(transaksi, classId))) return null;
+      const anggota = await readMember(transaksi, classId, userId);
       if (!anggota) return null;
-      await jagaAdminTerakhir(transaksi, anggota);
+      await guardLastAdmin(transaksi, anggota);
 
       const subkelasDiKelas = transaksi
         .select({ id: subclasses.id })
@@ -138,7 +138,7 @@ export const anggotaKelasModel = {
       await transaksi
         .delete(subclassPj)
         .where(and(eq(subclassPj.userId, userId), inArray(subclassPj.subclassId, subkelasDiKelas)));
-      await transaksi.delete(classMembers).where(idAnggota(classId, userId));
+      await transaksi.delete(classMembers).where(memberFilter(classId, userId));
       if (ban) {
         const reason = ban.reason ?? null;
         await transaksi
@@ -151,17 +151,17 @@ export const anggotaKelasModel = {
     });
   },
 
-  async cabutBan(classId: string, userId: string) {
+  async unban(classId: string, userId: string) {
     return db.transaction(async (transaksi) => {
-      if (!(await kunciKelas(transaksi, classId))) return false;
-      const [hasil] = await transaksi.delete(classBans).where(idBan(classId, userId));
+      if (!(await lockClass(transaksi, classId))) return false;
+      const [hasil] = await transaksi.delete(classBans).where(banFilter(classId, userId));
       return hasil.affectedRows > 0;
     });
   },
 
-  async buatUndanganAdmin({ classId, email, invitedBy }: UndanganBaru) {
+  async createAdminInvite({ classId, email, invitedBy }: NewInvite) {
     return db.transaction(async (transaksi) => {
-      if (!(await kunciKelas(transaksi, classId))) return null;
+      if (!(await lockClass(transaksi, classId))) return null;
       const filter = and(
         eq(classAdminInvites.classId, classId),
         eq(classAdminInvites.email, email),
@@ -194,10 +194,10 @@ export const anggotaKelasModel = {
     });
   },
 
-  async daftarUndanganPerKelas(classId: string, halaman: Halaman) {
+  async listInvitesByClass(classId: string, halaman: Pagination) {
     const filter = eq(classAdminInvites.classId, classId);
 
-    return ambilHalaman(halaman, db.$count(classAdminInvites, filter), (limit, offset) =>
+    return paginate(halaman, db.$count(classAdminInvites, filter), (limit, offset) =>
       db
         .select()
         .from(classAdminInvites)
@@ -208,9 +208,9 @@ export const anggotaKelasModel = {
     );
   },
 
-  async daftarUndanganAdmin(email: string, halaman: Halaman) {
+  async listAdminInvites(email: string, halaman: Pagination) {
     const filter = and(eq(classAdminInvites.email, email), eq(classAdminInvites.status, "pending"));
-    return ambilHalaman(halaman, db.$count(classAdminInvites, filter), (limit, offset) =>
+    return paginate(halaman, db.$count(classAdminInvites, filter), (limit, offset) =>
       db
         .select()
         .from(classAdminInvites)
@@ -222,9 +222,9 @@ export const anggotaKelasModel = {
   },
 
   // Controller memberikan ID dan email terverifikasi dari pengguna yang sama.
-  async terimaUndanganAdmin(classId: string, id: string, email: string, userId: string) {
+  async acceptAdminInvite(classId: string, id: string, email: string, userId: string) {
     return db.transaction(async (transaksi) => {
-      const kelas = await kunciKelas(transaksi, classId);
+      const kelas = await lockClass(transaksi, classId);
       if (!kelas || kelas.status !== "active") return null;
 
       const filter = and(
@@ -234,17 +234,17 @@ export const anggotaKelasModel = {
         eq(classAdminInvites.status, "pending"),
       );
       const [hasil] = await transaksi
-        .select({ undangan: classAdminInvites })
+        .select({ invite: classAdminInvites })
         .from(classAdminInvites)
         .innerJoin(users, and(eq(users.id, userId), eq(users.email, classAdminInvites.email)))
         .where(filter)
         .for("update");
       if (!hasil) return null;
-      if (await bacaBan(transaksi, classId, userId)) {
+      if (await readBan(transaksi, classId, userId)) {
         throw new ConflictError("Pengguna diblokir dari kelas ini.");
       }
-      if (kelas.memberLimit !== null && !(await bacaAnggota(transaksi, classId, userId))) {
-        await pastikanAdaKuota(transaksi, classId, kelas.memberLimit);
+      if (kelas.memberLimit !== null && !(await readMember(transaksi, classId, userId))) {
+        await ensureCapacity(transaksi, classId, kelas.memberLimit);
       }
 
       await transaksi
@@ -252,13 +252,13 @@ export const anggotaKelasModel = {
         .values({ classId, userId, role: "admin" })
         .onDuplicateKeyUpdate({ set: { role: "admin" } });
       await transaksi.update(classAdminInvites).set({ status: "accepted" }).where(filter);
-      return { ...hasil.undangan, status: "accepted" as const };
+      return { ...hasil.invite, status: "accepted" as const };
     });
   },
 
-  async cabutUndanganAdmin(classId: string, id: string) {
+  async revokeAdminInvite(classId: string, id: string) {
     return db.transaction(async (transaksi) => {
-      if (!(await kunciKelas(transaksi, classId))) return false;
+      if (!(await lockClass(transaksi, classId))) return false;
       const [hasil] = await transaksi
         .update(classAdminInvites)
         .set({ status: "revoked" })

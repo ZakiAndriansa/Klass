@@ -5,9 +5,9 @@ import { headers } from "next/headers";
 
 import { db } from "@/server/db";
 import { accounts, users } from "@/server/db/schema/auth";
-import type { AkunDevDto } from "@/types/api/dev-auth";
+import type { DevAccountDto } from "@/types/api/dev-auth";
 
-import { ambilAuth } from "./konfigurasi";
+import { getAuth } from "./config";
 
 /**
  * Akun contoh untuk pengembangan. Pemilik: Zaki.
@@ -24,7 +24,7 @@ import { ambilAuth } from "./konfigurasi";
  * `class_members` dan `subclass_pj`. Sampai data contohnya dibuat, yang benar-benar
  * berbeda hanya superadmin (`users.is_superadmin`).
  */
-export const AKUN_DEV: readonly AkunDevDto[] = [
+export const DEV_ACCOUNTS: readonly DevAccountDto[] = [
   {
     id: "dev-superadmin",
     name: "Superadmin Contoh",
@@ -75,21 +75,21 @@ export const AKUN_DEV: readonly AkunDevDto[] = [
 /**
  * Kata sandi bersama semua akun contoh. Sengaja ditulis di kode: akun ini hanya
  * hidup saat pengembangan, dan login kata sandi dimatikan di produksi
- * (`emailAndPassword` di `konfigurasi.ts`). Pengguna tidak pernah mengetiknya;
+ * (`emailAndPassword` di `config.ts`). Pengguna tidak pernah mengetiknya;
  * halaman `/dev/login` cukup diklik.
  */
-const KATA_SANDI_DEV = "klass-akun-contoh";
+const DEV_PASSWORD = "klass-akun-contoh";
 
-export function cariAkunDev(id: string): AkunDevDto | undefined {
-  return AKUN_DEV.find((akun) => akun.id === id);
+export function findDevAccount(id: string): DevAccountDto | undefined {
+  return DEV_ACCOUNTS.find((akun) => akun.id === id);
 }
 
 /** Memasukkan akun contoh ke tabel `users` bila belum ada. Aman dipanggil berulang. */
-async function siapkanAkunDev(akun: AkunDevDto): Promise<void> {
+async function prepareDevAccount(akun: DevAccountDto): Promise<void> {
   const [ada] = await db.select({ id: users.id }).from(users).where(eq(users.id, akun.id)).limit(1);
   if (ada) return;
 
-  const kataSandi = await hashPassword(KATA_SANDI_DEV);
+  const kataSandi = await hashPassword(DEV_PASSWORD);
 
   await db.transaction(async (tx) => {
     await tx.insert(users).values({
@@ -112,11 +112,11 @@ async function siapkanAkunDev(akun: AkunDevDto): Promise<void> {
 }
 
 /** Masuk sebagai akun contoh: membuat sesi dan memasang cookie-nya. */
-export async function masukAkunDev(akun: AkunDevDto): Promise<void> {
-  await siapkanAkunDev(akun);
+export async function signInDevAccount(akun: DevAccountDto): Promise<void> {
+  await prepareDevAccount(akun);
 
-  await ambilAuth().api.signInEmail({
-    body: { email: akun.email, password: KATA_SANDI_DEV },
+  await getAuth().api.signInEmail({
+    body: { email: akun.email, password: DEV_PASSWORD },
     headers: await headers(),
   });
 }

@@ -1,10 +1,10 @@
 import "server-only";
 
 import { modePengembangan } from "@/env";
-import { AKUN_DEV, cariAkunDev, masukAkunDev } from "@/server/auth";
+import { DEV_ACCOUNTS, findDevAccount, signInDevAccount } from "@/server/auth";
 import { NotFoundError } from "@/server/http/errors";
-import { masukDevSchema, type AkunDevDto } from "@/types/api/dev-auth";
-import type { SesiDto } from "@/types/api/session";
+import { devSignInSchema, type DevAccountDto } from "@/types/api/dev-auth";
+import type { SessionDto } from "@/types/api/session";
 
 /**
  * Controller akun contoh untuk pengembangan. Pemilik: Zaki.
@@ -17,36 +17,36 @@ import type { SesiDto } from "@/types/api/session";
  */
 
 /** Dipakai halaman `/dev/login` untuk memutuskan tampil atau 404. */
-export function loginDevAktif(): boolean {
+export function isDevLoginEnabled(): boolean {
   return modePengembangan;
 }
 
 /** Di produksi alamat ini dianggap tidak ada, jadi jawabannya 404, bukan 403. */
-function pastikanModePengembangan(): void {
+function ensureDevMode(): void {
   if (!modePengembangan) {
     throw new NotFoundError("Alamat ini hanya ada saat pengembangan.");
   }
 }
 
 /** Daftar akun contoh, satu per peran. */
-export async function daftarAkunDev(): Promise<AkunDevDto[]> {
-  pastikanModePengembangan();
+export async function listDevAccounts(): Promise<DevAccountDto[]> {
+  ensureDevMode();
 
-  return [...AKUN_DEV];
+  return [...DEV_ACCOUNTS];
 }
 
 /** Masuk sebagai salah satu akun contoh. */
-export async function masukDev(masukan: unknown): Promise<SesiDto> {
-  pastikanModePengembangan();
+export async function signInDev(masukan: unknown): Promise<SessionDto> {
+  ensureDevMode();
 
-  const { accountId } = masukDevSchema.parse(masukan);
+  const { accountId } = devSignInSchema.parse(masukan);
 
-  const akun = cariAkunDev(accountId);
+  const akun = findDevAccount(accountId);
   if (!akun) {
     throw new NotFoundError("Akun contoh tidak ditemukan.");
   }
 
-  await masukAkunDev(akun);
+  await signInDevAccount(akun);
 
   return {
     id: akun.id,

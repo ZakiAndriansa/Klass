@@ -1,25 +1,25 @@
 import "server-only";
 
 import { NotFoundError } from "@/server/http/errors";
-import { subkelasModel } from "@/server/models/subkelas";
+import { subclassModel } from "@/server/models/subclass";
 import { requireClassAdmin } from "@/server/permissions";
-import { buatSubkelasSchema, type SubkelasDto } from "@/types/api/subclass";
+import { createSubclassSchema, type SubclassDto } from "@/types/api/subclass";
 
 /**
  * Membuat subkelas baru di dalam suatu kelas.
  * Siapa yang boleh: Hanya Admin kelas tersebut
  */
-export async function buatSubkelas(classId: string, bodyInput: unknown): Promise<SubkelasDto> {
-  const input = buatSubkelasSchema.parse(bodyInput);
+export async function createSubclass(classId: string, bodyInput: unknown): Promise<SubclassDto> {
+  const input = createSubclassSchema.parse(bodyInput);
 
   await requireClassAdmin(classId);
 
-  const baris = await subkelasModel.buat(
+  const baris = await subclassModel.create(
     {
       classId,
       name: input.name,
     },
-    input.pjAwal,
+    input.pjUserIds,
   );
 
   if (!baris) {

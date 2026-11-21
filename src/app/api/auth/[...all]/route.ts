@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 
-import { penanganAuth } from "@/server/auth";
+import { authHandler } from "@/server/auth";
 
 /**
  * `/api/auth/*`: alamat milik Better Auth. Pemilik: Zaki.
@@ -12,11 +12,11 @@ import { penanganAuth } from "@/server/auth";
  * Frontend tidak memanggil alamat ini langsung. Pakai `masukDenganGoogle()` dari
  * `src/lib/auth-client.ts`, dan `/api/v1/session` untuk membaca sesi atau keluar.
  */
-async function teruskan(req: Request): Promise<Response> {
+async function forward(req: Request): Promise<Response> {
   // Jangan dijalankan saat `npm run build`.
   await connection();
 
-  return penanganAuth(req);
+  return authHandler(req);
 }
 
-export { teruskan as GET, teruskan as POST };
+export { forward as GET, forward as POST };
