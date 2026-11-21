@@ -16,9 +16,9 @@ import * as schema from "./schema";
 
 // Saat `npm run dev`, berkas dimuat ulang setiap kali kode berubah. Pool disimpan di
 // `globalThis` supaya tidak dibuat ulang terus sampai MySQL kehabisan koneksi.
-const penyimpan = globalThis as unknown as { poolKlass?: mysql.Pool };
+const globalStore = globalThis as unknown as { poolKlass?: mysql.Pool };
 
-function buatPool(): mysql.Pool {
+function createDbPool(): mysql.Pool {
   const pool = mysql.createPool({
     uri: env.DATABASE_URL,
     connectionLimit: 10,
@@ -39,10 +39,10 @@ function buatPool(): mysql.Pool {
   return pool;
 }
 
-const pool = penyimpan.poolKlass ?? buatPool();
+const pool = globalStore.poolKlass ?? createDbPool();
 
 if (process.env.NODE_ENV !== "production") {
-  penyimpan.poolKlass = pool;
+  globalStore.poolKlass = pool;
 }
 
 export const db = drizzle(pool, { schema, mode: "default" });

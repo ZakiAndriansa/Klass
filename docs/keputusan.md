@@ -106,29 +106,78 @@ mengikuti nama kolom database dalam `camelCase`, supaya tidak ada dua nama untuk
 Nama berkas di `src/app/api`, `src/server/controllers`, dan `src/types/api` mengikuti nama sumber
 daya di URL. Nama fungsi dan variabel di kode tidak berubah. Rinciannya di `docs/api.md`.
 
-Yang ikut diubah: `HealthDto` dan `AkunDevDto`, serta body `POST /api/v1/dev/session`
+Yang ikut diubah: `HealthDto` dan `DevAccountDto`, serta body `POST /api/v1/dev/session`
 (`idAkun` menjadi `accountId`).
 
 ## 20 November 2026: lapisan izin dan penjagaan halaman
 
-| Keputusan                                                                           | Alasan                                                                                                                                            |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pemeriksaan peran hanya ditulis di `src/server/permissions`, dipanggil controller   | Satu tempat untuk diuji per peran; controller tidak menulis `if (role === ...)`                                                                   |
-| Peran tidak diperiksa di proxy (dulu middleware)                                    | Peran berlaku per kelas dan harus dibaca dari database; proxy hanya mengalihkan pengunjung tanpa cookie sesi                                      |
-| Penjagaan halaman ditaruh di halaman, bukan di `layout.tsx`                         | Dicoba di layout: Next.js merender layout dan halaman terpisah, sehingga isi halaman tetap terkirim ke yang tidak berhak                          |
-| Orang luar di kelas privat mendapat 404, di kelas terdaftar 403                     | Keberadaan kelas privat tidak boleh bisa ditebak                                                                                                  |
-| Kelas yang diarsipkan hanya bisa dibaca; mengubahnya dijawab 409                    | PRD menyebut datanya disimpan, tetapi tidak menyebut boleh diubah. Bila tim memutuskan lain, ubah `pastikanBolehDiubah` di `permissions/kelas.ts` |
-| `forbidden()` milik Next.js tidak dipakai; 403 di halaman dialihkan ke `/forbidden` | `forbidden()` masih eksperimental di Next.js 16.4                                                                                                 |
-| Sesi dibaca frontend lewat `/api/v1/session`, bukan `/api/v1/dev/session`           | Alamat `dev` menjawab 404 di produksi, sehingga tombol Keluar tidak berfungsi di sana                                                             |
+| Keputusan                                                                           | Alasan                                                                                                                                       |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pemeriksaan peran hanya ditulis di `src/server/permissions`, dipanggil controller   | Satu tempat untuk diuji per peran; controller tidak menulis `if (role === ...)`                                                              |
+| Peran tidak diperiksa di proxy (dulu middleware)                                    | Peran berlaku per kelas dan harus dibaca dari database; proxy hanya mengalihkan pengunjung tanpa cookie sesi                                 |
+| Penjagaan halaman ditaruh di halaman, bukan di `layout.tsx`                         | Dicoba di layout: Next.js merender layout dan halaman terpisah, sehingga isi halaman tetap terkirim ke yang tidak berhak                     |
+| Orang luar di kelas privat mendapat 404, di kelas terdaftar 403                     | Keberadaan kelas privat tidak boleh bisa ditebak                                                                                             |
+| Kelas yang diarsipkan hanya bisa dibaca; mengubahnya dijawab 409                    | PRD menyebut datanya disimpan, tetapi tidak menyebut boleh diubah. Bila tim memutuskan lain, ubah `ensureEditable` di `permissions/class.ts` |
+| `forbidden()` milik Next.js tidak dipakai; 403 di halaman dialihkan ke `/forbidden` | `forbidden()` masih eksperimental di Next.js 16.4                                                                                            |
+| Sesi dibaca frontend lewat `/api/v1/session`, bukan `/api/v1/dev/session`           | Alamat `dev` menjawab 404 di produksi, sehingga tombol Keluar tidak berfungsi di sana                                                        |
 
 ## 20 November 2026: 400 untuk kiriman yang salah
 
-Body yang bukan JSON dulu dijawab 500. Sekarang `route.ts` membaca body dengan `bacaJson(req)` dan
+Body yang bukan JSON dulu dijawab 500. Sekarang `route.ts` membaca body dengan `readJson(req)` dan
 jawabannya 400. Empat pesan di model yang sebenarnya salah masukan dipindah dari 409 ke 400 (materi
 tanpa file dan tautan, kelas privat tanpa kode undangan, pengingat tidak sebelum tenggat, poster
 berulang dalam satu perubahan urutan), dan hari jadwal di luar 1 sampai 7 sekarang dijawab 400,
 bukan 500. Patokannya: 400 bila kiriman yang sama tidak akan pernah berhasil, 409 bila kirimannya
 benar tetapi keadaan datanya tidak memungkinkan.
+
+## 21 November 2026: nama di backend memakai bahasa Inggris
+
+Sebelumnya hanya URL dan nama field JSON yang berbahasa Inggris, sedangkan nama fungsi, model,
+tipe, dan berkas backend berbahasa Indonesia. Akibatnya muncul nama campuran seperti
+`ambilProfile` dan `buatSubkelas`, dan kunci berbahasa Indonesia di hasil model berisiko ikut
+terkirim ke frontend. Sekarang semuanya bahasa Inggris.
+
+Yang berubah: nama fungsi, objek model dan metodenya, tipe, konstanta, dan berkas di
+`src/server`, `src/types/api`, dan `src/app/api`, beserta kunci data di hasil model dan fungsi
+izin. Yang **tidak** berubah: URL, tabel dan kolom database (tidak ada migrasi), isi respons API
+selain satu field di bawah, komentar, `message` galat, nama tes, dan seluruh kode frontend.
+
+Satu field API ikut berganti: body `POST /api/v1/classes/{classId}/subclasses` memakai
+`pjUserIds`, bukan lagi `pjAwal`.
+
+Padanan yang paling sering dipakai:
+
+| Lama                                            | Baru                                                 |
+| ----------------------------------------------- | ---------------------------------------------------- |
+| `bacaJson(req)`                                 | `readJson(req)`                                      |
+| `ambilSesi()`, `keluar()`                       | `getSession()`, `signOut()`                          |
+| `sesiSaya()`, `keluarSesi()`                    | `getMySession()`, `endSession()`                     |
+| `wajibLogin()`, `wajibSuperadmin()`             | `requirePageLogin()`, `requirePageSuperadmin()`      |
+| `untukHalaman(fn)`                              | `forPage(fn)`                                        |
+| `bacaAksesKelas()`, `aksesKelasSaya()`          | `readClassAccess()`, `getMyClassAccess()`            |
+| `{ user, kelas, role }` dari fungsi izin        | `{ user, classData, role }`                          |
+| opsi `{ bolehArsip: true }`                     | `{ allowArchived: true }`                            |
+| `kelasModel`, `anggotaKelasModel`               | `classModel`, `classMemberModel`                     |
+| `subkelasModel`, `materiModel`                  | `subclassModel`, `materialModel`                     |
+| `jadwalModel`, `tugasModel`                     | `scheduleModel`, `assignmentModel`                   |
+| `cariPerId`, `buat`, `ubah`, `hapus`            | `findById`, `create`, `update`, `remove`             |
+| `daftar`, `daftarPerKelas`, `daftarPerSubkelas` | `list`, `listByClass`, `listBySubclass`              |
+| hasil daftar `{ baris, total }`                 | `{ rows, total }`                                    |
+| `ambilHalaman()`, tipe `Halaman`                | `paginate()`, tipe `Pagination`                      |
+| `SesiDto`, `AksesKelasDto`, `SubkelasDto`       | `SessionDto`, `ClassAccessDto`, `SubclassDto`        |
+| `ApiSukses`, `ApiGagal`, `MetaDaftar`           | `ApiSuccess`, `ApiFailure`, `ListMeta`               |
+| `models/kelas.ts`, `models/anggota-kelas.ts`    | `models/class.ts`, `models/class-member.ts`          |
+| `models/materi.ts`, `jadwal.ts`, `tugas.ts`     | `models/material.ts`, `schedule.ts`, `assignment.ts` |
+| `auth/sesi.ts`, `konfigurasi.ts`, `akun-dev.ts` | `auth/session.ts`, `config.ts`, `dev-accounts.ts`    |
+| `permissions/kelas.ts`, `halaman.ts`            | `permissions/class.ts`, `page.ts`                    |
+| `types/api/umum.ts`                             | `types/api/common.ts`                                |
+
+Kunci hasil fungsi izin bernama `classData`, bukan `class`, karena `class` kata khusus di
+JavaScript dan tidak bisa ditulis sebagai `const { class } = ...`.
+
+Bagi yang punya branch dari sebelum perubahan ini: setelah `git pull origin main`, jalankan
+`npm run typecheck`. Setiap nama lama yang masih dipakai akan muncul sebagai galat, dan
+penggantinya ada di tabel di atas.
 
 ## Ditunda
 

@@ -13,7 +13,7 @@ import { alamatLogin } from "@/lib/tujuan";
  * INI BUKAN PENGAMANAN. Proxy hanya melihat "ada cookie atau tidak"; cookie palsu
  * akan lolos dari sini. Pemeriksaan sungguhan (sesi masih berlaku, perannya apa)
  * dilakukan di tempat lain:
- *   halaman   `wajibLogin()` dan `wajibSuperadmin()` di layout
+ *   halaman   `requirePageLogin()` dan `requirePageSuperadmin()` di layout
  *   data      `requireAuth()` dan `require...` di controller (`src/server/permissions`)
  *
  * Peran (admin kelas, PJ) sengaja tidak diperiksa di sini, karena peran berlaku per

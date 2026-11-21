@@ -1,4 +1,4 @@
-import { cekKesehatan } from "@/server/controllers/health";
+import { checkHealth } from "@/server/controllers/health";
 import { handle, ok } from "@/server/http";
 
 /**
@@ -7,4 +7,4 @@ import { handle, ok } from "@/server/http";
  * `route.ts` hanya menghubungkan alamat ke satu fungsi controller.
  * Tidak ada query, tidak ada pemeriksaan izin, tidak ada logika di sini.
  */
-export const GET = handle(async () => ok(await cekKesehatan()));
+export const GET = handle(async () => ok(await checkHealth()));

@@ -67,7 +67,7 @@ Folder berkurung siku seperti `[classId]` berarti bagian alamat itu berubah-ubah
 
 Pengunjung yang belum login dipindahkan ke `/login` oleh `src/proxy.ts`. Itu hanya pengalihan
 cepat. Pengaman sesungguhnya ada di controller: halaman yang mengambil data memanggil controller
-lewat `untukHalaman()` dari `@/server/permissions`, dan bila ditolak pengguna dipindahkan ke
+lewat `forPage()` dari `@/server/permissions`, dan bila ditolak pengguna dipindahkan ke
 `/login`, halaman 404, atau `/forbidden`. Halaman di grup ini masih memakai data contoh, jadi
 belum memanggil controller.
 

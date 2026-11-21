@@ -2,23 +2,23 @@ import "server-only";
 import { and, asc, eq, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
 
 import { db } from "@/server/db";
-import { classes } from "@/server/db/schema/kelas";
-import { assignmentReminders, assignments, subclasses } from "@/server/db/schema/subkelas";
+import { classes } from "@/server/db/schema/class";
+import { assignmentReminders, assignments, subclasses } from "@/server/db/schema/subclass";
 import { ConflictError, ValidationError } from "@/server/http/errors";
 
-import { ambilHalaman, type Halaman, type Transaksi } from "./query";
+import { paginate, type Pagination, type Transaction } from "./query";
 
-type TugasBaru = Pick<
+type NewAssignment = Pick<
   typeof assignments.$inferInsert,
   "subclassId" | "createdBy" | "title" | "description" | "dueAt"
 >;
-type PerubahanTugas = Partial<Pick<TugasBaru, "title" | "description" | "dueAt">>;
-type WaktuPengingat = (typeof assignmentReminders.$inferInsert)["remindAt"];
+type AssignmentChanges = Partial<Pick<NewAssignment, "title" | "description" | "dueAt">>;
+type ReminderTime = (typeof assignmentReminders.$inferInsert)["remindAt"];
 
-const filterPengingat = (assignmentId: string) =>
+const reminderFilter = (assignmentId: string) =>
   and(eq(assignmentReminders.assignmentId, assignmentId), isNull(assignmentReminders.sentAt));
 
-function filterKelas(classId: string) {
+function classFilter(classId: string) {
   const subkelasDiKelas = db
     .select({ id: subclasses.id })
     .from(subclasses)
@@ -26,7 +26,7 @@ function filterKelas(classId: string) {
   return inArray(assignments.subclassId, subkelasDiKelas);
 }
 
-async function bacaTugas(koneksi: Pick<typeof db, "select">, id: string, kelas?: SQL) {
+async function readAssignment(koneksi: Pick<typeof db, "select">, id: string, kelas?: SQL) {
   const [tugas] = await koneksi
     .select()
     .from(assignments)
@@ -35,8 +35,8 @@ async function bacaTugas(koneksi: Pick<typeof db, "select">, id: string, kelas?:
   return tugas ?? null;
 }
 
-async function daftarTugas(filter: SQL, halaman: Halaman) {
-  return ambilHalaman(halaman, db.$count(assignments, filter), (limit, offset) =>
+async function listAssignments(filter: SQL, halaman: Pagination) {
+  return paginate(halaman, db.$count(assignments, filter), (limit, offset) =>
     db
       .select()
       .from(assignments)
@@ -47,16 +47,16 @@ async function daftarTugas(filter: SQL, halaman: Halaman) {
   );
 }
 
-const detik = (tanggal: Date) => Math.floor(tanggal.getTime() / 1000);
+const toSeconds = (tanggal: Date) => Math.floor(tanggal.getTime() / 1000);
 
-async function simpanPengingat(
-  transaksi: Transaksi,
+async function saveReminders(
+  transaksi: Transaction,
   assignmentId: string,
   dueAt: Date,
-  waktuPengingat: readonly WaktuPengingat[],
+  waktuPengingat: readonly ReminderTime[],
 ) {
   if (!waktuPengingat.length) return;
-  if (waktuPengingat.some((remindAt) => detik(remindAt) >= detik(dueAt))) {
+  if (waktuPengingat.some((remindAt) => toSeconds(remindAt) >= toSeconds(dueAt))) {
     throw new ValidationError("Waktu pengingat harus sebelum tenggat tugas.");
   }
 
@@ -67,22 +67,22 @@ async function simpanPengingat(
     .onDuplicateKeyUpdate({ set: { id: sql`${assignmentReminders.id}` } });
 }
 
-export const tugasModel = {
-  cariPerId(classId: string, id: string) {
-    return bacaTugas(db, id, filterKelas(classId));
+export const assignmentModel = {
+  findById(classId: string, id: string) {
+    return readAssignment(db, id, classFilter(classId));
   },
 
-  daftarPerKelas(classId: string, halaman: Halaman) {
-    return daftarTugas(filterKelas(classId), halaman);
+  listByClass(classId: string, halaman: Pagination) {
+    return listAssignments(classFilter(classId), halaman);
   },
 
-  daftarPerSubkelas(subclassId: string, halaman: Halaman) {
-    return daftarTugas(eq(assignments.subclassId, subclassId), halaman);
+  listBySubclass(subclassId: string, halaman: Pagination) {
+    return listAssignments(eq(assignments.subclassId, subclassId), halaman);
   },
 
-  async buat(
-    { subclassId, createdBy, title, description, dueAt }: TugasBaru,
-    waktuPengingat: readonly WaktuPengingat[] = [],
+  async create(
+    { subclassId, createdBy, title, description, dueAt }: NewAssignment,
+    waktuPengingat: readonly ReminderTime[] = [],
   ) {
     return db.transaction(async (transaksi) => {
       const [hasil] = await transaksi
@@ -91,29 +91,29 @@ export const tugasModel = {
         .$returningId();
       if (!hasil) throw new Error("ID tugas yang baru dibuat tidak tersedia.");
 
-      await simpanPengingat(transaksi, hasil.id, dueAt, waktuPengingat);
-      const tugas = await bacaTugas(transaksi, hasil.id);
+      await saveReminders(transaksi, hasil.id, dueAt, waktuPengingat);
+      const tugas = await readAssignment(transaksi, hasil.id);
       if (!tugas) throw new Error("Tugas yang baru dibuat tidak ditemukan.");
       return tugas;
     });
   },
 
-  async ubah(
+  async update(
     classId: string,
     id: string,
-    { title, description, dueAt }: PerubahanTugas,
-    waktuPengingat?: readonly WaktuPengingat[],
+    { title, description, dueAt }: AssignmentChanges,
+    waktuPengingat?: readonly ReminderTime[],
   ) {
     return db.transaction(async (transaksi) => {
-      const filter = and(eq(assignments.id, id), filterKelas(classId));
+      const filter = and(eq(assignments.id, id), classFilter(classId));
       const [tugas] = await transaksi.select().from(assignments).where(filter).for("update");
       if (!tugas) return null;
 
       if (
         waktuPengingat === undefined &&
         dueAt &&
-        detik(dueAt) !== detik(tugas.dueAt) &&
-        (await transaksi.$count(assignmentReminders, filterPengingat(id)))
+        toSeconds(dueAt) !== toSeconds(tugas.dueAt) &&
+        (await transaksi.$count(assignmentReminders, reminderFilter(id)))
       ) {
         throw new ConflictError("Sertakan jadwal pengingat baru saat mengubah tenggat tugas.");
       }
@@ -124,24 +124,24 @@ export const tugasModel = {
       }
 
       if (waktuPengingat !== undefined) {
-        await transaksi.delete(assignmentReminders).where(filterPengingat(id));
-        await simpanPengingat(transaksi, id, dueAt ?? tugas.dueAt, waktuPengingat);
+        await transaksi.delete(assignmentReminders).where(reminderFilter(id));
+        await saveReminders(transaksi, id, dueAt ?? tugas.dueAt, waktuPengingat);
       }
 
-      return bacaTugas(transaksi, id);
+      return readAssignment(transaksi, id);
     });
   },
 
-  async hapus(classId: string, id: string) {
+  async remove(classId: string, id: string) {
     // MySQL menghapus pengingat terkait melalui ON DELETE CASCADE.
     const [hasil] = await db
       .delete(assignments)
-      .where(and(eq(assignments.id, id), filterKelas(classId)));
+      .where(and(eq(assignments.id, id), classFilter(classId)));
     return hasil.affectedRows > 0;
   },
 
   // Menampilkan semua pengingat yang terhubung dengan satu tugas
-  async daftarPengingat(assignmentId: string) {
+  async listReminders(assignmentId: string) {
     return db
       .select()
       .from(assignmentReminders)
@@ -151,7 +151,7 @@ export const tugasModel = {
 
   // Daftar ini tidak mengklaim pekerjaan. Worker harus mencegah pemrosesan paralel
   // terhadap pengingat yang sama sebelum memanggil layanan push.
-  async daftarPengingatSiapKirim(batas: Date, halaman: Halaman) {
+  async listDueReminders(batas: Date, halaman: Pagination) {
     const tugasDiKelasAktif = db
       .select({ id: assignments.id })
       .from(assignments)
@@ -163,9 +163,13 @@ export const tugasModel = {
       lte(assignmentReminders.remindAt, batas),
       inArray(assignmentReminders.assignmentId, tugasDiKelasAktif),
     );
-    return ambilHalaman(halaman, db.$count(assignmentReminders, filter), (limit, offset) =>
+    return paginate(halaman, db.$count(assignmentReminders, filter), (limit, offset) =>
       db
-        .select({ pengingat: assignmentReminders, tugas: assignments, classId: subclasses.classId })
+        .select({
+          reminder: assignmentReminders,
+          assignment: assignments,
+          classId: subclasses.classId,
+        })
         .from(assignmentReminders)
         .innerJoin(assignments, eq(assignmentReminders.assignmentId, assignments.id))
         .innerJoin(subclasses, eq(assignments.subclassId, subclasses.id))
@@ -177,7 +181,7 @@ export const tugasModel = {
   },
 
   // Panggil setelah pengiriman berhasil. Kondisi sent_at hanya menjaga catatan kirim.
-  async tandaiPengingatTerkirim(id: string, sentAt: Date) {
+  async markReminderSent(id: string, sentAt: Date) {
     const [hasil] = await db
       .update(assignmentReminders)
       .set({ sentAt })

@@ -81,7 +81,7 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    // Body dibaca lewat `bacaJson(req)`, supaya body yang bukan JSON dijawab 400, bukan 500.
+    // Body dibaca lewat `readJson(req)`, supaya body yang bukan JSON dijawab 400, bukan 500.
     files: ["src/app/api/**"],
     rules: {
       "no-restricted-syntax": [
@@ -90,7 +90,7 @@ const eslintConfig = defineConfig([
           selector:
             "CallExpression[callee.property.name='json'][callee.object.name=/^(req|request)$/]",
           message:
-            "Pakai bacaJson(req) dari @/server/http, bukan req.json(). Body yang bukan JSON harus dijawab 400.",
+            "Pakai readJson(req) dari @/server/http, bukan req.json(). Body yang bukan JSON harus dijawab 400.",
         },
       ],
     },

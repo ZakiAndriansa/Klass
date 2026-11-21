@@ -13,7 +13,7 @@ import * as skemaAuth from "@/server/db/schema/auth";
  * STATUS: alur login Google sudah tersambung (`/api/auth/*` dan tombol di `/login`),
  * tetapi baru aktif setelah `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` diisi di `.env`
  * (caranya ada di `README.md` folder ini). Sebelum itu, saat pengembangan, masuknya
- * lewat akun contoh di `/dev/login` (lihat `akun-dev.ts`).
+ * lewat akun contoh di `/dev/login` (lihat `dev-accounts.ts`).
  *
  * Konfigurasi ini dan `src/server/db/schema/auth.ts` adalah satu pasang. Mengubah
  * `additionalFields`, `usePlural`, atau menambah plugin berarti skema harus dibuat ulang
@@ -29,7 +29,7 @@ const google =
     ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET }
     : undefined;
 
-function buatAuth() {
+function createAuth() {
   return betterAuth({
     baseURL: env.NEXT_PUBLIC_APP_URL,
     secret: env.BETTER_AUTH_SECRET,
@@ -54,7 +54,7 @@ function buatAuth() {
       },
     },
 
-    // Login email dan kata sandi HANYA untuk akun contoh saat pengembangan (`akun-dev.ts`).
+    // Login email dan kata sandi HANYA untuk akun contoh saat pengembangan (`dev-accounts.ts`).
     // Di produksi fitur ini mati, sehingga satu-satunya cara masuk adalah Google.
     emailAndPassword: { enabled: modePengembangan },
 
@@ -65,9 +65,9 @@ function buatAuth() {
   });
 }
 
-type Auth = ReturnType<typeof buatAuth>;
+type Auth = ReturnType<typeof createAuth>;
 
-let tersimpan: Auth | undefined;
+let cachedAuth: Auth | undefined;
 
 /**
  * Better Auth yang sudah dikonfigurasi.
@@ -76,18 +76,18 @@ let tersimpan: Auth | undefined;
  * `npm run build` tidak ikut menyalakan Better Auth, yang di mode produksi
  * menolak berjalan tanpa `BETTER_AUTH_SECRET`.
  */
-export function ambilAuth(): Auth {
-  tersimpan ??= buatAuth();
-  return tersimpan;
+export function getAuth(): Auth {
+  cachedAuth ??= createAuth();
+  return cachedAuth;
 }
 
 /**
  * Menjalankan permintaan ke `/api/auth/*` (login Google dan callback-nya).
  * Hanya dipakai `src/app/api/auth/[...all]/route.ts`.
  */
-export function penanganAuth(req: Request): Promise<Response> {
-  return ambilAuth().handler(req);
+export function authHandler(req: Request): Promise<Response> {
+  return getAuth().handler(req);
 }
 
 /** Bentuk sesi dan pengguna yang dikembalikan Better Auth, termasuk `isSuperadmin`. */
-export type Sesi = Auth["$Infer"]["Session"];
+export type Session = Auth["$Infer"]["Session"];

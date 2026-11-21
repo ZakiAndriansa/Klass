@@ -1,5 +1,5 @@
-import { masukDev } from "@/server/controllers/dev-auth";
-import { bacaJson, handle, ok } from "@/server/http";
+import { signInDev } from "@/server/controllers/dev-auth";
+import { readJson, handle, ok } from "@/server/http";
 
 /**
  * `POST /api/v1/dev/session`: masuk sebagai akun contoh, body `{ "accountId": "dev-superadmin" }`.
@@ -7,4 +7,4 @@ import { bacaJson, handle, ok } from "@/server/http";
  *
  * Membaca sesi dan keluar memakai `/api/v1/session`, yang berlaku juga di produksi.
  */
-export const POST = handle(async (req) => ok(await masukDev(await bacaJson(req))));
+export const POST = handle(async (req) => ok(await signInDev(await readJson(req))));

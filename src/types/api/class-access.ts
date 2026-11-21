@@ -1,5 +1,5 @@
 /** Peran seorang anggota di satu kelas. */
-export type PeranKelas = "admin" | "member";
+export type ClassRole = "admin" | "member";
 
 /**
  * Hak pengguna yang sedang login di SATU kelas, dikirim
@@ -14,10 +14,10 @@ export type PeranKelas = "admin" | "member";
  *
  * Ini hanya untuk tampilan. Server tetap memeriksa izin di setiap endpoint.
  */
-export type AksesKelasDto = {
+export type ClassAccessDto = {
   classId: string;
   /** `null` berarti belum menjadi anggota kelas ini. */
-  role: PeranKelas | null;
+  role: ClassRole | null;
   /** ID subkelas di kelas ini yang PJ-nya pengguna ini. Kosong bila bukan PJ. */
   pjSubclassIds: string[];
   /** `true` bila kelas sudah diarsipkan: masih bisa dibaca, tidak bisa diubah. */

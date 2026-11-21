@@ -3,9 +3,9 @@
  *
  * Yang ada di sini hanya identitas. Peran di sebuah kelas berbeda-beda per kelas,
  * jadi diambil terpisah lewat `GET /api/v1/classes/{classId}/access`
- * (`AksesKelasDto` di `class-access.ts`).
+ * (`ClassAccessDto` di `class-access.ts`).
  */
-export type SesiDto = {
+export type SessionDto = {
   /** Sama dengan `users.id`. */
   id: string;
   name: string;

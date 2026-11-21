@@ -1,5 +1,5 @@
-import { buatSubkelas } from "@/server/controllers/subclass";
-import { bacaJson, handle, ok } from "@/server/http";
+import { createSubclass } from "@/server/controllers/subclass";
+import { readJson, handle, ok } from "@/server/http";
 
 /**
  * POST /api/v1/classes/[classId]/subclasses
@@ -7,8 +7,8 @@ import { bacaJson, handle, ok } from "@/server/http";
  */
 export const POST = handle(async (req, ctx: { params: Promise<{ classId: string }> }) => {
   const { classId } = await ctx.params;
-  const body = await bacaJson(req);
+  const body = await readJson(req);
 
-  const data = await buatSubkelas(classId, body);
+  const data = await createSubclass(classId, body);
   return ok(data, 201);
 });

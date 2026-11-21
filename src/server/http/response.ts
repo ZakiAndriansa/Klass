@@ -1,4 +1,4 @@
-import type { ApiGagal, ApiSukses, MetaDaftar } from "@/types/api/umum";
+import type { ApiFailure, ApiSuccess, ListMeta } from "@/types/api/common";
 
 /**
  * Pembentuk respons API. Pemilik: Zaki.
@@ -6,8 +6,8 @@ import type { ApiGagal, ApiSukses, MetaDaftar } from "@/types/api/umum";
  */
 
 /** Respons berhasil: `{ data }`, atau `{ data, meta }` untuk daftar berhalaman. */
-export function ok<T>(data: T, status = 200, meta?: MetaDaftar): Response {
-  const isi: ApiSukses<T> = meta ? { data, meta } : { data };
+export function ok<T>(data: T, status = 200, meta?: ListMeta): Response {
+  const isi: ApiSuccess<T> = meta ? { data, meta } : { data };
   return Response.json(isi, { status });
 }
 
@@ -18,6 +18,6 @@ export function fail(
   message: string,
   details: unknown = null,
 ): Response {
-  const isi: ApiGagal = { error: { code, message, details } };
+  const isi: ApiFailure = { error: { code, message, details } };
   return Response.json(isi, { status });
 }

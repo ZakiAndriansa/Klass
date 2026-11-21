@@ -5,23 +5,20 @@ import { db } from "@/server/db";
 import { posters } from "@/server/db/schema/website";
 import { ValidationError } from "@/server/http/errors";
 
-import { ambilHalaman, type Halaman } from "./query";
+import { paginate, type Pagination } from "./query";
 
 type Poster = typeof posters.$inferSelect;
-type PosterBaru = Pick<
-  typeof posters.$inferInsert,
-  "title" | "imageUrl" | "isActive" | "sortOrder"
->;
-type PerubahanPoster = Partial<Omit<PosterBaru, "sortOrder">>;
-type UrutanPoster = Pick<Poster, "id" | "sortOrder">;
+type NewPoster = Pick<typeof posters.$inferInsert, "title" | "imageUrl" | "isActive" | "sortOrder">;
+type PosterChanges = Partial<Omit<NewPoster, "sortOrder">>;
+type PosterOrder = Pick<Poster, "id" | "sortOrder">;
 
-async function bacaPoster(koneksi: Pick<typeof db, "select">, id: string) {
+async function readPoster(koneksi: Pick<typeof db, "select">, id: string) {
   const [poster] = await koneksi.select().from(posters).where(eq(posters.id, id)).limit(1);
   return poster ?? null;
 }
 
-async function daftarPoster(halaman: Halaman, filter?: SQL) {
-  return ambilHalaman(halaman, db.$count(posters, filter), (limit, offset) =>
+async function listPosters(halaman: Pagination, filter?: SQL) {
+  return paginate(halaman, db.$count(posters, filter), (limit, offset) =>
     db
       .select()
       .from(posters)
@@ -33,42 +30,42 @@ async function daftarPoster(halaman: Halaman, filter?: SQL) {
 }
 
 export const posterModel = {
-  cariPerId(id: string) {
-    return bacaPoster(db, id);
+  findById(id: string) {
+    return readPoster(db, id);
   },
 
-  daftar(halaman: Halaman) {
-    return daftarPoster(halaman);
+  list(halaman: Pagination) {
+    return listPosters(halaman);
   },
 
-  daftarAktif(halaman: Halaman) {
-    return daftarPoster(halaman, eq(posters.isActive, true));
+  listActive(halaman: Pagination) {
+    return listPosters(halaman, eq(posters.isActive, true));
   },
 
-  async buat({ title, imageUrl, isActive, sortOrder }: PosterBaru) {
+  async create({ title, imageUrl, isActive, sortOrder }: NewPoster) {
     return db.transaction(async (transaksi) => {
       const [hasil] = await transaksi
         .insert(posters)
         .values({ title, imageUrl, isActive, sortOrder })
         .$returningId();
       if (!hasil) throw new Error("ID poster yang baru dibuat tidak tersedia.");
-      const poster = await bacaPoster(transaksi, hasil.id);
+      const poster = await readPoster(transaksi, hasil.id);
       if (!poster) throw new Error("Poster yang baru dibuat tidak ditemukan.");
       return poster;
     });
   },
 
-  async ubah(id: string, { title, imageUrl, isActive }: PerubahanPoster) {
+  async update(id: string, { title, imageUrl, isActive }: PosterChanges) {
     const perubahan = { title, imageUrl, isActive };
-    if (Object.values(perubahan).every((nilai) => nilai === undefined)) return bacaPoster(db, id);
+    if (Object.values(perubahan).every((nilai) => nilai === undefined)) return readPoster(db, id);
 
     return db.transaction(async (transaksi) => {
       await transaksi.update(posters).set(perubahan).where(eq(posters.id, id));
-      return bacaPoster(transaksi, id);
+      return readPoster(transaksi, id);
     });
   },
 
-  async ubahUrutan(urutan: readonly UrutanPoster[]) {
+  async reorder(urutan: readonly PosterOrder[]) {
     if (!urutan.length) return true;
     const ids = urutan.map(({ id }) => id);
     if (new Set(ids).size !== ids.length) {
@@ -91,7 +88,7 @@ export const posterModel = {
     });
   },
 
-  async hapus(id: string) {
+  async remove(id: string) {
     const [hasil] = await db.delete(posters).where(eq(posters.id, id));
     return hasil.affectedRows > 0;
   },

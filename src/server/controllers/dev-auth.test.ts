@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ZodError } from "zod";
 
-import { masukAkunDev } from "@/server/auth";
+import { signInDevAccount } from "@/server/auth";
 import { NotFoundError } from "@/server/http/errors";
 
-import { daftarAkunDev, masukDev } from "./dev-auth";
+import { listDevAccounts, signInDev } from "./dev-auth";
 
 /**
  * Uji controller akun contoh. Folder auth diganti tiruan, jadi uji ini tidak
@@ -32,47 +32,47 @@ vi.mock("@/env", () => ({
 }));
 
 vi.mock("@/server/auth", () => ({
-  AKUN_DEV: [akunSuperadmin],
-  cariAkunDev: (id: string) => (id === akunSuperadmin.id ? akunSuperadmin : undefined),
-  masukAkunDev: vi.fn(),
+  DEV_ACCOUNTS: [akunSuperadmin],
+  findDevAccount: (id: string) => (id === akunSuperadmin.id ? akunSuperadmin : undefined),
+  signInDevAccount: vi.fn(),
 }));
 
 describe("controller akun contoh", () => {
   beforeEach(() => {
     modus.pengembangan = true;
-    vi.mocked(masukAkunDev).mockReset();
+    vi.mocked(signInDevAccount).mockReset();
   });
 
   it("mengembalikan daftar akun contoh", async () => {
-    await expect(daftarAkunDev()).resolves.toEqual([akunSuperadmin]);
+    await expect(listDevAccounts()).resolves.toEqual([akunSuperadmin]);
   });
 
   it("masuk sebagai akun contoh dan mengembalikan sesinya", async () => {
-    await expect(masukDev({ accountId: "dev-superadmin" })).resolves.toEqual({
+    await expect(signInDev({ accountId: "dev-superadmin" })).resolves.toEqual({
       id: "dev-superadmin",
       name: "Superadmin Contoh",
       email: "superadmin@klass.test",
       image: null,
       isSuperadmin: true,
     });
-    expect(masukAkunDev).toHaveBeenCalledWith(akunSuperadmin);
+    expect(signInDevAccount).toHaveBeenCalledWith(akunSuperadmin);
   });
 
   it("menolak body tanpa accountId", async () => {
-    await expect(masukDev({})).rejects.toBeInstanceOf(ZodError);
-    expect(masukAkunDev).not.toHaveBeenCalled();
+    await expect(signInDev({})).rejects.toBeInstanceOf(ZodError);
+    expect(signInDevAccount).not.toHaveBeenCalled();
   });
 
   it("menjawab tidak ditemukan untuk akun yang tidak ada di daftar", async () => {
-    await expect(masukDev({ accountId: "dev-tidak-ada" })).rejects.toBeInstanceOf(NotFoundError);
-    expect(masukAkunDev).not.toHaveBeenCalled();
+    await expect(signInDev({ accountId: "dev-tidak-ada" })).rejects.toBeInstanceOf(NotFoundError);
+    expect(signInDevAccount).not.toHaveBeenCalled();
   });
 
   it("menolak semua fungsi di produksi", async () => {
     modus.pengembangan = false;
 
-    await expect(daftarAkunDev()).rejects.toBeInstanceOf(NotFoundError);
-    await expect(masukDev({ accountId: "dev-superadmin" })).rejects.toBeInstanceOf(NotFoundError);
-    expect(masukAkunDev).not.toHaveBeenCalled();
+    await expect(listDevAccounts()).rejects.toBeInstanceOf(NotFoundError);
+    await expect(signInDev({ accountId: "dev-superadmin" })).rejects.toBeInstanceOf(NotFoundError);
+    expect(signInDevAccount).not.toHaveBeenCalled();
   });
 });

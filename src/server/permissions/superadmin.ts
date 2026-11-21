@@ -1,6 +1,6 @@
 import "server-only";
 
-import { requireAuth, type Sesi } from "@/server/auth";
+import { requireAuth, type Session } from "@/server/auth";
 import { ForbiddenError } from "@/server/http/errors";
 
 /**
@@ -13,7 +13,7 @@ import { ForbiddenError } from "@/server/http/errors";
  *   belum login        401 UNAUTHORIZED
  *   bukan superadmin   403 FORBIDDEN
  */
-export async function requireSuperadmin(): Promise<Sesi["user"]> {
+export async function requireSuperadmin(): Promise<Session["user"]> {
   const user = await requireAuth();
 
   if (!user.isSuperadmin) {

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { healthModel } from "@/server/models/health";
 
-import { cekKesehatan } from "./health";
+import { checkHealth } from "./health";
 
 /**
  * CONTOH UJI CONTROLLER. Model diganti tiruan, jadi uji ini tidak butuh database.
@@ -12,7 +12,7 @@ vi.mock("@/server/models/health", () => ({
   healthModel: { ping: vi.fn() },
 }));
 
-describe("cekKesehatan", () => {
+describe("checkHealth", () => {
   beforeEach(() => {
     vi.mocked(healthModel.ping).mockReset();
   });
@@ -20,7 +20,7 @@ describe("cekKesehatan", () => {
   it("melaporkan database terhubung bila query berhasil", async () => {
     vi.mocked(healthModel.ping).mockResolvedValue();
 
-    await expect(cekKesehatan()).resolves.toEqual({
+    await expect(checkHealth()).resolves.toEqual({
       app: "running",
       database: "connected",
     });
@@ -29,7 +29,7 @@ describe("cekKesehatan", () => {
   it("melaporkan database terputus bila query gagal, tanpa melempar galat", async () => {
     vi.mocked(healthModel.ping).mockRejectedValue(new Error("ECONNREFUSED"));
 
-    await expect(cekKesehatan()).resolves.toEqual({
+    await expect(checkHealth()).resolves.toEqual({
       app: "running",
       database: "disconnected",
     });

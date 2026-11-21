@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { DasborSuperadmin } from "@/components/features/dasbor/dasbor-superadmin";
 import { KerangkaDasbor } from "@/components/features/dasbor/kerangka-dasbor";
-import { wajibSuperadmin } from "@/server/permissions";
+import { requirePageSuperadmin } from "@/server/permissions";
 
 export const metadata: Metadata = {
   title: "Ruang kendali Klass",
@@ -33,7 +33,7 @@ export default function HalamanDasborSuperadmin() {
 }
 
 async function IsiDasborSuperadmin() {
-  await wajibSuperadmin();
+  await requirePageSuperadmin();
 
   return (
     <KerangkaDasbor

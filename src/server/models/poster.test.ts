@@ -3,41 +3,49 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { posterModel } from "./poster";
 import {
-  hasilBaca,
-  hasilHitung,
-  hasilTulis,
+  readResult,
+  countResult,
+  writeResult,
   query,
-  resetMysqlTiruan,
-  siapkan,
-  sqlDijalankan,
-  waktu,
-} from "./uji/mysql";
+  resetMysqlMock,
+  queueResults,
+  executedSql,
+  sampleTime,
+} from "./testing/mysql";
 
-vi.mock("mysql2/promise", async () => (await import("./uji/mysql")).driver);
+vi.mock("mysql2/promise", async () => (await import("./testing/mysql")).driver);
 vi.mock("@/env", () => ({ env: { DATABASE_URL: "mysql://localhost/klass_test" } }));
 
 describe("posterModel", () => {
-  beforeEach(resetMysqlTiruan);
+  beforeEach(resetMysqlMock);
 
   it("menampilkan hanya poster aktif dengan urutan tampilan dan total", async () => {
-    siapkan(
-      hasilHitung(1),
-      hasilBaca(["poster", "Selamat Datang", "https://example.test/poster", 1, 2, waktu, waktu]),
+    queueResults(
+      countResult(1),
+      readResult([
+        "poster",
+        "Selamat Datang",
+        "https://example.test/poster",
+        1,
+        2,
+        sampleTime,
+        sampleTime,
+      ]),
     );
 
-    await expect(posterModel.daftarAktif({ page: 1, limit: 10 })).resolves.toMatchObject({
-      baris: [{ id: "poster", isActive: true, sortOrder: 2 }],
+    await expect(posterModel.listActive({ page: 1, limit: 10 })).resolves.toMatchObject({
+      rows: [{ id: "poster", isActive: true, sortOrder: 2 }],
       total: 1,
     });
-    expect(sqlDijalankan()[1]).toContain("`posters`.`is_active` = ?");
-    expect(sqlDijalankan()[1]).toContain("order by `posters`.`sort_order` asc");
+    expect(executedSql()[1]).toContain("`posters`.`is_active` = ?");
+    expect(executedSql()[1]).toContain("order by `posters`.`sort_order` asc");
   });
 
   it("mengubah semua posisi dalam satu transaksi", async () => {
-    siapkan(hasilTulis, hasilBaca(["satu"], ["dua"]), hasilTulis, hasilTulis, hasilTulis);
+    queueResults(writeResult, readResult(["satu"], ["dua"]), writeResult, writeResult, writeResult);
 
     await expect(
-      posterModel.ubahUrutan([
+      posterModel.reorder([
         { id: "satu", sortOrder: 2 },
         { id: "dua", sortOrder: 1 },
       ]),
@@ -46,14 +54,14 @@ describe("posterModel", () => {
       [2, "satu"],
       [1, "dua"],
     ]);
-    expect(sqlDijalankan().at(-1)).toBe("commit");
+    expect(executedSql().at(-1)).toBe("commit");
   });
 
   it("mengembalikan false tanpa menulis jika ada poster yang tidak ditemukan", async () => {
-    siapkan(hasilTulis, hasilBaca(["satu"]), hasilTulis);
+    queueResults(writeResult, readResult(["satu"]), writeResult);
 
     await expect(
-      posterModel.ubahUrutan([
+      posterModel.reorder([
         { id: "satu", sortOrder: 2 },
         { id: "hilang", sortOrder: 1 },
       ]),
@@ -63,7 +71,7 @@ describe("posterModel", () => {
 
   it("menolak ID berulang sebelum membuka transaksi", async () => {
     await expect(
-      posterModel.ubahUrutan([
+      posterModel.reorder([
         { id: "satu", sortOrder: 1 },
         { id: "satu", sortOrder: 2 },
       ]),
@@ -72,14 +80,20 @@ describe("posterModel", () => {
   });
 
   it("membatalkan perubahan urutan pertama jika penulisan berikutnya gagal", async () => {
-    siapkan(hasilTulis, hasilBaca(["satu"], ["dua"]), hasilTulis, new Error("gagal"), hasilTulis);
+    queueResults(
+      writeResult,
+      readResult(["satu"], ["dua"]),
+      writeResult,
+      new Error("gagal"),
+      writeResult,
+    );
 
     await expect(
-      posterModel.ubahUrutan([
+      posterModel.reorder([
         { id: "satu", sortOrder: 2 },
         { id: "dua", sortOrder: 1 },
       ]),
     ).rejects.toThrow();
-    expect(sqlDijalankan().at(-1)).toBe("rollback");
+    expect(executedSql().at(-1)).toBe("rollback");
   });
 });

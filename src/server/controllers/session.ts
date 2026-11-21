@@ -1,7 +1,7 @@
 import "server-only";
 
-import { ambilSesi, keluar } from "@/server/auth";
-import type { SesiDto } from "@/types/api/session";
+import { getSession, signOut } from "@/server/auth";
+import type { SessionDto } from "@/types/api/session";
 
 /**
  * Controller sesi: siapa yang sedang login, dan keluar. Pemilik: Zaki.
@@ -11,8 +11,8 @@ import type { SesiDto } from "@/types/api/session";
  */
 
 /** Pengguna yang sedang login. `null` berarti belum login (bukan galat). */
-export async function sesiSaya(): Promise<SesiDto | null> {
-  const sesi = await ambilSesi();
+export async function getMySession(): Promise<SessionDto | null> {
+  const sesi = await getSession();
   if (!sesi) return null;
 
   const { user } = sesi;
@@ -27,9 +27,9 @@ export async function sesiSaya(): Promise<SesiDto | null> {
 }
 
 /** Mengakhiri sesi dan menghapus cookie-nya. Aman dipanggil walau belum login. */
-export async function keluarSesi(): Promise<null> {
-  if (await ambilSesi()) {
-    await keluar();
+export async function endSession(): Promise<null> {
+  if (await getSession()) {
+    await signOut();
   }
 
   return null;

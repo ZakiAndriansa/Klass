@@ -4,7 +4,7 @@ import { cache } from "react";
 
 import { UnauthorizedError } from "@/server/http/errors";
 
-import { ambilAuth, type Sesi } from "./konfigurasi";
+import { getAuth, type Session } from "./config";
 
 /**
  * Pembaca sesi login. Pemilik: Zaki.
@@ -20,12 +20,12 @@ import { ambilAuth, type Sesi } from "./konfigurasi";
  * Dibungkus `cache()` supaya dalam satu kali render halaman, layout, halaman, dan
  * controller yang sama-sama bertanya "siapa yang login" hanya membaca database sekali.
  */
-export const ambilSesi = cache(async (): Promise<Sesi | null> => {
+export const getSession = cache(async (): Promise<Session | null> => {
   // `headers()` dibaca lebih dulu. Saat `npm run build`, baris ini menghentikan
-  // prerender sebelum Better Auth sempat dinyalakan (lihat `ambilAuth`).
+  // prerender sebelum Better Auth sempat dinyalakan (lihat `getAuth`).
   const kepala = await headers();
 
-  return ambilAuth().api.getSession({ headers: kepala });
+  return getAuth().api.getSession({ headers: kepala });
 });
 
 /**
@@ -33,10 +33,10 @@ export const ambilSesi = cache(async (): Promise<Sesi | null> => {
  *
  * Pemakaian di controller:
  *   const pengguna = await requireAuth();
- *   const profil = await profileModel.cariPerId(pengguna.id);
+ *   const profil = await profileModel.findById(pengguna.id);
  */
-export async function requireAuth(): Promise<Sesi["user"]> {
-  const sesi = await ambilSesi();
+export async function requireAuth(): Promise<Session["user"]> {
+  const sesi = await getSession();
 
   if (!sesi) {
     throw new UnauthorizedError();
@@ -46,6 +46,6 @@ export async function requireAuth(): Promise<Sesi["user"]> {
 }
 
 /** Mengakhiri sesi yang sedang berjalan dan menghapus cookie-nya. */
-export async function keluar(): Promise<void> {
-  await ambilAuth().api.signOut({ headers: await headers() });
+export async function signOut(): Promise<void> {
+  await getAuth().api.signOut({ headers: await headers() });
 }

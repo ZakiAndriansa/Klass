@@ -10,11 +10,11 @@ import { ValidationError } from "./errors";
  * mengubahnya menjadi 400 `VALIDATION_ERROR`, karena yang salah adalah kiriman klien.
  *
  * Pemakaian:
- *   export const POST = handle(async (req) => ok(await buatKelas(await bacaJson(req)), 201));
+ *   export const POST = handle(async (req) => ok(await buatKelas(await readJson(req)), 201));
  *
  * Hasilnya `unknown`. Bentuknya baru diperiksa controller dengan Zod.
  */
-export async function bacaJson(req: Request): Promise<unknown> {
+export async function readJson(req: Request): Promise<unknown> {
   try {
     return await req.json();
   } catch {

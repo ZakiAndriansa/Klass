@@ -3,20 +3,20 @@
  */
 
 /** Keterangan halaman pada respons daftar. */
-export type MetaDaftar = {
+export type ListMeta = {
   page: number;
   limit: number;
   total: number;
 };
 
 /** Respons berhasil. `meta` hanya ada pada daftar berhalaman. */
-export type ApiSukses<T> = {
+export type ApiSuccess<T> = {
   data: T;
-  meta?: MetaDaftar;
+  meta?: ListMeta;
 };
 
 /** Respons gagal. Frontend bercabang berdasarkan `code` dan menampilkan `message`. */
-export type ApiGagal = {
+export type ApiFailure = {
   error: {
     code: string;
     message: string;

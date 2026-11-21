@@ -86,12 +86,12 @@ export const classMembers = mysqlTable(
 );
 
 export const classMembersRelations = relations(classMembers, ({ one }) => ({
-  kelas: one(classes, {
+  class: one(classes, {
     fields: [classMembers.classId],
     references: [classes.id],
   }),
 
-  pengguna: one(users, {
+  user: one(users, {
     fields: [classMembers.userId],
     references: [users.id],
   }),
@@ -122,12 +122,12 @@ export const classBans = mysqlTable(
 );
 
 export const classBansRelations = relations(classBans, ({ one }) => ({
-  kelas: one(classes, {
+  class: one(classes, {
     fields: [classBans.classId],
     references: [classes.id],
   }),
 
-  pengguna: one(users, {
+  user: one(users, {
     fields: [classBans.userId],
     references: [users.id],
   }),
@@ -162,12 +162,12 @@ export const classAdminInvites = mysqlTable(
 );
 
 export const classAdminInvitesRelations = relations(classAdminInvites, ({ one }) => ({
-  kelas: one(classes, {
+  class: one(classes, {
     fields: [classAdminInvites.classId],
     references: [classes.id],
   }),
 
-  pengundang: one(users, {
+  inviter: one(users, {
     fields: [classAdminInvites.invitedBy],
     references: [users.id],
   }),

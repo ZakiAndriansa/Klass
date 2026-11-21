@@ -3,79 +3,79 @@ import { and, asc, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema/auth";
-import { classMembers, classes } from "@/server/db/schema/kelas";
+import { classMembers, classes } from "@/server/db/schema/class";
 import { ConflictError, ValidationError } from "@/server/http/errors";
 
-import { kunciKelas } from "./keanggotaan";
-import { ambilHalaman, entriDuplikat, type Halaman, type Transaksi } from "./query";
+import { lockClass } from "./membership";
+import { paginate, isDuplicateEntry, type Pagination, type Transaction } from "./query";
 
-type Kelas = typeof classes.$inferSelect;
-type KelasBaru = typeof classes.$inferInsert;
-type DataBuatKelas = Pick<KelasBaru, "name" | "isListed" | "inviteCode" | "memberLimit"> & {
-  createdBy: NonNullable<KelasBaru["createdBy"]>;
+type ClassRow = typeof classes.$inferSelect;
+type NewClass = typeof classes.$inferInsert;
+type CreateClassData = Pick<NewClass, "name" | "isListed" | "inviteCode" | "memberLimit"> & {
+  createdBy: NonNullable<NewClass["createdBy"]>;
 };
-type PengaturanKelas = Partial<
-  Pick<KelasBaru, "name" | "isListed" | "inviteCode" | "memberLimit" | "style">
+type ClassSettings = Partial<
+  Pick<NewClass, "name" | "isListed" | "inviteCode" | "memberLimit" | "style">
 >;
-type FilterPengajuan = { createdBy?: string; status?: Kelas["status"] };
+type RequestFilter = { createdBy?: string; status?: ClassRow["status"] };
 
-async function bacaKelasPerId(
+async function readClassById(
   koneksi: Pick<typeof db, "select">,
   id: string,
-): Promise<Kelas | null> {
+): Promise<ClassRow | null> {
   const [kelas] = await koneksi.select().from(classes).where(eq(classes.id, id)).limit(1);
   return kelas ?? null;
 }
 
-function pastikanKodeKelasPrivat(isListed: boolean, inviteCode: KelasBaru["inviteCode"]) {
+function ensurePrivateClassCode(isListed: boolean, inviteCode: NewClass["inviteCode"]) {
   if (!isListed && !inviteCode) {
     throw new ValidationError("Kelas yang tidak terdaftar harus memiliki kode undangan.");
   }
 }
 
-function lemparKonflikKodeUndangan(galat: unknown): never {
-  if (entriDuplikat(galat)) throw new ConflictError("Kode undangan sudah dipakai kelas lain.");
+function throwInviteCodeConflict(galat: unknown): never {
+  if (isDuplicateEntry(galat)) throw new ConflictError("Kode undangan sudah dipakai kelas lain.");
   throw galat;
 }
 
-async function bacaPengajuanPending(transaksi: Transaksi, id: string) {
-  const kelas = await kunciKelas(transaksi, id);
+async function readPendingRequest(transaksi: Transaction, id: string) {
+  const kelas = await lockClass(transaksi, id);
   if (kelas && kelas.status !== "pending") {
     throw new ConflictError("Pengajuan kelas ini sudah diputuskan.");
   }
   return kelas;
 }
 
-export const kelasModel = {
-  async cariPerId(id: string): Promise<Kelas | null> {
-    return bacaKelasPerId(db, id);
+export const classModel = {
+  async findById(id: string): Promise<ClassRow | null> {
+    return readClassById(db, id);
   },
 
-  async buat({
+  async create({
     name,
     createdBy,
     isListed,
     inviteCode,
     memberLimit,
-  }: DataBuatKelas): Promise<Kelas> {
-    pastikanKodeKelasPrivat(isListed ?? true, inviteCode);
+  }: CreateClassData): Promise<ClassRow> {
+    ensurePrivateClassCode(isListed ?? true, inviteCode);
     return db.transaction(async (transaksi) => {
       const [hasil] = await transaksi
         .insert(classes)
         .values({ name, createdBy, isListed, inviteCode, memberLimit })
         .$returningId()
-        .catch(lemparKonflikKodeUndangan);
+        .catch(throwInviteCodeConflict);
       if (!hasil) throw new Error("ID kelas yang baru dibuat tidak tersedia.");
 
       // Baca hasil INSERT agar nilai bawaan dari MySQL ikut dikembalikan.
-      const kelas = await bacaKelasPerId(transaksi, hasil.id);
+      const kelas = await readClassById(transaksi, hasil.id);
       if (!kelas) throw new Error("Kelas yang baru dibuat tidak ditemukan.");
 
       return kelas;
     });
   },
 
-  async cariPerKodeUndangan(inviteCode: string) {
+  async findByInviteCode(inviteCode: string) {
     const [kelas] = await db
       .select()
       .from(classes)
@@ -84,14 +84,14 @@ export const kelasModel = {
     return kelas?.inviteCode === inviteCode ? kelas : null;
   },
 
-  async daftarPublik(halaman: Halaman, pencarian?: string) {
+  async listPublic(halaman: Pagination, pencarian?: string) {
     const kata = pencarian?.replace(/[!%_]/g, "!$&");
     const filter = and(
       eq(classes.status, "active"),
       eq(classes.isListed, true),
       kata ? sql`${classes.name} like ${"%" + kata + "%"} escape '!'` : undefined,
     );
-    return ambilHalaman(halaman, db.$count(classes, filter), (limit, offset) =>
+    return paginate(halaman, db.$count(classes, filter), (limit, offset) =>
       db
         .select({ id: classes.id, name: classes.name, style: classes.style })
         .from(classes)
@@ -102,11 +102,11 @@ export const kelasModel = {
     );
   },
 
-  async daftarPerPengguna(userId: string, halaman: Halaman) {
+  async listByUser(userId: string, halaman: Pagination) {
     const filter = eq(classMembers.userId, userId);
-    return ambilHalaman(halaman, db.$count(classMembers, filter), (limit, offset) =>
+    return paginate(halaman, db.$count(classMembers, filter), (limit, offset) =>
       db
-        .select({ kelas: classes, role: classMembers.role })
+        .select({ classData: classes, role: classMembers.role })
         .from(classMembers)
         .innerJoin(classes, eq(classMembers.classId, classes.id))
         .where(filter)
@@ -116,14 +116,14 @@ export const kelasModel = {
     );
   },
 
-  async daftarPengajuan(halaman: Halaman, { createdBy, status }: FilterPengajuan = {}) {
+  async listRequests(halaman: Pagination, { createdBy, status }: RequestFilter = {}) {
     const filter = and(
       createdBy === undefined ? undefined : eq(classes.createdBy, createdBy),
       status === undefined ? undefined : eq(classes.status, status),
     );
-    return ambilHalaman(halaman, db.$count(classes, filter), (limit, offset) =>
+    return paginate(halaman, db.$count(classes, filter), (limit, offset) =>
       db
-        .select({ kelas: classes, namaPengaju: users.name })
+        .select({ classData: classes, requesterName: users.name })
         .from(classes)
         .leftJoin(users, eq(classes.createdBy, users.id))
         .where(filter)
@@ -133,9 +133,9 @@ export const kelasModel = {
     );
   },
 
-  async setujuiPengajuan(id: string) {
+  async approveRequest(id: string) {
     return db.transaction(async (transaksi) => {
-      const kelas = await bacaPengajuanPending(transaksi, id);
+      const kelas = await readPendingRequest(transaksi, id);
       if (!kelas) return null;
       if (!kelas.createdBy) throw new ConflictError("Pengaju kelas sudah tidak tersedia.");
 
@@ -144,43 +144,43 @@ export const kelasModel = {
         .values({ classId: id, userId: kelas.createdBy, role: "admin" })
         .onDuplicateKeyUpdate({ set: { role: "admin" } });
       await transaksi.update(classes).set({ status: "active" }).where(eq(classes.id, id));
-      return bacaKelasPerId(transaksi, id);
+      return readClassById(transaksi, id);
     });
   },
 
-  async tolakPengajuan(id: string) {
+  async rejectRequest(id: string) {
     return db.transaction(async (transaksi) => {
-      if (!(await bacaPengajuanPending(transaksi, id))) return null;
+      if (!(await readPendingRequest(transaksi, id))) return null;
       await transaksi.update(classes).set({ status: "rejected" }).where(eq(classes.id, id));
-      return bacaKelasPerId(transaksi, id);
+      return readClassById(transaksi, id);
     });
   },
 
-  async ubahPengaturan(
+  async updateSettings(
     id: string,
-    { name, isListed, inviteCode, memberLimit, style }: PengaturanKelas,
+    { name, isListed, inviteCode, memberLimit, style }: ClassSettings,
   ) {
     return db.transaction(async (transaksi) => {
-      const kelas = await kunciKelas(transaksi, id);
+      const kelas = await lockClass(transaksi, id);
       if (!kelas) return null;
 
       const perubahan = { name, isListed, inviteCode, memberLimit, style };
       if (Object.values(perubahan).every((nilai) => nilai === undefined)) return kelas;
       if (isListed !== undefined || inviteCode !== undefined) {
         const kode = inviteCode === undefined ? kelas.inviteCode : inviteCode;
-        pastikanKodeKelasPrivat(isListed ?? kelas.isListed, kode);
+        ensurePrivateClassCode(isListed ?? kelas.isListed, kode);
       }
 
       await transaksi
         .update(classes)
         .set(perubahan)
         .where(eq(classes.id, id))
-        .catch(lemparKonflikKodeUndangan);
-      return bacaKelasPerId(transaksi, id);
+        .catch(throwInviteCodeConflict);
+      return readClassById(transaksi, id);
     });
   },
 
-  async arsipkan(id: string) {
+  async archive(id: string) {
     const [hasil] = await db
       .update(classes)
       .set({ status: "archived" })
@@ -188,7 +188,7 @@ export const kelasModel = {
     return hasil.affectedRows > 0;
   },
 
-  async hapusPermanen(id: string) {
+  async deletePermanently(id: string) {
     // Controller wajib memeriksa izin superadmin sebelum penghapusan berantai.
     const [hasil] = await db.delete(classes).where(eq(classes.id, id));
     return hasil.affectedRows > 0;
