@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { Accordion } from "@/components/shared/accordion";
-import { AjakanBergabung } from "@/components/shared/ajakan-bergabung";
-import { Feed } from "@/components/shared/feed";
+import { AlurArsip, type LangkahLanding } from "@/components/features/landing/alur-arsip";
+import type { KelasPilihan } from "@/components/features/landing/folder-kelas";
+import { IndeksMap, type ItemIndeks } from "@/components/features/landing/indeks-map";
+import { IsiMap, type FiturLanding } from "@/components/features/landing/isi-map";
+import { Manifesto } from "@/components/features/landing/manifesto";
+import { PapanKabar, type SiaranLanding } from "@/components/features/landing/papan-kabar";
+import { PetaKelas } from "@/components/features/landing/peta-kelas";
+import { SuratAjakan } from "@/components/features/landing/surat-ajakan";
+import { TanyaJawab, type FaqLanding } from "@/components/features/landing/tanya-jawab";
 import { Footer } from "@/components/shared/footer";
 import { Hero } from "@/components/shared/hero";
-import { GridKartu, KartuFolder } from "@/components/shared/kartu";
-import { GridFitur, KartuFitur } from "@/components/shared/kartu-fitur";
-import { DaftarLangkah } from "@/components/shared/langkah";
 import { Navbar } from "@/components/shared/navbar";
-import { Poster } from "@/components/shared/poster";
-import { Section, SectionHead, SectionInner } from "@/components/shared/section";
-import { InkLink, SectionHeading } from "@/components/shared/section-heading";
+import { getMySession } from "@/server/controllers/session";
 
 export const metadata: Metadata = {
   title: { absolute: "Klass — Komunitas kelas yang rapi" },
@@ -34,275 +36,282 @@ const lencanaHero = [
   { label: "Terkumpul", varian: "success" as const },
 ];
 
-const fitur = [
+const indeksHalaman: ItemIndeks[] = [
+  { id: "tentang", nomor: "01", label: "Kenapa" },
+  { id: "features", nomor: "02", label: "Isi map" },
+  { id: "how-it-works", nomor: "03", label: "Alur" },
+  { id: "explore", nomor: "04", label: "Kelas" },
+  { id: "broadcast", nomor: "05", label: "Kabar" },
+  { id: "faq", nomor: "06", label: "Tanya" },
+  { id: "gabung", nomor: "07", label: "Gabung" },
+];
+
+const fitur: FiturLanding[] = [
   {
-    nomor: "01 / Materi",
+    jenis: "materi",
+    kode: "01 / Materi",
     judul: "Satu map, semua materi.",
     deskripsi:
-      "File dan tautan tersusun per mata kuliah. Cari yang kamu butuhkan, bukan chat minggu lalu.",
-    warna: "folder" as const,
+      "PDF, video, tautan, dan catatan tersusun per mata kuliah. Tinggal buka, bukan scroll chat minggu lalu.",
   },
   {
-    nomor: "02 / Jadwal",
+    jenis: "jadwal",
+    kode: "02 / Jadwal",
     judul: "Tahu harus ke mana.",
-    deskripsi: "Jadwal mingguan yang jelas, lengkap dengan waktu, ruang, dan penanggung jawab.",
-    warna: "blue" as const,
+    deskripsi:
+      "Jadwal mingguan dengan waktu, ruang, dan PJ. Perubahan langsung terlihat oleh semua anggota.",
   },
   {
-    nomor: "03 / Pengingat",
-    judul: "Deadline ikut diingatkan.",
+    jenis: "pengingat",
+    kode: "03 / Pengingat",
+    judul: "Deadline ikut ingat.",
     deskripsi:
-      "Pengingat langsung ke perangkat lewat notifikasi PWA. Tetap siap, tanpa saling tag.",
-    warna: "yellow" as const,
+      "Notifikasi PWA datang 3 hari dan 1 hari sebelum tenggat. Nggak perlu saling tag di grup.",
   },
 ];
 
-const langkah = [
+const langkah: LangkahLanding[] = [
   {
     nomor: "01",
-    judul: "Gabung Kelas Terbuka",
-    deskripsi: "Gabung kelas terbuka, pakai kode undangan, atau ajukan ruang baru.",
+    label: "Gabung",
+    judul: "Buat atau gabung",
+    deskripsi: "Bikin kelas baru, masuk lewat kode undangan, atau pilih kelas terbuka.",
   },
   {
     nomor: "02",
+    label: "Susun",
     judul: "Susun bareng pengurus",
-    deskripsi: "Admin membuat mata kuliah dan menunjuk PJ dari anggota kelas.",
+    deskripsi: "Admin menambah mata kuliah dan menunjuk PJ. PJ mengisi materi, jadwal, dan tugas.",
   },
   {
     nomor: "03",
-    judul: "Pengingat PWA otomatis",
-    deskripsi:
-      "Notifikasi Web Push dikirimkan langsung ke layar HP anggota 3 hari dan 1 hari sebelum batas pengumpulan tugas.",
+    label: "Ingat",
+    judul: "Biarkan pengingat jalan",
+    deskripsi: "Anggota dapat notifikasi PWA 3 hari dan 1 hari sebelum deadline.",
   },
 ];
 
 /**
- * Enam kelas unggulan untuk "Jelajah pilihan" (Figma 60:724). Dua baris
- * pertama manila, dua berikutnya lilac, dua terakhir hijau.
+ * Enam kelas contoh untuk pita "Jelajahi semua kelas". Isinya sengaja
+ * mengikuti data contoh kelas supaya bahasa dan angkanya konsisten.
  */
-const kelasPilihan = [
+const kelasPilihan: KelasPilihan[] = [
   {
-    meta: "19 Mar 2026",
+    nomor: "01",
+    kode: "ALG-302",
+    anggota: 46,
     judul: "Algoritma & Struktur Data",
-    deskripsi: "Kumpulan slide kuliah, catatan graf, dan jadwal praktikum mingguan kelas IF-24A.",
-    warna: "manila" as const,
+    deskripsi: "Slide kuliah, catatan graf, dan jadwal praktikum mingguan.",
+    warna: "manila",
+    berkas: [
+      { jenis: "Materi", judul: "Graf & BFS", meta: "12 slide · PDF", href: "/classes" },
+      { jenis: "Tugas", judul: "Praktikum 04", meta: "Besok, 23.59", href: "/classes" },
+      {
+        jenis: "Jadwal",
+        judul: "Praktikum mingguan",
+        meta: "Rabu, 10.00 · Lab 3",
+        href: "/classes",
+      },
+    ],
   },
   {
-    meta: "19 Mar 2026",
+    nomor: "02",
+    kode: "BD-301",
+    anggota: 42,
     judul: "Basis Data Lanjut",
-    deskripsi: "PJ: Nadia Putri. Tugas normalisasi dikumpulkan paling lambat Jumat pukul 23.59.",
-    warna: "manila" as const,
+    deskripsi: "Normalisasi, indeks, dan kuis mingguan. PJ: Nadia Putri.",
+    warna: "manila",
+    berkas: [
+      { jenis: "Materi", judul: "B-Tree Indexing", meta: "18 halaman · PDF", href: "/classes" },
+      { jenis: "Tugas", judul: "Normalisasi", meta: "Jumat, 23.59", href: "/classes" },
+      {
+        jenis: "Jadwal",
+        judul: "Kelas mingguan",
+        meta: "Jumat, 13.00 · Ruang 2.4",
+        href: "/classes",
+      },
+    ],
   },
   {
-    meta: "20 Mar 2026",
+    nomor: "03",
+    kode: "WEB-204",
+    anggota: 38,
     judul: "Pemrograman Web",
-    deskripsi: "Modul praktikum, repo contoh, dan rekaman sesi kelas sepanjang semester.",
-    warna: "lilac" as const,
+    deskripsi: "Modul praktikum, repo contoh, dan rekaman sesi sepanjang semester.",
+    warna: "lilac",
+    berkas: [
+      { jenis: "Materi", judul: "Modul 05", meta: "6 berkas · repo", href: "/classes" },
+      { jenis: "Tugas", judul: "Landing page", meta: "Minggu, 23.59", href: "/classes" },
+      { jenis: "Jadwal", judul: "Praktikum", meta: "Selasa, 08.00 · Lab 1", href: "/classes" },
+    ],
   },
   {
-    meta: "20 Mar 2026",
+    nomor: "04",
+    kode: "JAR-205",
+    anggota: 40,
     judul: "Jaringan Komputer",
-    deskripsi: "Catatan subnetting, modul praktikum, dan jadwal responsi tiap Jumat sore.",
-    warna: "lilac" as const,
+    deskripsi: "Catatan subnetting, modul responsi, dan jadwal praktikum.",
+    warna: "lilac",
+    berkas: [
+      { jenis: "Materi", judul: "Subnetting", meta: "9 halaman · PDF", href: "/classes" },
+      { jenis: "Tugas", judul: "Latihan 03", meta: "Kamis, 20.00", href: "/classes" },
+      { jenis: "Jadwal", judul: "Responsi", meta: "Jumat, 15.00 · Lab 2", href: "/classes" },
+    ],
   },
   {
-    meta: "21 Mar 2026",
+    nomor: "05",
+    kode: "SO-303",
+    anggota: 44,
     judul: "Sistem Operasi",
-    deskripsi: "Silabus, materi penjadwalan proses, dan kumpulan soal latihan UTS.",
-    warna: "green" as const,
+    deskripsi: "Silabus, materi penjadwalan proses, dan kumpulan latihan UTS.",
+    warna: "green",
+    berkas: [
+      { jenis: "Materi", judul: "Scheduling", meta: "14 slide · PDF", href: "/classes" },
+      { jenis: "Tugas", judul: "Shell 02", meta: "Sabtu, 23.59", href: "/classes" },
+      { jenis: "Jadwal", judul: "Kelas", meta: "Kamis, 09.00 · Ruang 3.1", href: "/classes" },
+    ],
   },
   {
-    meta: "21 Mar 2026",
+    nomor: "06",
+    kode: "IMK-206",
+    anggota: 36,
     judul: "Interaksi Manusia & Komputer",
-    deskripsi: "Slide perancangan antarmuka, tautan Figma kelas, dan rubrik tugas besar.",
-    warna: "green" as const,
+    deskripsi: "Slide perancangan, tautan Figma kelas, dan rubrik tugas besar.",
+    warna: "green",
+    berkas: [
+      { jenis: "Materi", judul: "Wireframe", meta: "21 slide · Figma", href: "/classes" },
+      { jenis: "Tugas", judul: "Studi kasus", meta: "Senin, 23.59", href: "/classes" },
+      { jenis: "Jadwal", judul: "Kelas", meta: "Senin, 11.00 · Ruang 4.2", href: "/classes" },
+    ],
   },
 ];
 
-const siaran = [
+const siaran: SiaranLanding[] = [
   {
-    varian: "peringatan" as const,
-    judul: "Pengingat Tugas IF-24A",
-    pesan:
-      "Tugas Normalisasi Basis Data harus dikumpulkan kurang dari 24 jam lagi di portal tugas.",
+    varian: "warning",
+    label: "Penting",
+    judul: "Tugas Normalisasi",
+    pesan: "Basis Data Lanjut · kurang dari 24 jam. Kumpulkan di portal tugas.",
+    sumber: "Admin BD-301",
   },
   {
-    varian: "info" as const,
-    judul: "Broadcast Aliansi Fasilkom · Admin IF-24A",
-    pesan:
-      "Kuliah Tamu Arsitektur AI-Native diadakan Sabtu 22 Nov di Auditorium Utama. Terbuka untuk seluruh angkatan.",
+    varian: "info",
+    label: "Info",
+    judul: "Kuliah tamu: AI-Native",
+    pesan: "Sabtu, 28 Nov · Auditorium Utama. Terbuka untuk seluruh angkatan.",
+    sumber: "Aliansi Fasilkom",
   },
   {
-    varian: "sukses" as const,
-    judul: "Materi Terbit · PJ Nadia Putri",
-    pesan:
-      "Slide Pertemuan 5 Basis Data: B-Tree Indexing dan Query Optimization sudah dapat diunduh di tab materi.",
+    varian: "success",
+    label: "Baru",
+    judul: "Slide Pertemuan 5 terbit",
+    pesan: "B-Tree Indexing dan Query Optimization sudah bisa diunduh di tab materi.",
+    sumber: "PJ Nadia Putri",
   },
 ];
 
-const faq = [
+const faq: FaqLanding[] = [
   {
-    tanya: "Klass hanya untuk kelas kuliah?",
+    tanya: "Klass cuma untuk kelas kuliah?",
     jawab:
-      "Tidak. Kelas kuliah, organisasi, klub, dan komunitas bisa punya ruang sendiri, dikelola langsung oleh anggotanya.",
+      "Nggak. Kelas kuliah, organisasi, klub, dan komunitas bisa punya ruang sendiri, dikelola langsung oleh anggotanya.",
   },
   {
     tanya: "Siapa yang mengelola kelas?",
     jawab:
-      "Admin kelas mengatur pengaturan kelas, tampilan, anggota, dan kolaborasi. PJ fokus mengelola materi, jadwal mingguan, dan tugas pada subkelas tertentu.",
+      "Admin kelas mengatur anggota, tampilan, dan pengaturan. PJ mengurus materi, jadwal, dan tugas di mata kuliahnya.",
+  },
+  {
+    tanya: "Apakah harus punya akun?",
+    jawab:
+      "Iya. Akun dipakai untuk bergabung, menyimpan progres, dan menerima pengingat. Tanpa akun, halaman kelas hanya bisa dilihat sebagai contoh.",
+  },
+  {
+    tanya: "Pengingatnya dikirim ke mana?",
+    jawab:
+      "Lewat notifikasi PWA di perangkat yang sudah mengizinkan. Klass mengingatkan 3 hari dan 1 hari sebelum deadline.",
+  },
+  {
+    tanya: "Bisa dipakai tanpa install?",
+    jawab:
+      "Bisa. Klass berjalan di browser. Kalau mau, tambahkan ke layar utama sebagai PWA supaya lebih cepat dibuka.",
   },
 ];
 
 const tautanFooter = [
-  { label: "Jelajah", href: "#explore" },
+  { label: "Kenapa", href: "#tentang" },
   { label: "Fitur", href: "#features" },
-  { label: "Cara kerja", href: "#how-it-works" },
-  { label: "Tanya jawab", href: "#faq" },
+  { label: "Kelas", href: "#explore" },
+  { label: "Kabar", href: "#broadcast" },
+  { label: "Tanya", href: "#faq" },
 ];
 
 /**
  * Halaman utama (F11) — `/`.
  *
- * Menyusun komponen design system Klass mengikuti urutan section Figma
- * 60:640: hero, prinsip komunitas, fitur utama, cara kerja, jelajah pilihan,
- * siaran komunitas, papan informasi, FAQ, lalu ajakan bergabung. Jarak antar
- * section memakai ritme rapat (48px) karena Figma menumpuknya hampir tanpa
- * jeda.
+ * Hero dipertahankan; semua section di bawahnya memakai arah "Buka Mapnya":
+ * halaman terasa seperti isi satu map kelas, dengan pembatas bab, pita meja
+ * untuk jelajah kelas, papan pengumuman, dan surat undangan di penutup.
  *
- * Halaman ini statis (Server Component). Galeri seluruh komponen dan varian
- * ada di `/components`; demo dialog dan toast ada di sana.
+ * Halaman ini statis (Server Component). Interaksi hanya ada di dua tempat:
+ * indeks map di tepi kanan dan buka/tutup map kelas.
  */
 export default function HalamanUtama() {
   return (
     <>
-      <Navbar merek="Klass" item={navigasi} aksi={{ label: "Masuk", href: "/login" }} />
+      <Suspense
+        fallback={
+          <Navbar merek="Klass" item={navigasi} aksi={{ label: "Masuk", href: "/login" }} />
+        }
+      >
+        <NavbarLanding />
+      </Suspense>
 
-      <main id="top" className="ds-kolom">
+      <main id="top" className="ds-kolom landing-main">
         <Hero
           judul="Klass — platform komunitas kelas dan kelompok mandiri"
           lencana={lencanaHero}
           aksi={[
             { label: "Temukan kelasmu ↗", href: "#explore" },
-            { label: "Ajukan kelas baru", href: "/login" },
+            { label: "Ajukan kelas baru", href: "/classes" },
           ]}
         />
 
-        <Section jarak="rapat">
-          <SectionInner>
-            <SectionHeading
-              varian="pisah"
-              judul="Dari anggota. Untuk anggota."
-              subjudul={
-                <>
-                  Kelas kuliah, organisasi, atau komunitas.
-                  <br />
-                  Kamu yang pegang kendalinya.
-                </>
-              }
-            />
-          </SectionInner>
-        </Section>
+        <IndeksMap item={indeksHalaman} />
 
-        <Section jarak="rapat" id="features">
-          <SectionInner>
-            <SectionHead judul="Lebih sedikit tercecer. Lebih banyak teratur." />
-            <GridFitur>
-              {fitur.map((item) => (
-                <KartuFitur key={item.nomor} {...item} />
-              ))}
-            </GridFitur>
-          </SectionInner>
-        </Section>
-
-        <Section jarak="rapat" id="how-it-works">
-          <SectionInner>
-            <SectionHeading varian="tulisan" judul="Bagaimana cara kerjanya?" />
-            <DaftarLangkah langkah={langkah} />
-          </SectionInner>
-        </Section>
-
-        <Section jarak="rapat" id="explore">
-          <SectionInner>
-            <div className="landing-jelajah__head">
-              <InkLink href="#explore">
-                <span>Jelajahi semua kelas</span>
-                <span aria-hidden="true">↗</span>
-              </InkLink>
-            </div>
-
-            <GridKartu>
-              {kelasPilihan.map((kelas) => (
-                <KartuFolder key={kelas.judul} {...kelas} />
-              ))}
-            </GridKartu>
-
-            <SectionHead className="landing-jelajah__title" judul="Ada ruang untuk kelasmu." />
-          </SectionInner>
-        </Section>
-
-        <Section jarak="rapat" id="broadcast">
-          <SectionInner>
-            <Feed
-              eyebrow="jaringan antar-kelas"
-              judul="Siaran Komunitas Terkini"
-              intro="Informasi lintas kelas disiarkan satu arah oleh admin kelas tanpa perlu membuat grup chat baru berulang kali."
-              siaran={siaran}
-            />
-          </SectionInner>
-        </Section>
-
-        <Section jarak="rapat">
-          <SectionInner>
-            <Poster
-              label="Papan Informasi / 01"
-              judul={
-                <>
-                  Ide bagus tumbuh
-                  <br />
-                  kalau dibagi.
-                </>
-              }
-              meta={
-                <>
-                  Sesi kenalan Klass
-                  <br />
-                  Sabtu, 21 November 2026 · 15.00 WIB
-                </>
-              }
-              aksi={{ label: "Lihat agenda ↗", href: "#broadcast" }}
-            />
-          </SectionInner>
-        </Section>
-
-        <Section jarak="rapat" id="faq">
-          <SectionInner>
-            <SectionHeading
-              varian="polos"
-              judul="Masih penasaran?"
-              subjudul="Sedikit jawaban sebelum mulai."
-            />
-            <Accordion item={faq} />
-          </SectionInner>
-        </Section>
-
-        <div id="request">
-          <AjakanBergabung
-            judul="Kelas rapi dimulai dari kamu."
-            salinan="Bawa teman-temanmu. Sisanya, kita rapikan bareng."
-            // Formulir pengajuan sekarang ada di dasbor pengguna (`/dashboard`),
-            // karena pengajuan butuh akun: status dan riwayatnya terikat ke
-            // pengguna. Halaman ini mengarahkan ke login lebih dulu.
-            aksi={{ label: "Ajukan kelas baru ↗", href: "/login" }}
-          />
-        </div>
+        <Manifesto />
+        <IsiMap fitur={fitur} />
+        <AlurArsip langkah={langkah} />
+        <PetaKelas kelas={kelasPilihan} />
+        <PapanKabar siaran={siaran} />
+        <TanyaJawab faq={faq} />
+        <SuratAjakan />
       </main>
 
       <Footer
+        className="landing-footer"
         tagline="Satu tempat rapi untuk materi, jadwal, dan tugas kelas yang dikelola bersama."
         tautan={tautanFooter}
         hakCipta="© 2026 Klass · Komunitas Kelas"
         lencana="Paper & Folder Edition"
       />
     </>
+  );
+}
+
+/**
+ * Navbar halaman utama. Dibaca terpisah di dalam `<Suspense>` supaya sisa
+ * halaman tetap bisa diprerender walau sesi butuh cookie.
+ */
+async function NavbarLanding() {
+  const pengguna = await getMySession();
+
+  return (
+    <Navbar
+      merek="Klass"
+      item={navigasi}
+      aksi={pengguna ? { label: "Meja", href: "/dashboard" } : { label: "Masuk", href: "/login" }}
+      pengguna={pengguna ? { name: pengguna.name, image: pengguna.image } : null}
+    />
   );
 }

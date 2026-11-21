@@ -66,7 +66,12 @@
   --ds-color-well-shape: #c9bd9f;
   --ds-color-well-shape-alt: #b5aa8f;
 
-  /* Cap merah untuk penanda keputusan (Loket). */
+  /* --- Colors: Landing "Buka Mapnya" ---
+     Meja kerja untuk pita jelajah dan malam untuk undangan. `stamp-red`
+     dipakai bersama dengan Loket. */
+  --ds-color-desk: #e9dfc8;
+  --ds-color-desk-line: rgba(28, 25, 23, 0.07);
+  --ds-color-night: #171412;
   --ds-color-stamp-red: #b83a32;
 
   /* --- Highlighter / Stabilo Marker ---
@@ -309,6 +314,17 @@
      kartu kelas, dan panel progress, jadi namanya tidak lagi menyebut "dash". */
   --ds-shadow-kertas-panel: 0 2px 0 var(--ds-color-rule-dashed), 0 6px 14px rgba(28, 25, 23, 0.08);
 
+  /* --- Landing "Buka Mapnya" ---
+     Artefak fitur, slip kertas, dan surat undangan di atas meja malam. */
+  --ds-peta-tab-height: 36px;
+  --ds-peta-gutter: calc(
+    max(0px, (100vw - var(--ds-container-wide-max)) / 2) + var(--ds-content-gutter)
+  );
+  --ds-shadow-artefak: 0 2px 0 var(--ds-color-folder-edge), 0 18px 32px -14px rgba(28, 25, 23, 0.3);
+  --ds-shadow-slip: 0 1px 0 var(--ds-color-rule-dashed), 0 10px 18px -10px rgba(28, 25, 23, 0.28);
+  --ds-shadow-surat:
+    0 30px 60px -24px rgba(0, 0, 0, 0.65), inset 0 1px 0 var(--ds-color-highlight-specular);
+
   /* --- Folder Card (Figma "file card") --- */
   --ds-folder-card-gap: 41px;
   /* 2 × 549 + 41 = 1139px: lebar blok grid kartu di Figma "Jelajah pilihan".
@@ -429,6 +445,12 @@
   --ds-duration-slow: 320ms;
   --ds-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ds-ease-press: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Butir kertas ---
+     Sudah dipakai halaman auth; landing memakai ulang agar kertasnya sama. */
+  --ds-paper-grain: var(--ds-auth-paper-grain);
+  /* Sedikit memantul di ujung: dipakai kertas yang naik keluar dari map. */
+  --ds-ease-kertas: cubic-bezier(0.18, 0.92, 0.24, 1.04);
   /* --- Z-index --- */
   --ds-z-base: 1;
   --ds-z-tape: 5;

@@ -7,6 +7,7 @@ Komponen milik satu fitur. Satu fitur satu subfolder:
 ```
 features/
   kelas/        daftar kelas, beranda kelas, jadwal, materi, progress, anggota
+  landing/      section halaman utama "Buka Mapnya"
   meja/         isi /dashboard: Meja (pengguna) dan Loket (superadmin)
   admin/        tabel pengajuan kelas
   dev/          daftar akun contoh untuk /dev/login (khusus pengembangan)
@@ -14,6 +15,24 @@ features/
 
 Satu subfolder dikerjakan satu orang supaya Rehan dan Darrel tidak mengubah berkas yang sama.
 Pembagiannya ditentukan Aqil. Subfolder dibuat saat fiturnya mulai dikerjakan.
+
+## features/landing
+
+Section halaman utama (`/`) setelah hero, dengan arah "Buka Mapnya". Rinciannya
+ada di `landing/README.md`.
+
+| Berkas             | Isi                                                  |
+| ------------------ | ---------------------------------------------------- |
+| `bab.tsx`          | penanda bab + kepala bab dua kolom                   |
+| `indeks-map.tsx`   | Client Component: indeks bab di tepi kanan           |
+| `manifesto.tsx`    | pernyataan + tiga prinsip kelas                      |
+| `isi-map.tsx`      | tiga fitur sebagai artefak meja                      |
+| `alur-arsip.tsx`   | tiga langkah bertab                                  |
+| `folder-kelas.tsx` | Client Component: map kelas buka/tutup + tiga berkas |
+| `peta-kelas.tsx`   | pita "Jelajahi semua kelas"                          |
+| `papan-kabar.tsx`  | siaran satu arah + poster acara                      |
+| `tanya-jawab.tsx`  | FAQ landing memakai `shared/accordion.tsx`           |
+| `surat-ajakan.tsx` | penutup undangan di meja malam                       |
 
 ## features/kelas
 

@@ -1,0 +1,150 @@
+/* ==========================================================================
+   Component: Tanya Jawab (landing FAQ)
+   Kolom kiri menempel saat daftar dibaca. Accordion bawaan dirapikan menjadi
+   baris-baris bergaris putus-putus; item terbuka menjadi lembar map.
+   ========================================================================== */
+
+.ds .tanya {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-10);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .ds .tanya {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(var(--ds-space-8), 6vw, var(--ds-space-16));
+  }
+
+  .ds .tanya__kiri {
+    position: sticky;
+    top: var(--ds-space-8);
+  }
+}
+
+.ds .tanya__judul {
+  margin: var(--ds-space-4) 0 var(--ds-space-4);
+  max-width: 11ch;
+  font-size: clamp(2.2rem, 4.5vw, var(--ds-text-3xl));
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.ds .tanya__intro {
+  margin: 0;
+  max-width: 34ch;
+  font-size: var(--ds-text-base);
+  line-height: 1.7;
+  color: var(--ds-color-ink-secondary);
+}
+
+.ds .tanya__catatan {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  max-width: 32ch;
+  margin: var(--ds-space-8) 0 0;
+  padding-top: var(--ds-space-4);
+  border-top: var(--ds-border-base) dashed var(--ds-color-rule-dashed);
+  font-family: var(--ds-font-hand);
+  font-size: var(--ds-text-xl);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ds .tanya__catatan svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* --- Accordion versi landing --- */
+.ds .tanya .accordion {
+  gap: 0;
+  counter-reset: faq;
+}
+
+.ds .tanya .accordion__item {
+  background-color: transparent;
+  border: 0;
+  border-top: var(--ds-border-base) dashed var(--ds-color-rule-dashed);
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.ds .tanya .accordion__item:last-child {
+  border-bottom: var(--ds-border-base) dashed var(--ds-color-rule-dashed);
+}
+
+.ds .tanya .accordion__trigger {
+  gap: var(--ds-space-4);
+  min-height: 0;
+  padding: var(--ds-space-5) var(--ds-space-1);
+  background-color: transparent;
+  font-size: clamp(var(--ds-text-base), 1.5vw, var(--ds-text-lg));
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.ds .tanya .accordion__trigger::before {
+  counter-increment: faq;
+  content: counter(faq, decimal-leading-zero);
+  min-width: 28px;
+  flex-shrink: 0;
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--ds-tracking-wide);
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .tanya .accordion__trigger > span:first-of-type {
+  flex: 1;
+}
+
+.ds .tanya .accordion__trigger:hover {
+  background-color: transparent;
+}
+
+.ds .tanya .accordion__trigger:hover > span:first-of-type {
+  text-decoration: underline;
+  text-decoration-color: var(--ds-color-primary);
+  text-decoration-thickness: 4px;
+  text-underline-offset: 4px;
+}
+
+.ds .tanya .accordion__chevron {
+  width: 26px;
+  height: 26px;
+  box-shadow:
+    0 2px 0 var(--ds-color-border-ink),
+    0 4px 6px rgba(28, 25, 23, 0.14);
+}
+
+.ds .tanya .accordion__item.is-open {
+  background-color: var(--ds-color-folder-bg);
+  border-top: var(--ds-border-base) solid var(--ds-color-border-ink);
+  box-shadow: var(--ds-shadow-paper);
+}
+
+.ds .tanya .accordion__item.is-open .accordion__trigger {
+  padding-inline: var(--ds-space-4);
+  background-color: transparent;
+  border-bottom: var(--ds-border-base) solid var(--ds-color-border-ink);
+}
+
+.ds .tanya .accordion__body {
+  padding: 0 var(--ds-space-1) var(--ds-space-2);
+  border-top: 0;
+  font-size: var(--ds-text-sm);
+  line-height: 1.7;
+  color: var(--ds-color-ink-secondary);
+}
+
+/* Padding vertikal jawaban dibuat di dalam, bukan di panelnya, supaya tinggi
+   0fr saat tertutup benar-benar nol dan transisinya mulus. */
+.ds .tanya .accordion__item.is-open .accordion__body {
+  padding: var(--ds-space-4) var(--ds-space-5) var(--ds-space-5) calc(var(--ds-space-4) + 44px);
+}
