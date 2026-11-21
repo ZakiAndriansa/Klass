@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ZodError } from "zod";
 import { requireAuth } from "@/server/auth";
-import { NotFoundError, UnauthorizedError } from "@/server/http/errors";
+import { NotFoundError, UnauthorizedError } from "@/server/http";
 import { profileModel } from "@/server/models/profile";
 import { getProfile, updateProfile } from "./profile";
 
