@@ -31,7 +31,16 @@ const kelas = [
   sampleTime,
   sampleTime,
 ];
-const subkelas = ["subkelas", "kelas", "Basis Data", sampleTime, sampleTime];
+// Urutan kolom mengikuti definisi tabel: id, class_id, name, description, created_at, updated_at.
+const subkelas = ["subkelas", "kelas", "Basis Data", null, sampleTime, sampleTime];
+const subkelasBerdeskripsi = [
+  "subkelas",
+  "kelas",
+  "Basis Data",
+  "Materi dan tugas Basis Data semester 3.",
+  sampleTime,
+  sampleTime,
+];
 
 describe("subclassModel", () => {
   beforeEach(resetMysqlMock);
@@ -94,6 +103,110 @@ describe("subclassModel", () => {
       subclassModel.create({ classId: "kelas", name: "Basis Data" }, ["pengguna-luar"]),
     ).rejects.toThrow("anggota kelas yang sama");
     expect(executedSql().at(-1)).toBe("rollback");
+  });
+
+  it("menyimpan deskripsi saat membuat subkelas", async () => {
+    queueResults(
+      writeResult, // Mulai transaksi
+      readResult(kelas), // Kelas dikunci
+      writeResult, // INSERT
+      readResult(subkelasBerdeskripsi), // Baca hasilnya
+      writeResult, // Commit
+    );
+
+    const hasil = await subclassModel.create({
+      classId: "kelas",
+      name: "Basis Data",
+      description: "Materi dan tugas Basis Data semester 3.",
+    });
+
+    expect(hasil).toMatchObject({
+      id: "subkelas",
+      name: "Basis Data",
+      description: "Materi dan tugas Basis Data semester 3.",
+    });
+    const queryTambah = query.mock.calls.find(([perintah]) =>
+      perintah.sql.startsWith("insert into `subclasses`"),
+    );
+    expect(queryTambah?.[1]).toContain("Materi dan tugas Basis Data semester 3.");
+    expect(executedSql().at(-1)).toBe("commit");
+  });
+
+  it("membuat subkelas tanpa deskripsi, sehingga deskripsinya kosong", async () => {
+    queueResults(writeResult, readResult(kelas), writeResult, readResult(subkelas), writeResult);
+
+    const hasil = await subclassModel.create({ classId: "kelas", name: "Basis Data" });
+
+    expect(hasil).toMatchObject({ id: "subkelas", description: null });
+  });
+
+  it("mengubah nama dan deskripsi sekaligus", async () => {
+    queueResults(writeResult, writeResult, readResult(subkelasBerdeskripsi), writeResult);
+
+    const hasil = await subclassModel.update("kelas", "subkelas", {
+      name: "Basis Data",
+      description: "Materi dan tugas Basis Data semester 3.",
+    });
+
+    expect(hasil).toMatchObject({ description: "Materi dan tugas Basis Data semester 3." });
+    const queryUbah = query.mock.calls.find(([perintah]) =>
+      perintah.sql.startsWith("update `subclasses`"),
+    );
+    expect(queryUbah?.[0].sql).toContain("`name` = ?");
+    expect(queryUbah?.[0].sql).toContain("`description` = ?");
+    expect(queryUbah?.[1]).toEqual([
+      "Basis Data",
+      "Materi dan tugas Basis Data semester 3.",
+      "kelas",
+      "subkelas",
+    ]);
+  });
+
+  it("mengubah deskripsi saja tanpa menyentuh nama", async () => {
+    queueResults(writeResult, writeResult, readResult(subkelasBerdeskripsi), writeResult);
+
+    await subclassModel.update("kelas", "subkelas", {
+      description: "Materi dan tugas Basis Data semester 3.",
+    });
+
+    const queryUbah = query.mock.calls.find(([perintah]) =>
+      perintah.sql.startsWith("update `subclasses`"),
+    );
+    expect(queryUbah?.[0].sql).not.toContain("`name` = ?");
+    expect(queryUbah?.[1]).toEqual([
+      "Materi dan tugas Basis Data semester 3.",
+      "kelas",
+      "subkelas",
+    ]);
+  });
+
+  it("mengosongkan deskripsi bila dikirim null", async () => {
+    queueResults(writeResult, writeResult, readResult(subkelas), writeResult);
+
+    const hasil = await subclassModel.update("kelas", "subkelas", { description: null });
+
+    expect(hasil).toMatchObject({ description: null });
+    const queryUbah = query.mock.calls.find(([perintah]) =>
+      perintah.sql.startsWith("update `subclasses`"),
+    );
+    expect(queryUbah?.[1]).toEqual([null, "kelas", "subkelas"]);
+  });
+
+  it("tidak menjalankan UPDATE bila tidak ada yang diubah", async () => {
+    queueResults(writeResult, readResult(subkelas), writeResult);
+
+    await expect(subclassModel.update("kelas", "subkelas", {})).resolves.toMatchObject({
+      id: "subkelas",
+    });
+    expect(executedSql().some((sql) => sql.startsWith("update"))).toBe(false);
+  });
+
+  it("mengembalikan null bila subkelas yang diubah tidak ada di kelas itu", async () => {
+    queueResults(writeResult, noChange, readResult(), writeResult);
+
+    await expect(
+      subclassModel.update("kelas", "subkelas-lain", { name: "Nama Baru" }),
+    ).resolves.toBeNull();
   });
 
   it("berhasil menghapus subkelas dari kelas yang benar", async () => {
