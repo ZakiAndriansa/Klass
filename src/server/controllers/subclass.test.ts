@@ -45,13 +45,14 @@ describe("subkelas controller - createSubclass", () => {
       id: "sub-123",
       classId: "kelas-abc",
       name: "Algoritma & Pemrograman",
-      description: null,
+      description: "Kelas praktikum semester 3",
       createdAt: sekarang,
       updatedAt: sekarang,
     });
 
     const hasil = await createSubclass("kelas-abc", {
       name: "Algoritma & Pemrograman",
+      description: "Kelas praktikum semester 3",
     });
 
     expect(requireClassAdmin).toHaveBeenCalledWith("kelas-abc");
@@ -59,6 +60,7 @@ describe("subkelas controller - createSubclass", () => {
       {
         classId: "kelas-abc",
         name: "Algoritma & Pemrograman",
+        description: "Kelas praktikum semester 3",
       },
       [],
     );
@@ -66,6 +68,7 @@ describe("subkelas controller - createSubclass", () => {
       id: "sub-123",
       classId: "kelas-abc",
       name: "Algoritma & Pemrograman",
+      description: "Kelas praktikum semester 3",
       createdAt: sekarang.toISOString(),
       updatedAt: sekarang.toISOString(),
     });
@@ -78,13 +81,14 @@ describe("subkelas controller - createSubclass", () => {
       id: "sub-123",
       classId: "kelas-abc",
       name: "Basis Data",
-      description: null,
+      description: "Kelas praktikum semester 3",
       createdAt: sekarang,
       updatedAt: sekarang,
     });
 
     const hasil = await createSubclass("kelas-abc", {
       name: "Basis Data",
+      description: "Kelas praktikum semester 3",
       pjUserIds: ["user-2"],
     });
 
@@ -92,6 +96,7 @@ describe("subkelas controller - createSubclass", () => {
       {
         classId: "kelas-abc",
         name: "Basis Data",
+        description: "Kelas praktikum semester 3"
       },
       ["user-2"],
     );
@@ -128,6 +133,7 @@ describe("subkelas controller - createSubclass", () => {
     await expect(
       createSubclass("kelas-abc", {
         name: "Basis Data",
+        description: "Kelas praktikum semester 3",
         pjUserIds: ["user-luar"],
       }),
     ).rejects.toThrow(ConflictError);
@@ -145,15 +151,24 @@ describe("subkelas controller - createSubclass", () => {
       id: "sub-123",
       classId: "kelas-abc",
       name: "Basis Data",
-      description: null,
+      description: "Kelas praktikum semester 3",
       createdAt: sekarang,
       updatedAt: sekarang,
     });
 
-    await createSubclass("kelas-abc", { name: "Basis Data", pjUserIds: ["user-2", "user-3"] });
+    await createSubclass("kelas-abc", 
+      { 
+        name: "Basis Data",
+        description: "Kelas praktikum semester 3",
+        pjUserIds: ["user-2", "user-3"] 
+      });
 
     expect(subclassModel.create).toHaveBeenCalledWith(
-      { classId: "kelas-abc", name: "Basis Data" },
+      { 
+        classId: "kelas-abc",
+        name: "Basis Data",
+        description: "Kelas praktikum semester 3",
+      },
       ["user-2", "user-3"],
     );
   });
@@ -162,6 +177,7 @@ describe("subkelas controller - createSubclass", () => {
     await expect(
       createSubclass("kelas-abc", {
         name: "Basis Data",
+        description: "Kelas praktikum semester 3",
         pjUserIds: ["user-2", "user-3", "user-4"],
       }),
     ).rejects.toThrow(ZodError);

@@ -304,13 +304,13 @@ const { data: sesi } = await api<SessionDto | null>("/session");
 Membuat subkelas baru di dalam kelas. `pjUserIds` boleh tidak dikirim; isinya paling banyak 2 ID
 pengguna, dan semuanya harus sudah menjadi anggota kelas itu.
 
-| Hal                | Isi                                                                      |
-| ------------------ | ------------------------------------------------------------------------ |
-| Siapa yang boleh   | Admin kelas                                                              |
-| Body               | `{ "name": "Nama Subkelas", "pjUserIds"?: ["user-id-1"] }`               |
-| Respons berhasil   | 201 dengan `data: SubclassDto`                                           |
-| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND` |
-| Tipe               | `SubclassDto`, `CreateSubclassInput` di `src/types/api/subclass.ts`      |
+| Hal                | Isi                                                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
+| Siapa yang boleh   | Admin kelas                                                                                     |
+| Body               | `{ "name": "Nama Subkelas", "description": "Deskripsi opsional", pjUserIds"?: ["user-id-1"] }`  |
+| Respons berhasil   | 201 dengan `data: SubclassDto`                                                                  |
+| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND`                        |
+| Tipe               | `SubclassDto`, `CreateSubclassInput` di `src/types/api/subclass.ts`                             |
 
 ### Templat untuk endpoint baru
 
