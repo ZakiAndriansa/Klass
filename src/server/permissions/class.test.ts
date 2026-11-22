@@ -77,6 +77,7 @@ function sebagai(
             id: "sub-a",
             classId: "kelas-a",
             name: "Basis Data",
+            description: null,
             createdAt: waktu,
             updatedAt: waktu,
           }

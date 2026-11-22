@@ -1,0 +1,1 @@
+ALTER TABLE `subclasses` ADD `description` text;
