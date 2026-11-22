@@ -32,6 +32,9 @@ export const subclasses = mysqlTable(
 
     name: varchar("name", { length: 150 }).notNull(),
 
+    // Penjelasan singkat subkelas. Boleh kosong.
+    description: text("description"),
+
     createdAt: timestamp("created_at").notNull().defaultNow(),
 
     updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),

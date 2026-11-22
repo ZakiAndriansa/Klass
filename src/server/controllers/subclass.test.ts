@@ -45,6 +45,7 @@ describe("subkelas controller - createSubclass", () => {
       id: "sub-123",
       classId: "kelas-abc",
       name: "Algoritma & Pemrograman",
+      description: null,
       createdAt: sekarang,
       updatedAt: sekarang,
     });
@@ -77,6 +78,7 @@ describe("subkelas controller - createSubclass", () => {
       id: "sub-123",
       classId: "kelas-abc",
       name: "Basis Data",
+      description: null,
       createdAt: sekarang,
       updatedAt: sekarang,
     });
@@ -143,6 +145,7 @@ describe("subkelas controller - createSubclass", () => {
       id: "sub-123",
       classId: "kelas-abc",
       name: "Basis Data",
+      description: null,
       createdAt: sekarang,
       updatedAt: sekarang,
     });
