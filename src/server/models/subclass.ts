@@ -10,7 +10,9 @@ import { ConflictError } from "@/server/http/errors";
 import { lockClass } from "./membership";
 import { paginate, isDuplicateEntry, type Pagination, type Transaction } from "./query";
 
-type NewSubclass = Pick<typeof subclasses.$inferInsert, "classId" | "name">;
+type NewSubclass = Pick<typeof subclasses.$inferInsert, "classId" | "name" | "description">;
+// Yang boleh diubah setelah subkelas dibuat. `description: null` mengosongkan deskripsi.
+type SubclassChanges = Partial<Omit<NewSubclass, "classId">>;
 type Pj = typeof subclassPj.$inferSelect;
 
 const pjFilter = (subclassId: string, userId: string) =>
@@ -79,10 +81,16 @@ export const subclassModel = {
     );
   },
 
-  async create({ classId, name }: NewSubclass, pjUserIds: readonly Pj["userId"][] = []) {
+  async create(
+    { classId, name, description }: NewSubclass,
+    pjUserIds: readonly Pj["userId"][] = [],
+  ) {
     return db.transaction(async (transaksi) => {
       if (!(await lockClass(transaksi, classId))) return null;
-      const [hasil] = await transaksi.insert(subclasses).values({ classId, name }).$returningId();
+      const [hasil] = await transaksi
+        .insert(subclasses)
+        .values({ classId, name, description })
+        .$returningId();
       if (!hasil) throw new Error("ID subkelas yang baru dibuat tidak tersedia.");
 
       if (pjUserIds.length) {
@@ -94,12 +102,16 @@ export const subclassModel = {
     });
   },
 
-  async rename(classId: string, subclassId: string, name: NewSubclass["name"]) {
+  // Mengubah nama, deskripsi, atau keduanya. Yang tidak dikirim tidak disentuh.
+  async update(classId: string, subclassId: string, { name, description }: SubclassChanges) {
     return db.transaction(async (transaksi) => {
-      await transaksi
-        .update(subclasses)
-        .set({ name })
-        .where(and(eq(subclasses.classId, classId), eq(subclasses.id, subclassId)));
+      const perubahan = { name, description };
+      if (Object.values(perubahan).some((nilai) => nilai !== undefined)) {
+        await transaksi
+          .update(subclasses)
+          .set(perubahan)
+          .where(and(eq(subclasses.classId, classId), eq(subclasses.id, subclassId)));
+      }
       return readSubclass(transaksi, subclassId, classId);
     });
   },
