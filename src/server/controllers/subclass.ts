@@ -18,18 +18,20 @@ export async function createSubclass(classId: string, bodyInput: unknown): Promi
     {
       classId,
       name: input.name,
+      description: input.description ?? null,
     },
     input.pjUserIds,
   );
 
   if (!baris) {
-    throw new NotFoundError("Kelas tidak ditemukan");
+    throw new NotFoundError("Kelas tidak ditemukan.");
   }
 
   return {
     id: baris.id,
     classId: baris.classId,
     name: baris.name,
+    description: baris.description,
     createdAt: baris.createdAt.toISOString(),
     updatedAt: baris.updatedAt.toISOString(),
   };

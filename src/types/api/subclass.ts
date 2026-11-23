@@ -8,7 +8,14 @@ export const createSubclassSchema = z.object({
     .string()
     .trim()
     .min(1, "Nama subkelas tidak boleh kosong.")
-    .max(150, "Nama subkelas maksimal 150 karakter"),
+    .max(150, "Nama subkelas maksimal 150 karakter."),
+  description: z
+    .string()
+    .trim()
+    .max(125, "Deskripsi maksimal 125 karakter.")
+    .transform((val) => (val === "" ? null : val))
+    .nullable()
+    .optional(),
   pjUserIds: z
     .array(z.string().trim().min(1, "ID pengguna tidak boleh kosong."))
     .max(2, "PJ awal maksimal 2 orang.")
@@ -22,6 +29,7 @@ export type SubclassDto = {
   id: string;
   classId: string;
   name: string;
+  description: string | null;
   createdAt: string;
   updatedAt: string;
 };
