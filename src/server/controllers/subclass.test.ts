@@ -38,21 +38,21 @@ describe("subkelas controller - createSubclass", () => {
     vi.clearAllMocks();
   });
 
-  it("berhasil membuat subkelas bila pemanggil adalah admin kelas", async () => {
+  // 1. Tes TANPA description (description otomatis null)
+  it("berhasil membuat subkelas tanpa deskripsi bila pemanggil adalah admin kelas", async () => {
     const sekarang = new Date();
     vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
     vi.mocked(subclassModel.create).mockResolvedValue({
       id: "sub-123",
       classId: "kelas-abc",
       name: "Algoritma & Pemrograman",
-      description: "Kelas praktikum semester 3",
+      description: null,
       createdAt: sekarang,
       updatedAt: sekarang,
     });
 
     const hasil = await createSubclass("kelas-abc", {
       name: "Algoritma & Pemrograman",
-      description: "Kelas praktikum semester 3",
     });
 
     expect(requireClassAdmin).toHaveBeenCalledWith("kelas-abc");
@@ -60,7 +60,7 @@ describe("subkelas controller - createSubclass", () => {
       {
         classId: "kelas-abc",
         name: "Algoritma & Pemrograman",
-        description: "Kelas praktikum semester 3",
+        description: null,
       },
       [],
     );
@@ -68,12 +68,13 @@ describe("subkelas controller - createSubclass", () => {
       id: "sub-123",
       classId: "kelas-abc",
       name: "Algoritma & Pemrograman",
-      description: "Kelas praktikum semester 3",
+      description: null,
       createdAt: sekarang.toISOString(),
       updatedAt: sekarang.toISOString(),
     });
   });
 
+  // 2. Tes DENGAN description
   it("berhasil membuat subkelas sekaligus menunjuk PJ awal", async () => {
     const sekarang = new Date();
     vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
@@ -96,11 +97,41 @@ describe("subkelas controller - createSubclass", () => {
       {
         classId: "kelas-abc",
         name: "Basis Data",
-        description: "Kelas praktikum semester 3"
+        description: "Kelas praktikum semester 3",
       },
       ["user-2"],
     );
     expect(hasil.name).toBe("Basis Data");
+    expect(hasil.description).toBe("Kelas praktikum semester 3");
+  });
+
+  // 3. Tes BARU: mengubah deskripsi kosong atau hanya spasi menjadi null
+  it("mengubah deskripsi kosong atau hanya spasi menjadi null", async () => {
+    const sekarang = new Date();
+    vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
+    vi.mocked(subclassModel.create).mockResolvedValue({
+      id: "sub-123",
+      classId: "kelas-abc",
+      name: "Jaringan Komputer",
+      description: null,
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+
+    const hasil = await createSubclass("kelas-abc", {
+      name: "Jaringan Komputer",
+      description: "   ",
+    });
+
+    expect(subclassModel.create).toHaveBeenCalledWith(
+      {
+        classId: "kelas-abc",
+        name: "Jaringan Komputer",
+        description: null,
+      },
+      [],
+    );
+    expect(hasil.description).toBeNull();
   });
 
   it("menolak pembuatan dan tidak memanggil model bila pemanggil bukan admin kelas", async () => {
@@ -144,6 +175,18 @@ describe("subkelas controller - createSubclass", () => {
     expect(subclassModel.create).not.toHaveBeenCalled();
   });
 
+  // 4. Tes BARU: menolak jika deskripsi melebihi 125 karakter
+  it("menolak pembuatan jika deskripsi melebihi 125 karakter (validasi Zod)", async () => {
+    const deskripsiPanjang = "a".repeat(126);
+    await expect(
+      createSubclass("kelas-abc", {
+        name: "Basis Data",
+        description: deskripsiPanjang,
+      }),
+    ).rejects.toThrow(ZodError);
+    expect(subclassModel.create).not.toHaveBeenCalled();
+  });
+
   it("menerima dua PJ awal", async () => {
     const sekarang = new Date();
     vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
@@ -156,15 +199,14 @@ describe("subkelas controller - createSubclass", () => {
       updatedAt: sekarang,
     });
 
-    await createSubclass("kelas-abc", 
-      { 
-        name: "Basis Data",
-        description: "Kelas praktikum semester 3",
-        pjUserIds: ["user-2", "user-3"] 
-      });
+    await createSubclass("kelas-abc", {
+      name: "Basis Data",
+      description: "Kelas praktikum semester 3",
+      pjUserIds: ["user-2", "user-3"],
+    });
 
     expect(subclassModel.create).toHaveBeenCalledWith(
-      { 
+      {
         classId: "kelas-abc",
         name: "Basis Data",
         description: "Kelas praktikum semester 3",

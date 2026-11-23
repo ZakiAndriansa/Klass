@@ -13,6 +13,7 @@ export const createSubclassSchema = z.object({
     .string()
     .trim()
     .max(125, "Deskripsi maksimal 125 karakter.")
+    .transform((val) => (val === "" ? null : val))
     .nullable()
     .optional(),
   pjUserIds: z
