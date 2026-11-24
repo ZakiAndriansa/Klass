@@ -46,7 +46,7 @@ export async function updateSubclass(subclassId: string, bodyInput: unknown): Pr
   const input = updateSubclassSchema.parse(bodyInput);
 
   await requireAuth();
-  
+
   const oldSubclass = await subclassModel.findById(subclassId);
   if (!oldSubclass) {
     throw new NotFoundError("Subkelas tidak ditemukan.");
