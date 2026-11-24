@@ -5,12 +5,14 @@ import { ConflictError, ForbiddenError, NotFoundError } from "@/server/http/erro
 import { subclassModel } from "@/server/models/subclass";
 import { requireClassAdmin } from "@/server/permissions";
 
-import { createSubclass } from "./subclass";
+import { createSubclass, updateSubclass } from "./subclass";
 
 // Mocking model Fadlan
 vi.mock("@/server/models/subclass", () => ({
   subclassModel: {
     create: vi.fn(),
+    update: vi.fn(),
+    findById: vi.fn(),
   },
 }));
 
@@ -230,5 +232,77 @@ describe("subkelas controller - createSubclass", () => {
     const namaPanjang = "a".repeat(151);
     await expect(createSubclass("kelas-abc", { name: namaPanjang })).rejects.toThrow(ZodError);
     expect(subclassModel.create).not.toHaveBeenCalled();
+  });
+});
+
+describe("subkelas controller - updateSubclass", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("berhasil mengubah nama subkelas bila pemanggil adalah admin kelas", async () => {
+    const sekarang = new Date();
+    vi.mocked(subclassModel.findById).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO",
+      description: "Ini kelas DPBO",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+    vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
+    vi.mocked(subclassModel.update).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "PPW",
+      description: "Ini kelas PPW",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+
+    const hasil = await updateSubclass("sub-1", { name: "PPW", description: "Ini kelas PPW" });
+
+    expect(subclassModel.findById).toHaveBeenCalledWith("sub-1");
+    expect(requireClassAdmin).toHaveBeenCalledWith("kelas-abc");
+    expect(subclassModel.update).toHaveBeenCalledWith("kelas-abc", "sub-1", {
+      name: "PPW",
+      description: "Ini kelas PPW",
+    });
+    expect(hasil.name).toBe("PPW");
+    expect(hasil.description).toBe("Ini kelas PPW");
+  });
+
+  it("menolak pengubahan dan tidak memanggil model bila pemanggil bukan admin kelas", async () => {
+    const sekarang = new Date();
+    vi.mocked(subclassModel.findById).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO",
+      description: "Ini kelas DPBO",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+    vi.mocked(requireClassAdmin).mockRejectedValue(
+      new ForbiddenError("Kamu tidak punya izin untuk aksi ini."),
+    );
+
+    await expect(updateSubclass("sub-1", { name: "Nama Baru" })).rejects.toThrow(ForbiddenError);
+
+    expect(subclassModel.update).not.toHaveBeenCalled();
+  });
+
+  it("melempar NotFoundError bila subkelas tidak ditemukan", async () => {
+    vi.mocked(subclassModel.findById).mockResolvedValue(null as never);
+
+    await expect(updateSubclass("sub-palsu", { name: "Nama Baru" })).rejects.toThrow(NotFoundError);
+
+    expect(requireClassAdmin).not.toHaveBeenCalled();
+    expect(subclassModel.update).not.toHaveBeenCalled();
+  });
+
+  it("menolak pengubahan jika nama kosong (validasi Zod)", async () => {
+    await expect(updateSubclass("sub-1", { name: "" })).rejects.toThrow(ZodError);
+
+    expect(subclassModel.update).not.toHaveBeenCalled();
   });
 });

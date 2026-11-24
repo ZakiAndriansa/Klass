@@ -3,7 +3,7 @@ import "server-only";
 import { NotFoundError } from "@/server/http/errors";
 import { subclassModel } from "@/server/models/subclass";
 import { requireClassAdmin } from "@/server/permissions";
-import { createSubclassSchema, type SubclassDto } from "@/types/api/subclass";
+import { createSubclassSchema, updateSubclassSchema, type SubclassDto } from "@/types/api/subclass";
 
 /**
  * Membuat subkelas baru di dalam suatu kelas.
@@ -34,5 +34,38 @@ export async function createSubclass(classId: string, bodyInput: unknown): Promi
     description: baris.description,
     createdAt: baris.createdAt.toISOString(),
     updatedAt: baris.updatedAt.toISOString(),
+  };
+}
+
+/**
+ * Mengubah isi subkelas di dalam suatu kelas.
+ * Siapa yang boleh: Hanya Admin kelas tersebut
+ */
+export async function updateSubclass(subclassId: string, bodyInput: unknown): Promise<SubclassDto> {
+  const input = updateSubclassSchema.parse(bodyInput);
+
+  const oldSubclass = await subclassModel.findById(subclassId);
+  if (!oldSubclass) {
+    throw new NotFoundError("Subkelas tidak ditemukan.");
+  }
+
+  await requireClassAdmin(oldSubclass.classId);
+
+  const getline = await subclassModel.update(oldSubclass.classId, subclassId, {
+    name: input.name,
+    ...(input.description !== undefined ? { description: input.description } : {}),
+  });
+
+  if (!getline) {
+    throw new NotFoundError("Subkelas tidak ditemukan.");
+  }
+
+  return {
+    id: getline.id,
+    classId: getline.classId,
+    name: getline.name,
+    description: getline.description,
+    createdAt: getline.createdAt.toISOString(),
+    updatedAt: getline.updatedAt.toISOString(),
   };
 }
