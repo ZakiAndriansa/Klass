@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ZodError } from "zod";
 
-import { ConflictError, ForbiddenError, NotFoundError } from "@/server/http/errors";
+import { requireAuth } from "@/server/auth";
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/server/http/errors";
 import { subclassModel } from "@/server/models/subclass";
 import { requireClassAdmin } from "@/server/permissions";
 
@@ -15,7 +21,10 @@ vi.mock("@/server/models/subclass", () => ({
     findById: vi.fn(),
   },
 }));
-
+// Mocking auth Zaki
+vi.mock("@/server/auth", () => ({
+  requireAuth: vi.fn(),
+}));
 // Mocking lapisan izin Zaki
 vi.mock("@/server/permissions", () => ({
   requireClassAdmin: vi.fn(),
@@ -238,9 +247,19 @@ describe("subkelas controller - createSubclass", () => {
 describe("subkelas controller - updateSubclass", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(requireAuth).mockResolvedValue(mockAksesAdmin.user as never);
   });
 
-  it("berhasil mengubah nama subkelas bila pemanggil adalah admin kelas", async () => {
+  it("menolak pengubahan dan tidak mencari subkelas bila pemanggil belum login", async () => {
+    vi.mocked(requireAuth).mockRejectedValue(new UnauthorizedError("Belum login."));
+
+    await expect(updateSubclass("sub-1", { name: "PPW" })).rejects.toThrow(UnauthorizedError);
+
+    expect(subclassModel.findById).not.toHaveBeenCalled();
+    expect(subclassModel.update).not.toHaveBeenCalled();
+  });
+
+  it("berhasil mengubah nama dan deskripsi subkelas bila pemanggil adalah admin kelas", async () => {
     const sekarang = new Date();
     vi.mocked(subclassModel.findById).mockResolvedValue({
       id: "sub-1",
@@ -262,6 +281,7 @@ describe("subkelas controller - updateSubclass", () => {
 
     const hasil = await updateSubclass("sub-1", { name: "PPW", description: "Ini kelas PPW" });
 
+    expect(requireAuth).toHaveBeenCalled();
     expect(subclassModel.findById).toHaveBeenCalledWith("sub-1");
     expect(requireClassAdmin).toHaveBeenCalledWith("kelas-abc");
     expect(subclassModel.update).toHaveBeenCalledWith("kelas-abc", "sub-1", {
@@ -270,6 +290,89 @@ describe("subkelas controller - updateSubclass", () => {
     });
     expect(hasil.name).toBe("PPW");
     expect(hasil.description).toBe("Ini kelas PPW");
+  });
+
+  it("berhasil mengubah hanya deskripsi tanpa mengirim nama", async () => {
+    const sekarang = new Date();
+    vi.mocked(subclassModel.findById).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO",
+      description: "Deskripsi Lama",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+    vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
+    vi.mocked(subclassModel.update).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO",
+      description: "Deskripsi Baru",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+
+    const hasil = await updateSubclass("sub-1", { description: "Deskripsi Baru" });
+
+    expect(subclassModel.update).toHaveBeenCalledWith("kelas-abc", "sub-1", {
+      description: "Deskripsi Baru",
+    });
+    expect(hasil.description).toBe("Deskripsi Baru");
+  });
+
+  it("berhasil mengubah hanya nama tanpa menyentuh deskripsi", async () => {
+    const sekarang = new Date();
+    vi.mocked(subclassModel.findById).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO",
+      description: "Deskripsi Lama",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+    vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
+    vi.mocked(subclassModel.update).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO Lanjut",
+      description: "Deskripsi Lama",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+
+    const hasil = await updateSubclass("sub-1", { name: "DPBO Lanjut" });
+
+    expect(subclassModel.update).toHaveBeenCalledWith("kelas-abc", "sub-1", {
+      name: "DPBO Lanjut",
+    });
+    expect(hasil.name).toBe("DPBO Lanjut");
+  });
+
+  it("mengosongkan deskripsi bila dikirim string kosong", async () => {
+    const sekarang = new Date();
+    vi.mocked(subclassModel.findById).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO",
+      description: "Deskripsi Lama",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+    vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
+    vi.mocked(subclassModel.update).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO",
+      description: null,
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+
+    await updateSubclass("sub-1", { description: "" });
+
+    expect(subclassModel.update).toHaveBeenCalledWith("kelas-abc", "sub-1", {
+      description: null,
+    });
   });
 
   it("menolak pengubahan dan tidak memanggil model bila pemanggil bukan admin kelas", async () => {
@@ -300,8 +403,24 @@ describe("subkelas controller - updateSubclass", () => {
     expect(subclassModel.update).not.toHaveBeenCalled();
   });
 
-  it("menolak pengubahan jika nama kosong (validasi Zod)", async () => {
+  it("menolak pengubahan jika nama dikirim sebagai string kosong (validasi Zod)", async () => {
     await expect(updateSubclass("sub-1", { name: "" })).rejects.toThrow(ZodError);
+
+    expect(subclassModel.update).not.toHaveBeenCalled();
+  });
+
+  it("menolak pengubahan jika nama melebihi 150 karakter (validasi Zod)", async () => {
+    const namaPanjang = "a".repeat(151);
+    await expect(updateSubclass("sub-1", { name: namaPanjang })).rejects.toThrow(ZodError);
+
+    expect(subclassModel.update).not.toHaveBeenCalled();
+  });
+
+  it("menolak pengubahan jika deskripsi melebihi 125 karakter (validasi Zod)", async () => {
+    const deskripsiPanjang = "a".repeat(126);
+    await expect(updateSubclass("sub-1", { description: deskripsiPanjang })).rejects.toThrow(
+      ZodError,
+    );
 
     expect(subclassModel.update).not.toHaveBeenCalled();
   });

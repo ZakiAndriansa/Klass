@@ -33,7 +33,8 @@ export const updateSubclassSchema = z.object({
     .string()
     .trim()
     .min(1, "Nama subkelas tidak boleh kosong.")
-    .max(150, "Nama subkelas maksimal 150 karakter."),
+    .max(150, "Nama subkelas maksimal 150 karakter.")
+    .optional(),
   description: z
     .string()
     .trim()

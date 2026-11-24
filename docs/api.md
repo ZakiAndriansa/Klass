@@ -320,7 +320,7 @@ Mengubah isi suatu subkelas di dalam kelas.
 | Siapa yang boleh   | Admin kelas                                                                             |
 | Body               | `{ "name": "Nama Subkelas", "description"?: "Deskripsi opsional (maks 125 karakter)" }` |
 | Respons berhasil   | 200 dengan `data: SubclassDto`                                                          |
-| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`                            |
+| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND`                |
 | Tipe               | `SubclassDto`, `UpdateSubclassInput` di `src/types/api/subclass.ts`                     |
 
 ### Templat untuk endpoint baru

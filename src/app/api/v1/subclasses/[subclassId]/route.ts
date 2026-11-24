@@ -9,6 +9,6 @@ export const PATCH = handle(async (req, ctx: { params: Promise<{ subclassId: str
   const { subclassId } = await ctx.params;
   const body = await readJson(req);
 
-  const data = updateSubclass(subclassId, body);
+  const data = await updateSubclass(subclassId, body);
   return ok(data);
 });

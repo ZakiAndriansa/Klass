@@ -4,6 +4,7 @@ import { NotFoundError } from "@/server/http/errors";
 import { subclassModel } from "@/server/models/subclass";
 import { requireClassAdmin } from "@/server/permissions";
 import { createSubclassSchema, updateSubclassSchema, type SubclassDto } from "@/types/api/subclass";
+import { requireAuth } from "@/server/auth";
 
 /**
  * Membuat subkelas baru di dalam suatu kelas.
@@ -44,6 +45,8 @@ export async function createSubclass(classId: string, bodyInput: unknown): Promi
 export async function updateSubclass(subclassId: string, bodyInput: unknown): Promise<SubclassDto> {
   const input = updateSubclassSchema.parse(bodyInput);
 
+  await requireAuth();
+  
   const oldSubclass = await subclassModel.findById(subclassId);
   if (!oldSubclass) {
     throw new NotFoundError("Subkelas tidak ditemukan.");
@@ -52,7 +55,7 @@ export async function updateSubclass(subclassId: string, bodyInput: unknown): Pr
   await requireClassAdmin(oldSubclass.classId);
 
   const getline = await subclassModel.update(oldSubclass.classId, subclassId, {
-    name: input.name,
+    ...(input.name !== undefined ? { name: input.name } : {}),
     ...(input.description !== undefined ? { description: input.description } : {}),
   });
 
