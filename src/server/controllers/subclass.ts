@@ -14,7 +14,7 @@ export async function createSubclass(classId: string, bodyInput: unknown): Promi
 
   await requireClassAdmin(classId);
 
-  const baris = await subclassModel.create(
+  const getline = await subclassModel.create(
     {
       classId,
       name: input.name,
@@ -23,17 +23,17 @@ export async function createSubclass(classId: string, bodyInput: unknown): Promi
     input.pjUserIds,
   );
 
-  if (!baris) {
+  if (!getline) {
     throw new NotFoundError("Kelas tidak ditemukan.");
   }
 
   return {
-    id: baris.id,
-    classId: baris.classId,
-    name: baris.name,
-    description: baris.description,
-    createdAt: baris.createdAt.toISOString(),
-    updatedAt: baris.updatedAt.toISOString(),
+    id: getline.id,
+    classId: getline.classId,
+    name: getline.name,
+    description: getline.description,
+    createdAt: getline.createdAt.toISOString(),
+    updatedAt: getline.updatedAt.toISOString(),
   };
 }
 
