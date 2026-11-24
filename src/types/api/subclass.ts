@@ -25,6 +25,27 @@ export const createSubclassSchema = z.object({
 
 export type CreateSubclassInput = z.infer<typeof createSubclassSchema>;
 
+/**
+ * SKEMA ZOD (PATCH /api/v1/subclasses/[subclassId])
+ */
+export const updateSubclassSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Nama subkelas tidak boleh kosong.")
+    .max(150, "Nama subkelas maksimal 150 karakter.")
+    .optional(),
+  description: z
+    .string()
+    .trim()
+    .max(125, "Deskripsi maksimal 125 karakter.")
+    .transform((val) => (val === "" ? null : val))
+    .nullable()
+    .optional(),
+});
+
+export type UpdateSubclassInput = z.infer<typeof updateSubclassSchema>;
+
 export type SubclassDto = {
   id: string;
   classId: string;

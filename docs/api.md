@@ -311,6 +311,18 @@ Membuat subkelas baru di dalam kelas. `description` bersifat opsional (maksimal 
 | Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND`                                             |
 | Tipe               | `SubclassDto`, `CreateSubclassInput` di `src/types/api/subclass.ts`                                                  |
 
+`PATCH /api/v1/subclasses/{subclassId}`
+
+Mengubah isi suatu subkelas di dalam kelas.
+
+| Hal                | Isi                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| Siapa yang boleh   | Admin kelas                                                                              |
+| Body               | `{ "name"?: "Nama Subkelas", "description"?: "Deskripsi opsional (maks 125 karakter)" }` |
+| Respons berhasil   | 200 dengan `data: SubclassDto`                                                           |
+| Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND`                 |
+| Tipe               | `SubclassDto`, `UpdateSubclassInput` di `src/types/api/subclass.ts`                      |
+
 ### Templat untuk endpoint baru
 
 Salin bagian ini lalu isi. Endpoint baru ditulis **di atas** bagian ini.
