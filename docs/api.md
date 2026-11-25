@@ -323,6 +323,18 @@ Mengubah isi suatu subkelas di dalam kelas.
 | Galat yang mungkin | `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND`                 |
 | Tipe               | `SubclassDto`, `UpdateSubclassInput` di `src/types/api/subclass.ts`                      |
 
+`DELETE /api/v1/subclasses/{subclassId}`
+
+Menghapus subkelas dari dalam kelas.
+
+| Hal                | Isi                                                  |
+| ------------------ | ---------------------------------------------------- |
+| Siapa yang boleh   | Admin kelas                                          |
+| Body               | Tidak ada                                            |
+| Respons berhasil   | 200 dengan `{ "data": null }`                        |
+| Galat yang mungkin | `UNAUTHORIZED`, `FORBIDDEN`, `CONFLICT`, `NOT_FOUND` |
+| Tipe               | Tidak ada                                            |
+
 ### Templat untuk endpoint baru
 
 Salin bagian ini lalu isi. Endpoint baru ditulis **di atas** bagian ini.

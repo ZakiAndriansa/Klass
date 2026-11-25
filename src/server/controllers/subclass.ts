@@ -72,3 +72,25 @@ export async function updateSubclass(subclassId: string, bodyInput: unknown): Pr
     updatedAt: getline.updatedAt.toISOString(),
   };
 }
+
+/**
+ * Menghapus subkelas dalam suatu kelas.
+ * Siapa yang boleh: Hanya Admin kelas tersebut.
+ */
+export async function deleteSubclass(subclassId: string): Promise<null> {
+  await requireAuth();
+
+  const oldSubclass = await subclassModel.findById(subclassId);
+  if (!oldSubclass) {
+    throw new NotFoundError("Subkelas tidak ditemukan.");
+  }
+
+  await requireClassAdmin(oldSubclass.classId);
+
+  const getline = await subclassModel.remove(oldSubclass.classId, subclassId);
+  if (!getline) {
+    throw new NotFoundError("Subkelas tidak ditemukan.");
+  }
+
+  return null;
+}

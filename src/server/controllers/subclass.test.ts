@@ -11,7 +11,7 @@ import {
 import { subclassModel } from "@/server/models/subclass";
 import { requireClassAdmin } from "@/server/permissions";
 
-import { createSubclass, updateSubclass } from "./subclass";
+import { createSubclass, updateSubclass, deleteSubclass } from "@/server/controllers/subclass";
 
 // Mocking model Fadlan
 vi.mock("@/server/models/subclass", () => ({
@@ -19,6 +19,7 @@ vi.mock("@/server/models/subclass", () => ({
     create: vi.fn(),
     update: vi.fn(),
     findById: vi.fn(),
+    remove: vi.fn(),
   },
 }));
 // Mocking auth Zaki
@@ -423,5 +424,87 @@ describe("subkelas controller - updateSubclass", () => {
     );
 
     expect(subclassModel.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("subkelas controller - deleteSubclass", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(requireAuth).mockResolvedValue(mockAksesAdmin.user as never);
+  });
+
+  it("berhasil menghapus subkelas bila pemanggil adalah admin kelas", async () => {
+    const sekarang = new Date();
+    vi.mocked(subclassModel.findById).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO",
+      description: "Ini kelas DPBO",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+    vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
+    vi.mocked(subclassModel.remove).mockResolvedValue(true);
+
+    const hasil = await deleteSubclass("sub-1");
+
+    expect(requireAuth).toHaveBeenCalled();
+    expect(subclassModel.findById).toHaveBeenCalledWith("sub-1");
+    expect(requireClassAdmin).toHaveBeenCalledWith("kelas-abc");
+    expect(subclassModel.remove).toHaveBeenCalledWith("kelas-abc", "sub-1");
+    expect(hasil).toBeNull();
+  });
+
+  it("menolak penghapusan dan tidak mencari subkelas bila belum login", async () => {
+    vi.mocked(requireAuth).mockRejectedValue(new UnauthorizedError("Belum login."));
+
+    await expect(deleteSubclass("sub-1")).rejects.toThrow(UnauthorizedError);
+
+    expect(subclassModel.findById).not.toHaveBeenCalled();
+    expect(subclassModel.remove).not.toHaveBeenCalled();
+  });
+
+  it("melempar NotFoundError bila subkelas tidak ditemukan", async () => {
+    vi.mocked(subclassModel.findById).mockResolvedValue(null as never);
+
+    await expect(deleteSubclass("sub-palsu")).rejects.toThrow(NotFoundError);
+
+    expect(requireClassAdmin).not.toHaveBeenCalled();
+    expect(subclassModel.remove).not.toHaveBeenCalled();
+  });
+
+  it("menolak penghapusan dan tidak memanggil model bila pemanggil bukan admin kelas", async () => {
+    const sekarang = new Date();
+    vi.mocked(subclassModel.findById).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO",
+      description: "Ini kelas DPBO",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+    vi.mocked(requireClassAdmin).mockRejectedValue(
+      new ForbiddenError("Kamu tidak punya izin untuk aksi ini."),
+    );
+
+    await expect(deleteSubclass("sub-1")).rejects.toThrow(ForbiddenError);
+
+    expect(subclassModel.remove).not.toHaveBeenCalled();
+  });
+
+  it("melempar NotFoundError bila gagal menghapus dari database (model mengembalikan false)", async () => {
+    const sekarang = new Date();
+    vi.mocked(subclassModel.findById).mockResolvedValue({
+      id: "sub-1",
+      classId: "kelas-abc",
+      name: "DPBO",
+      description: "Ini kelas DPBO",
+      createdAt: sekarang,
+      updatedAt: sekarang,
+    });
+    vi.mocked(requireClassAdmin).mockResolvedValue(mockAksesAdmin);
+    vi.mocked(subclassModel.remove).mockResolvedValue(false);
+
+    await expect(deleteSubclass("sub-1")).rejects.toThrow(NotFoundError);
   });
 });
