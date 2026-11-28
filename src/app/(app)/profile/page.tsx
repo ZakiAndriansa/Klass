@@ -8,8 +8,9 @@ import {
   kelasProfilContoh,
 } from "@/components/features/profil/data-contoh";
 import { Navbar } from "@/components/shared/navbar";
+import { getProfile } from "@/server/controllers/profile";
 import { getMySession } from "@/server/controllers/session";
-import { requirePageLogin } from "@/server/permissions";
+import { forPage } from "@/server/permissions";
 
 export const metadata: Metadata = {
   title: "Profil",
@@ -19,11 +20,15 @@ export const metadata: Metadata = {
 /**
  * Profil — `/profile`.
  *
- * Halaman inilah yang membaca sesi (lewat `getMySession`), lalu meneruskan
- * identitas ke `Navbar` dan `BukuProfil` sebagai props. Komponen tidak
- * menyentuh backend sama sekali — itu aturan folder di `eslint.config.mjs`.
+ * Halaman inilah yang membaca sesi dan profil, lalu meneruskan identitas ke
+ * `Navbar` dan `BukuProfil` sebagai props. Komponen tidak menyentuh backend
+ * sama sekali — itu aturan folder di `eslint.config.mjs`.
  *
- * Identitas berasal dari sesi nyata (`GET /api/v1/session` lewat controller).
+ * Identitas berasal dari `GET /api/v1/profile` lewat controller, bukan dari
+ * sesi: profil adalah sumber kebenaran untuk nama dan avatar, dan hanya endpoint
+ * itu yang bisa mengubahnya. `getMySession()` tetap dipakai navbar karena ia
+ * yang menentukan apakah tombol masuk perlu ditampilkan.
+ *
  * Daftar kelas, peran per kelas, dan catatan aktivitas masih data contoh
  * karena backend belum punya endpoint daftar kelas.
  *
@@ -70,17 +75,18 @@ function NavbarFallback() {
 }
 
 async function IsiProfil() {
-  // Yang belum login dipindahkan ke `/login?next=/profile`.
-  const pengguna = await requirePageLogin();
+  // `forPage` memindahkan ke `/login` bila sesinya sudah tidak berlaku, dan
+  // meneruskan galat lain ke `error.tsx`. Yang belum login tidak sampai ke sini.
+  const profil = await forPage(() => getProfile());
 
   return (
     <BukuProfil
-      nama={pengguna.name}
-      email={pengguna.email}
-      image={pengguna.image ?? null}
+      nama={profil.name}
+      email={profil.email}
+      image={profil.image}
       nim={null}
       deskripsi="Anggota Klass. Kelas yang kamu ikuti, peranmu di dalamnya, dan catatan terbaru ada di buku ini."
-      isSuperadmin={pengguna.isSuperadmin}
+      isSuperadmin={profil.isSuperadmin}
       kelas={kelasProfilContoh}
       catatan={catatanProfilContoh}
       jadwal={jadwalProfilContoh}

@@ -923,3 +923,71 @@
   font-weight: 700;
   line-height: 1.35;
 }
+
+/* --- Ubah profil: tombol di halaman 1 + isi dialog ------------------------- */
+
+.ds .profil-identitas__aksi {
+  margin-top: var(--ds-space-1);
+}
+
+.ds .profil-ubah {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+
+/* Pratinjau di dalam dialog: avatar dan nama mengikuti isi form, jadi
+   pengguna melihat hasilnya sebelum menyimpan. */
+.ds .profil-ubah__pratinjau {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3);
+  border: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+  border-radius: var(--ds-radius-sm);
+  background-color: var(--ds-color-paper-surface);
+}
+
+.ds .profil-ubah__keterangan {
+  min-width: 0;
+}
+
+.ds .profil-ubah__nama {
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--ds-text-base);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds .profil-ubah__email {
+  margin: 2px 0 0;
+  overflow: hidden;
+  font-size: var(--ds-text-xs);
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ds-color-ink-muted);
+}
+
+.ds .profil-ubah__catatan {
+  margin: 0;
+  padding-top: var(--ds-space-3);
+  border-top: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+  font-size: var(--ds-text-xs);
+  line-height: 1.55;
+  color: var(--ds-color-ink-muted);
+}
+
+/* Tombol aksi di dalam dialog ikut rata kanan seperti footer modal biasa. */
+.ds .profil-ubah__aksi {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-2);
+  padding-top: var(--ds-space-4);
+  border-top: var(--ds-border-thin) dashed var(--ds-color-rule-dashed);
+}

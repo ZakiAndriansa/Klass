@@ -17,6 +17,7 @@ Buku punya **empat halaman dalam dua bentangan**:
 | Berkas            | Jenis  | Isi                                            |
 | ----------------- | ------ | ---------------------------------------------- |
 | `buku-profil.tsx` | client | Buku empat halaman + navigasi sticky note sisi |
+| `ubah-profil.tsx` | client | Dialog ubah nama + avatar (`PATCH /profile`)   |
 | `data-contoh.ts`  | server | Kelas, peran, catatan, dan jadwal (sementara)  |
 
 Aturannya:
@@ -42,8 +43,11 @@ Aturannya:
    menjadi navigasinya.
 5. **Nama field mengikuti API bahasa Inggris** (`name`, `image`), sedangkan
    teks yang dilihat pengguna tetap bahasa Indonesia.
-6. Identitas berasal dari sesi nyata. Daftar kelas dan catatan masih data
-   contoh, ditandai `TODO(api)` di `page.tsx`.
+6. Identitas berasal dari `GET /api/v1/profile`, bukan dari sesi: nama dan
+   avatar hanya bisa diubah lewat endpoint itu. Dialog "Ubah profil" memanggil
+   `PATCH /api/v1/profile` lalu `router.refresh()` supaya halaman membaca ulang
+   dari server. Daftar kelas dan catatan masih data contoh, ditandai
+   `TODO(api)` di `page.tsx`.
 7. **Halaman ini satu-satunya jalan keluar.** Tombol "Keluar dari akun" di
    halaman 1 memakai `TombolKeluar` (`DELETE /api/v1/session`). Navbar di
    halaman lain hanya menautkan `Meja`, jadi jangan menambahkan tombol keluar

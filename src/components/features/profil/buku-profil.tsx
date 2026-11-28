@@ -9,6 +9,7 @@ import { TombolKeluar } from "@/components/shared/tombol-keluar";
 import { cn } from "@/lib/utils";
 
 import type { CatatanProfil, JadwalProfil, KelasProfil } from "./data-contoh";
+import { UbahProfil } from "./ubah-profil";
 
 /* Nilai ini harus seirama dengan durasi transisi di profil.css. */
 const DURASI_BALIK = 760;
@@ -153,6 +154,10 @@ export function BukuProfil({
                 <dd className="profil-data__email">{email}</dd>
               </div>
             </dl>
+
+            <div className="profil-identitas__aksi">
+              <UbahProfil nama={nama} email={email} image={image} />
+            </div>
 
             <div className="profil-keluar">
               <p className="profil-keluar__catatan">

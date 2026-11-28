@@ -101,10 +101,12 @@ kelas), sisi belakang berisi catatan kelas dan shortcut. Satu lembar berporos di
 tombol di samping buku membaliknya. Di bawah 900px lembar tidak diputar secara fisik, melainkan
 kedua sisi ditumpuk dan sticky note mengganti sisi yang terlihat.
 
-- Identitas berasal dari sesi nyata.
+- Identitas berasal dari `GET /api/v1/profile` (`getProfile` lewat `forPage`), bukan ditebak dari
+  sesi: hanya endpoint itu yang bisa mengubah nama dan avatar. Nama dan avatar bisa diubah lewat
+  dialog "Ubah profil" di halaman 1, yang memanggil `PATCH /api/v1/profile` lalu `router.refresh()`.
 - Daftar kelas, peran per kelas, dan catatan masih data contoh (`features/profil/data-contoh.ts`)
   sampai `GET /api/v1/classes` tersedia.
-- NIM belum ada di kolom `users`; yang tampil "Belum diisi".
+- NIM belum ada di kolom `users`; yang tampil "Belum diisi". Email tidak bisa diubah dari sini.
 - **`/profile` adalah satu-satunya tempat keluar.** Tombol "Keluar dari akun" ada di halaman 1
   buku dan memanggil `DELETE /api/v1/session`. Di halaman lain, tombol kanan atas di navbar
   adalah tautan ke Meja, bukan tombol keluar.
